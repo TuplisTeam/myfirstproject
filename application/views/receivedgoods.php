@@ -58,15 +58,13 @@
 						   <table id="example" class="display table" style="width: 100%; cellspacing: 0;">
 	                            <thead>
 	                                <tr>
-	                                    <th>From</th>
-	                                    <th>To</th>
 	                                    <th>Delivery No.</th>
 	                                    <th>DC Date</th>
-	                                    <th>Total Amount</th>
-	                                    <th>Received Date</th>
-	                                    <th>Unitname</th>
-	                                    <th>Checked By</th>
-	                                    <th>Incharge</th>
+	                                    <th>Supplier Name</th>
+	                                    <th>Customer Name</th>
+	                                    <th>Receiver Name</th>
+	                                    <th>Received Qty</th>
+	                                    <th>Pending Qty</th>
 	                                </tr>
 	                            </thead>
 	                            <tbody>
@@ -75,15 +73,13 @@
 	                                {
 									?>
 									<tr>
-										<td><?php echo $row->fromname; ?></td>
-										<td><?php echo $row->toname; ?></td>
 										<td><?php echo $row->deliveryno; ?></td>
 										<td><?php echo $row->dcdt; ?></td>
-										<td><?php echo $row->totalamount; ?></td>
-										<td><?php echo $row->rcdt; ?></td>
-										<td><?php echo $row->unitname; ?></td>
-										<td><?php echo $row->checkedby; ?></td>
-										<td><?php echo $row->incharge; ?></td>
+										<td><?php echo $row->suppliername; ?></td>
+										<td><?php echo $row->customername; ?></td>
+										<td><?php echo $row->receivername; ?></td>
+										<td><?php echo $row->yesquantity; ?></td>
+										<td><?php echo $row->noquantity; ?></td>
 									</tr>
 									<?php
 									}

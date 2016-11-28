@@ -342,15 +342,46 @@ public function delReceptionCheck($receptionCheckId)
 
 public function getReceivedGoods()
 {
-	
+	/*$sql = "SELECT 
+				h.id, h.deliveryno, DATE_FORMAT(h.dcdate,'%d-%m-%Y') AS dcdt, 
+				h.suppliername, h.customername, h.receivername, d.is_received, 
+				d.quantity,d.Nos
+			FROM
+				deliverynote_hdr h
+				INNER JOIN 
+					(SELECT 
+						deliverynoteid,is_received,SUM(quantity) AS quantity,
+						SUM(1) AS Nos
+					FROM deliverynote_dtl GROUP BY deliverynoteid,is_received) d 
+					ON h.id=d.deliverynoteid";*/
+	$sql = "SELECT 
+				h.id, h.deliveryno, DATE_FORMAT(h.dcdate,'%d-%m-%Y') AS dcdt, 
+				h.suppliername, h.customername, h.receivername, 
+				SUM(IF(d.is_received = 'yes',d.Nos,0)) AS yes, 
+				SUM(IF(d.is_received = 'no',d.Nos,0)) AS nos,
+				SUM(IF(d.is_received = 'yes',d.quantity,0)) AS yesquantity, 
+				SUM(IF(d.is_received = 'no',d.quantity,0)) AS noquantity
+			FROM
+				deliverynote_hdr h
+				INNER JOIN 
+					(SELECT 
+						deliverynoteid,is_received,COUNT(*) AS Nos,
+						SUM(quantity) AS quantity
+					FROM deliverynote_dtl GROUP BY deliverynoteid,is_received) d 
+					ON h.id=d.deliverynoteid
+			WHERE h.status <> 'inactive'
+			GROUP BY h.id";
+	$res = $this->db->query($sql);
+	return $res->result();
 }
 
 public function saveReceivedGoods($barcodeName)
 {
-	$sql = "INSERT INTO receivedgoods SET 
-				barcode = '".$barcodeName."', 
-				created_on = NOW(), 
-				created_by = '".$this->session->userdata('userid')."'";
+	$sql = "UPDATE deliverynote_dtl SET 
+				is_received = 'yes' , 
+				received_on = NOW(), 
+				received_by = '".$this->session->userdata('userid')."'
+			WHERE barcode = '".$barcodeName."'";
 	$this->db->query($sql);
 }
 
