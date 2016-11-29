@@ -596,6 +596,45 @@ public function delOperation($operationId)
 	$this->db->query($sql);
 }
 
+public function getMachineryDetails($machineryId = '')
+{
+	$sql = "SELECT * FROM machineries WHERE status <> 'inactive'";
+	if($machineryId > 0)
+	{
+		$sql .= " AND id = $machineryId";	
+	}
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function saveMachinery($machineryId, $machineryName, $machineryDesc)
+{
+	if($machineryId > 0)
+	{
+		$sql = "UPDATE machineries SET 
+					machineryname = '".$machineryName."', 
+					machinerydesc = '".$machineryDesc."', 
+					modified_on = NOW(), 
+					modified_by = '".$this->session->userdata('userid')."'
+				WHERE id = $machineryId";
+	}
+	else
+	{
+		$sql = "INSERT INTO machineries SET 
+					machineryname = '".$machineryName."', 
+					machinerydesc = '".$machineryDesc."', 
+					created_on = NOW(), 
+					created_by = '".$this->session->userdata('userid')."'";
+	}
+	$this->db->query($sql);
+}
+
+public function delMachinery($machineryId)
+{
+	$sql = "UPDATE machineries SET status = 'inactive' WHERE id = $machineryId";
+	$this->db->query($sql);
+}
+
 /*Manju Ends*/
 
 /*Pratheep Starts*/

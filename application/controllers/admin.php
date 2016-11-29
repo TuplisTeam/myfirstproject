@@ -979,6 +979,83 @@ public function delOperation()
 	echo json_encode($data);
 }
 
+public function machinery($machineryId = '')
+{
+	$data["machineryId"] = $machineryId;
+	
+	$data["machineryName"] = '';
+	$data["machineryDesc"] = '';
+	
+	$res = $this->adminmodel->getMachineryDetails($machineryId);
+	
+	if($machineryId > 0)
+	{
+		if(count($res) > 0)
+		{
+			foreach($res as $row)
+			{
+				$data["machineryName"] = $row->machineryname;
+				$data["machineryDesc"] = $row->machinerydesc;
+			}
+		}
+	}
+	else
+	{
+		$data["allMachineries"] = $res;
+	}
+	
+	$this->load->view('header');
+	$this->load->view('machineries', $data);
+	$this->load->view('footer');
+}
+
+public function saveMachinery()
+{
+	$machineryId = $this->input->post('machineryId');
+	$machineryName = $this->input->post('machineryName');
+	$machineryDesc = $this->input->post('machineryDesc');
+	
+	if($machineryName != "")
+	{
+		$this->adminmodel->saveMachinery($machineryId, $machineryName, $machineryDesc);
+		
+		$data["isError"] = FALSE;
+		if($machineryId > 0)
+		{
+			$data["msg"] = "Machinery Details Updated Successfully.";
+		}
+		else
+		{
+			$data["msg"] = "Machinery Details Saved Successfully.";
+		}
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
+}
+
+public function delMachinery()
+{
+	$machineryId = $this->input->post('machineryId');
+	
+	if($machineryId > 0)
+	{
+		$this->adminmodel->delMachinery($machineryId);
+		
+		$data["isError"] = FALSE;
+		$data["msg"] = "Machinery Details Removed Successfully.";
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
+}
+
 /*Common Function Starts*/
 
 public function downloadAsPDF($str='')
