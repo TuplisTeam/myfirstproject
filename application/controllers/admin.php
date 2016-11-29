@@ -383,7 +383,7 @@ public function deliverynote($deliveryNoteId = '')
 				$data["totalAmount"] = $row->totalamount;
 				$data["remarks"] = $row->remarks;
 				
-				$data["itemDtls"] = $this->adminmodel->getDeliveryNoteItemDetails($deliveryNoteId);
+				$data["itemDtls"] = $this->adminmodel->getDeliveryNoteItemDetails($deliveryNoteId, 'no');
 			}
 		}
 	}

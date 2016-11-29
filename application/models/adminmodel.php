@@ -209,7 +209,7 @@ public function getDeliveryNoteHeaderDetails($deliveryNoteId = '')
 	return $res->result();
 }
 
-public function getDeliveryNoteItemDetails($deliveryNoteId = '')
+public function getDeliveryNoteItemDetails($deliveryNoteId = '', $isReceived = '')
 {
 	$sql = "SELECT 
 				h.deliveryno, DATE_FORMAT(h.dcdate,'%d/%m/%Y') AS dcdt, d.*
@@ -217,6 +217,10 @@ public function getDeliveryNoteItemDetails($deliveryNoteId = '')
 				deliverynote_hdr h 
 				INNER JOIN deliverynote_dtl d ON h.id = d.deliverynoteid
 			WHERE h.status <> 'inactive'";
+	if($isReceived != "")
+	{
+		$sql .= " AND d.is_received = '$isReceived'";
+	}
 	if($deliveryNoteId > 0)
 	{
 		$sql .= " AND h.id = $deliveryNoteId";
@@ -259,7 +263,8 @@ public function saveDeliveryNote($deliveryNoteId, $deliveryNo, $dcDate, $supplie
 		$deliveryNoteId = $this->db->insert_id();
 	}
 	
-	$sqlDel = "DELETE FROM deliverynote_dtl WHERE deliverynoteid = $deliveryNoteId";
+	$sqlDel = "DELETE FROM deliverynote_dtl 
+				WHERE deliverynoteid = $deliveryNoteId AND is_received = 'no'";
 	$this->db->query($sqlDel);
 	
 	foreach($dtlArr as $row)
@@ -340,7 +345,7 @@ public function delReceptionCheck($receptionCheckId)
 	$this->db->query($sql);
 }
 
-public function getReceivedGoods()
+public function getReceivedGoods($deliveryNoteId = '')
 {
 	/*$sql = "SELECT 
 				h.id, h.deliveryno, DATE_FORMAT(h.dcdate,'%d-%m-%Y') AS dcdt, 
@@ -355,8 +360,8 @@ public function getReceivedGoods()
 					FROM deliverynote_dtl GROUP BY deliverynoteid,is_received) d 
 					ON h.id=d.deliverynoteid";*/
 	$sql = "SELECT 
-				h.id, h.deliveryno, DATE_FORMAT(h.dcdate,'%d-%m-%Y') AS dcdt, h.totalamount, 
-				h.suppliername, h.customername, h.receivername, 
+				h.id, h.deliveryno, DATE_FORMAT(h.dcdate,'%d-%m-%Y') AS dcdt, 
+				h.totalamount, h.suppliername, h.customername, h.receivername, 
 				SUM(IF(d.is_received = 'yes',d.Nos,0)) AS yes, 
 				SUM(IF(d.is_received = 'no',d.Nos,0)) AS nos,
 				SUM(IF(d.is_received = 'yes',d.quantity,0)) AS yesquantity, 
@@ -370,8 +375,12 @@ public function getReceivedGoods()
 						SUM(quantity) AS quantity
 					FROM deliverynote_dtl GROUP BY deliverynoteid,is_received) d 
 					ON h.id=d.deliverynoteid
-			WHERE h.status <> 'inactive'
-			GROUP BY h.id";
+			WHERE h.status <> 'inactive'";
+	if($deliveryNoteId > 0)
+	{
+		$sql .= " AND h.id = $deliveryNoteId";
+	}
+	$sql .= " GROUP BY h.id";
 	$res = $this->db->query($sql);
 	return $res->result();
 }
@@ -384,6 +393,29 @@ public function saveReceivedGoods($barcodeName)
 				received_by = '".$this->session->userdata('userid')."'
 			WHERE barcode = '".$barcodeName."'";
 	$this->db->query($sql);
+	
+	$sql1 = "SELECT h.id
+			FROM 
+			deliverynote_hdr h
+			INNER JOIN deliverynote_dtl d ON h.id = d.deliverynoteid
+			WHERE h.status <> 'inactive'";
+	$res1 = $this->db->query($sql1);
+	$deliveryNoteId = 0;
+	foreach($res1->result() as $row)
+	{
+		$deliveryNoteId = $row->id;
+	}
+	
+	$res = $this->getReceivedGoods($deliveryNoteId);
+	foreach($res as $row)
+	{
+		if($row->yes > 0 && $row->nos == 0)
+		{
+			$sql = "UPDATE deliverynote_hdr SET all_items_received = 'yes'
+					WHERE id = $deliveryNoteId";
+			$this->db->query($sql);
+		}
+	}
 }
 
 public function getRackHeaderDetails($rackDisplayId = '')

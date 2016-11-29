@@ -340,7 +340,7 @@
 			str += '</td>';
 			str += '<td>';
 			str += '<input type="text" class="form-control numeric noOfRolls_'+parseInt(rowNo)+'" placeholder="No. Of Rolls">';
-			str += '<button type="button" class="btn btn-xs btn-warning addProcessInfo" title="Add Process Info" rowNo="'+parseInt(rowNo)+'">>';
+			str += '<button type="button" class="btn btn-xs btn-warning addProcessInfo" title="Add Process Info" rowNo="'+parseInt(rowNo)+'">';
 			str += '<i class="fa fa-plus"></i>';
 			str += '</button>';
 			str += '</td>';

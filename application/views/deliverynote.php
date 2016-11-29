@@ -55,12 +55,27 @@
 										<td><?php echo $row->customername; ?></td>
 										<td><?php echo $row->receivername; ?></td>
 										<td>
+											<?php
+											if($row->all_items_received == "yes")
+											{
+											?>
+											<button class="btn btn-sm btn-success" title="All Items Received">
+												<span class="fa fa-check"></span>
+											</button>
+											<?php
+											}
+											else
+											{
+											?>
 											<button class="btn btn-sm btn-success editEntry" deliveryNoteId="<?php echo $row->id; ?>" title="Edit">
 												<span class="fa fa-pencil"></span>
 											</button>
 											<button class="btn btn-sm btn-danger delEntry" deliveryNoteId="<?php echo $row->id; ?>" title="Edit">
 												<span class="fa fa-close"></span>
 											</button>
+											<?php
+											}
+											?>
 											<button class="btn btn-sm btn-warning printEntry" deliveryNoteId="<?php echo $row->id; ?>" title="Print">
 												<span class="fa fa-print"></span>
 											</button>
