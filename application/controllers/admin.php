@@ -825,6 +825,85 @@ public function delRackDisplay()
 	echo json_encode($data);
 }
 
+public function employee($empId = '')
+{
+	$data["empId"] = $empId;
+	
+	$data["empNo"] = '';
+	$data["empName"] = '';
+	
+	$res = $this->adminmodel->getEmployeeDetails($empId);
+	
+	if($empId > 0)
+	{
+		if(count($res) > 0)
+		{
+			foreach($res as $row)
+			{
+				$data["empNo"] = $row->empno;
+				$data["empName"] = $row->empname;
+			}
+		}
+	}
+	else
+	{
+		$data["allEmployees"] = $res;
+	}
+	
+	$this->load->view('header');
+	$this->load->view('employee', $data);
+	$this->load->view('footer');
+}
+
+public function saveEmployee()
+{
+	$empId = $this->input->post('empId');
+	$empNo = $this->input->post('empNo');
+	$empName = $this->input->post('empName');
+	
+	if($empNo != "" && $empName != "")
+	{
+		$this->adminmodel->saveEmployee($empId, $empNo, $empName);
+		
+		$data["isError"] = FALSE;
+		if($empId > 0)
+		{
+			$data["msg"] = "Employee Details Updated Successfully.";
+		}
+		else
+		{
+			$data["msg"] = "Employee Details Saved Successfully.";
+		}
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
+}
+
+public function delEmployee()
+{
+	$empId = $this->input->post('empId');
+	
+	if($empId > 0)
+	{
+		$this->adminmodel->delEmployee($empId);
+		
+		$data["isError"] = FALSE;
+		$data["msg"] = "Employee Details Removed Successfully.";
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
+}
+
+/*Common Function Starts*/
+
 public function downloadAsPDF($str='')
 {
 	if($str == "")
@@ -838,6 +917,11 @@ public function downloadAsPDF($str='')
 	downloadPDFByContent($str);
 }
 
+/*Common Function Ends*/
+
 /*Manju Starts*/
+
+/*Pratheep Starts*/
+/*Pratheep Ends*/
 
 }

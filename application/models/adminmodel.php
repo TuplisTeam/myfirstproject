@@ -520,6 +520,46 @@ public function delRackDisplay($rackDisplayId)
 	$this->db->query($sql);
 }
 
+public function getEmployeeDetails($empId = '')
+{
+	$sql = "SELECT * FROM employee WHERE status <> 'inactive'";
+	if($empId > 0)
+	{
+		$sql .= " AND id = $empId";	
+	}
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function saveEmployee($empId, $empNo, $empName)
+{
+	if($empId > 0)
+	{
+		$sql = "UPDATE employee SET 
+					empno = '".$empNo."', empname = '".$empName."', 
+					modified_on = NOW(), 
+					modified_by = '".$this->session->userdata('userid')."'
+				WHERE id = $empId";
+	}
+	else
+	{
+		$sql = "INSERT INTO employee SET 
+					empno = '".$empNo."', empname = '".$empName."', 
+					created_on = NOW(), 
+					created_by = '".$this->session->userdata('userid')."'";
+	}
+	$this->db->query($sql);
+}
+
+public function delEmployee($empId)
+{
+	$sql = "UPDATE employee SET status = 'inactive' WHERE id = $empId";
+	$this->db->query($sql);
+}
+
 /*Manju Ends*/
+
+/*Pratheep Starts*/
+/*Pratheep Ends*/
 
 }
