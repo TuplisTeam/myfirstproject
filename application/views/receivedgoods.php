@@ -63,8 +63,10 @@
 	                                    <th>Supplier Name</th>
 	                                    <th>Customer Name</th>
 	                                    <th>Receiver Name</th>
+	                                    <th>Total Qty</th>
 	                                    <th>Received Qty</th>
 	                                    <th>Pending Qty</th>
+	                                    <th>Total Amount</th>
 	                                </tr>
 	                            </thead>
 	                            <tbody>
@@ -78,8 +80,10 @@
 										<td><?php echo $row->suppliername; ?></td>
 										<td><?php echo $row->customername; ?></td>
 										<td><?php echo $row->receivername; ?></td>
+										<td><?php echo $row->totalqty; ?></td>
 										<td><?php echo $row->yesquantity; ?></td>
 										<td><?php echo $row->noquantity; ?></td>
+										<td><?php echo $row->totalamount; ?></td>
 									</tr>
 									<?php
 									}

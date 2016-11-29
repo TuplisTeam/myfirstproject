@@ -51,9 +51,6 @@
 											<button class="btn btn-sm btn-danger delEntry" rackDisplayId="<?php echo $row->id; ?>" title="Edit">
 												<span class="fa fa-close"></span>
 											</button>
-											<button class="btn btn-sm btn-warning printEntry" rackDisplayId="<?php echo $row->id; ?>" title="Print">
-												<span class="fa fa-print"></span>
-											</button>
 										</td>
 									</tr>
 									<?php
@@ -128,6 +125,9 @@
 														</td>
 														<td>
 														<input type="text" class="form-control numeric noOfRolls_<?php echo $cnt; ?>" placeholder="No. Of Rolls" value="<?php echo $row->noofrolls; ?>">
+														<button type="button" class="btn btn-xs btn-warning addProcessInfo" title="Add Process Info" rowNo="<?php echo $cnt; ?>">
+															<i class="fa fa-plus"></i>
+														</button>
 														</td>
 														<td>
 														<input type="text" class="form-control barcodeId_<?php echo $cnt; ?>" placeholder="Barcode" value="<?php echo $row->barcodeid; ?>">
@@ -185,8 +185,83 @@
     </div>
 </div>
 
+<!--Modal Window Starts-->
+
+<div class="modal fade processInfoModal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+                <h4 class="modal-title" id="mySmallModalLabel">Process Info</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" id="processInfoForm" method="POST">
+					<div class="row">
+                		<div class="col-md-12">
+                			<div class="form-group">
+	                            <label class="col-sm-2 control-label">
+									Process 1&nbsp;<span style="color: red;">*</span>
+								</label>
+	                            <div class="col-sm-6">
+	                                <input type="text" class="form-control" id="process1" placeholder="Process 1" value="">
+									<input type="hidden" id="curRowNo_Process" />
+	                            </div>
+	                        </div>
+                		</div>
+                	</div>
+					<div class="row">
+                		<div class="col-md-12">
+                			<div class="form-group">
+	                            <label class="col-sm-2 control-label">
+									Process 2&nbsp;<span style="color: red;">*</span>
+								</label>
+	                            <div class="col-sm-6">
+	                                <input type="text" class="form-control" id="process2" placeholder="Process 2" value="">
+	                            </div>
+	                        </div>
+                		</div>
+                	</div>
+					<div class="row">
+                		<div class="col-md-12">
+                			<div class="form-group">
+	                            <label class="col-sm-2 control-label">
+									Process 3&nbsp;<span style="color: red;">*</span>
+								</label>
+	                            <div class="col-sm-6">
+	                                <input type="text" class="form-control" id="process3" placeholder="Process 3" value="">
+	                            </div>
+	                        </div>
+                		</div>
+                	</div>
+				</form>
+            </div>
+            <div class="modal-footer">
+				<div class="row">
+            		<div class="col-md-12">
+                        <div class="form-group">
+                            <div class="col-sm-offset-4 col-sm-8">
+                                <button type="button" class="btn btn-success updateProcessInfo">
+									Update Process
+								</button>
+								<button type="reset" class="btn btn-info" data-dismiss="modal">
+									Close
+								</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Modal Window Ends-->
+
 <script>
 	
+	var processInfoArr = [];
 	var deletedRowsCount = 0;
 	
 	$(document).ready(function()
@@ -203,6 +278,25 @@
 		if(rackDisplayId == "")
 		{
 			addNewRow();
+		}
+		else
+		{
+			var processDtlsArr = '<?php echo json_encode($processDtlsArr); ?>';
+			processDtlsArr = JSON.parse(processDtlsArr);
+			
+			if(processDtlsArr.length > 0)
+			{
+				for(var k=0; k<processDtlsArr.length; k++)
+				{
+					var cri = {};
+					cri["rackNo"] = processDtlsArr[k].rackname;
+					cri["process1"] = processDtlsArr[k].process1;
+					cri["process2"] = processDtlsArr[k].process2;
+					cri["process3"] = processDtlsArr[k].process3;
+					
+					processInfoArr.push(cri);
+				}
+			}
 		}
 	});
 	
@@ -246,6 +340,9 @@
 			str += '</td>';
 			str += '<td>';
 			str += '<input type="text" class="form-control numeric noOfRolls_'+parseInt(rowNo)+'" placeholder="No. Of Rolls">';
+			str += '<button type="button" class="btn btn-xs btn-warning addProcessInfo" title="Add Process Info" rowNo="'+parseInt(rowNo)+'">>';
+			str += '<i class="fa fa-plus"></i>';
+			str += '</button>';
 			str += '</td>';
 			str += '<td>';
 			str += '<input type="text" class="form-control barcodeId_'+parseInt(rowNo)+'" placeholder="Barcode">';
@@ -276,6 +373,92 @@
 			$(".rackDetailsTBody").append(str);
 			$(".numeric").numeric();
 		}
+	}
+	
+	$(document).on('click','.addProcessInfo',function()
+	{
+		var rowNo = $(this).attr('rowNo');
+		if(rowNo > 0)
+		{
+			$("#curRowNo_Process").val(rowNo);
+			var rackNo = $(".rackNo_"+rowNo).val();
+			
+			if(processInfoArr.length > 0)
+			{
+				for(var n=0; n<processInfoArr.length; n++)
+				{
+					if(processInfoArr[n] != null)
+					{
+						if(processInfoArr[n].rackNo == rackNo)
+						{
+							$("#process1").val(processInfoArr[n].process1);
+							$("#process2").val(processInfoArr[n].process2);
+							$("#process3").val(processInfoArr[n].process3);
+						}
+					}
+				}
+			}
+			
+			$(".processInfoModal").modal('show');
+		}
+	});
+	
+	$(".updateProcessInfo").click(function()
+	{
+		var rowNo = $("#curRowNo_Process").val();
+		if(rowNo > 0)
+		{
+			var rackNo = $(".rackNo_"+rowNo).val();
+			var process1 = $("#process1").val();
+			var process2 = $("#process2").val();
+			var process3 = $("#process3").val();
+			
+			var isSet = false;
+			
+			if(processInfoArr.length > 0)
+			{
+				for(var n=0; n<processInfoArr.length; n++)
+				{
+					if(processInfoArr[n] != null)
+					{
+						if(processInfoArr[n].rackNo == rackNo)
+						{
+							isSet = true;
+							
+							processInfoArr[n].process1 = process1;
+							processInfoArr[n].process2 = process2;
+							processInfoArr[n].process3 = process3;
+						}
+					}
+				}
+			}
+			
+			if(!isSet)
+			{
+				var cri = {};
+				cri["rackNo"] = rackNo;
+				cri["process1"] = process1;
+				cri["process2"] = process2;
+				cri["process3"] = process3;
+				
+				processInfoArr.push(cri);
+			}
+			alert('Process Info Updated Successfully.');
+			$(".processInfoModal").modal('hide');
+			clearModalFields();
+		}
+		else
+		{
+			return;
+		}
+	});
+	
+	function clearModalFields()
+	{
+		$("#curRowNo_Process").val('');
+		$("#process1").val('');
+		$("#process2").val('');
+		$("#process3").val('');
 	}
 	
 	$(document).on('click','.delRackDtl',function()
@@ -352,7 +535,8 @@
 				{
 					"rackDisplayId" : rackDisplayId,
 					"entryDate" : entryDate,
-					"dtlArr" : JSON.stringify(dtlArr)
+					"dtlArr" : JSON.stringify(dtlArr), 
+					"processInfoArr" : JSON.stringify(processInfoArr)
 				};
 				req.url = "admin/saveRackDetails";
 				RequestHandler(req, showResponse);
@@ -409,15 +593,6 @@
 		else
 		{
 			return;
-		}
-	});
-
-	$(".printEntry").click(function()
-	{
-		var rackDisplayId = $(this).attr('rackDisplayId');
-		if(rackDisplayId > 0)
-		{
-			window.open('<?php echo base_url(); ?>admin/printRackDisplay/'+rackDisplayId);
 		}
 	});
 	

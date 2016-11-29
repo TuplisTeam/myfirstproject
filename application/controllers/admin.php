@@ -755,6 +755,7 @@ public function rackdisplay($rackDisplayId = '')
 	$data["dtlArr"] = array();
 	
 	$data["rackDisplayDtls"] = array();
+	$data["processDtlsArr"] = array();
 	
 	$res = $this->adminmodel->getRackHeaderDetails($rackDisplayId);
 	
@@ -766,6 +767,7 @@ public function rackdisplay($rackDisplayId = '')
 			{
 				$data["entryDate"] = $row->entrydate;
 				$data["dtlArr"] = $this->adminmodel->getRackOrderDetails($rackDisplayId);
+				$data["processDtlsArr"] = $this->adminmodel->getRackProcessInfoDetails($rackDisplayId);
 			}
 		}
 	}
@@ -784,13 +786,15 @@ public function saveRackDetails()
 	$rackDisplayId = $this->input->post('rackDisplayId');
 	$entryDate = $this->input->post('entryDate');
 	$dtlArr = $this->input->post('dtlArr');
+	$processInfoArr = $this->input->post('processInfoArr');
 	$dtlArr = json_decode($dtlArr);
+	$processInfoArr = json_decode($processInfoArr);
 	
 	$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
 	
 	if($entryDate != "" && count($dtlArr) > 0)
 	{
-		$this->adminmodel->saveRackDetails($rackDisplayId, $entryDate, $dtlArr);
+		$this->adminmodel->saveRackDetails($rackDisplayId, $entryDate, $dtlArr, $processInfoArr);
 		
 		$data["isError"] = FALSE;
 		$data["msg"] = "Rack Details Updated Successfully.";

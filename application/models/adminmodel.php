@@ -355,12 +355,13 @@ public function getReceivedGoods()
 					FROM deliverynote_dtl GROUP BY deliverynoteid,is_received) d 
 					ON h.id=d.deliverynoteid";*/
 	$sql = "SELECT 
-				h.id, h.deliveryno, DATE_FORMAT(h.dcdate,'%d-%m-%Y') AS dcdt, 
+				h.id, h.deliveryno, DATE_FORMAT(h.dcdate,'%d-%m-%Y') AS dcdt, h.totalamount, 
 				h.suppliername, h.customername, h.receivername, 
 				SUM(IF(d.is_received = 'yes',d.Nos,0)) AS yes, 
 				SUM(IF(d.is_received = 'no',d.Nos,0)) AS nos,
 				SUM(IF(d.is_received = 'yes',d.quantity,0)) AS yesquantity, 
-				SUM(IF(d.is_received = 'no',d.quantity,0)) AS noquantity
+				SUM(IF(d.is_received = 'no',d.quantity,0)) AS noquantity, 
+				SUM(IF(d.is_received = 'yes',d.quantity,0)) + SUM(IF(d.is_received = 'no',d.quantity,0)) AS totalqty
 			FROM
 				deliverynote_hdr h
 				INNER JOIN 
@@ -408,7 +409,23 @@ public function getRackOrderDetails($rackDisplayId)
 	return $res->result();
 }
 
-public function saveRackDetails($rackDisplayId, $entryDate, $dtlArr)
+public function getRackProcessInfoDetails($rackDisplayId)
+{
+	$sql = "SELECT 
+				d.rackdispid, d.id AS rackdtlid, d.rackname, 
+				IFNULL(p.process1,'') AS process1, 
+				IFNULL(p.process2,'') AS process2, 
+				IFNULL(p.process3,'') AS process3
+			FROM 
+				rackhdr h 
+				INNER JOIN rackdtl d ON h.id = d.rackdispid
+				LEFT OUTER JOIN rackdtl_process p ON h.id = p.rackdispid AND d.id = p.rackdtlid
+			WHERE h.status <> 'inactive' AND h.id = $rackDisplayId";
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function saveRackDetails($rackDisplayId, $entryDate, $dtlArr, $processInfoArr)
 {	
 	if($rackDisplayId > 0)
 	{
@@ -431,7 +448,10 @@ public function saveRackDetails($rackDisplayId, $entryDate, $dtlArr)
 	
 	$sqlDel = "DELETE FROM rackdtl WHERE rackdispid = $rackDisplayId";
 	$this->db->query($sqlDel);
-	
+
+	$sqlDel1 = "DELETE FROM rackdtl_process WHERE rackdispid = $rackDisplayId";
+	$this->db->query($sqlDel1);
+		
 	foreach($dtlArr as $row)
 	{
 		$remarks = str_replace("'", "\'", $row->remarks);
@@ -444,6 +464,21 @@ public function saveRackDetails($rackDisplayId, $entryDate, $dtlArr)
 					dispatched = '".$row->dispatched."', pending = '".$row->pending."', 
 					totalavailstock = '".$row->totalAvailStock."', remarks = '".$remarks."'";
 		$this->db->query($sql1);
+		$rackDisplayDtlId = $this->db->insert_id();
+		
+		foreach($processInfoArr as $res)
+		{
+			if($row->rackNo == $res->rackNo)
+			{
+				$sql2 = "INSERT INTO rackdtl_process SET 
+							rackdispid = '".$rackDisplayId."', 
+							rackdtlid = '".$rackDisplayDtlId."', 
+							process1 = '".$res->process1."', 
+							process2 = '".$res->process2."', 
+							process3 = '".$res->process3."'";
+				$this->db->query($sql2);
+			}
+		}
 	}
 }
 
