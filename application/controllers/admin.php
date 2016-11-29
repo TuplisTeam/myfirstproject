@@ -902,6 +902,83 @@ public function delEmployee()
 	echo json_encode($data);
 }
 
+public function operation($operationId = '')
+{
+	$data["operationId"] = $operationId;
+	
+	$data["operationName"] = '';
+	$data["operationDesc"] = '';
+	
+	$res = $this->adminmodel->getOperationDetails($operationId);
+	
+	if($operationId > 0)
+	{
+		if(count($res) > 0)
+		{
+			foreach($res as $row)
+			{
+				$data["operationName"] = $row->operationname;
+				$data["operationDesc"] = $row->operationdesc;
+			}
+		}
+	}
+	else
+	{
+		$data["allOperations"] = $res;
+	}
+	
+	$this->load->view('header');
+	$this->load->view('operations', $data);
+	$this->load->view('footer');
+}
+
+public function saveOperation()
+{
+	$operationId = $this->input->post('operationId');
+	$operationName = $this->input->post('operationName');
+	$operationDesc = $this->input->post('operationDesc');
+	
+	if($operationName != "")
+	{
+		$this->adminmodel->saveOperation($operationId, $operationName, $operationDesc);
+		
+		$data["isError"] = FALSE;
+		if($operationId > 0)
+		{
+			$data["msg"] = "Operation Details Updated Successfully.";
+		}
+		else
+		{
+			$data["msg"] = "Operation Details Saved Successfully.";
+		}
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
+}
+
+public function delOperation()
+{
+	$operationId = $this->input->post('operationId');
+	
+	if($operationId > 0)
+	{
+		$this->adminmodel->delOperation($operationId);
+		
+		$data["isError"] = FALSE;
+		$data["msg"] = "Operation Details Removed Successfully.";
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
+}
+
 /*Common Function Starts*/
 
 public function downloadAsPDF($str='')

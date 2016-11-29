@@ -557,6 +557,45 @@ public function delEmployee($empId)
 	$this->db->query($sql);
 }
 
+public function getOperationDetails($operationId = '')
+{
+	$sql = "SELECT * FROM operations WHERE status <> 'inactive'";
+	if($operationId > 0)
+	{
+		$sql .= " AND id = $operationId";	
+	}
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function saveOperation($operationId, $operationName, $operationDesc)
+{
+	if($operationId > 0)
+	{
+		$sql = "UPDATE operations SET 
+					operationname = '".$operationName."', 
+					operationdesc = '".$operationDesc."', 
+					modified_on = NOW(), 
+					modified_by = '".$this->session->userdata('userid')."'
+				WHERE id = $operationId";
+	}
+	else
+	{
+		$sql = "INSERT INTO operations SET 
+					operationname = '".$operationName."', 
+					operationdesc = '".$operationDesc."', 
+					created_on = NOW(), 
+					created_by = '".$this->session->userdata('userid')."'";
+	}
+	$this->db->query($sql);
+}
+
+public function delOperation($operationId)
+{
+	$sql = "UPDATE operations SET status = 'inactive' WHERE id = $operationId";
+	$this->db->query($sql);
+}
+
 /*Manju Ends*/
 
 /*Pratheep Starts*/
