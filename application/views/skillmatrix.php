@@ -114,7 +114,6 @@
 				                        				<th width="15%">SAM</th>
 				                        				<th width="15%">Shift Hrs Worked</th>
 				                        				<th width="15%">OT Hrs Worked</th>
-				                        				<th width="15%">Efficiency</th>
 				                        				<th width="10%">Manage</th>
 				                        			</tr>
 				                        		</thead>
@@ -155,22 +154,19 @@
 																</select>
 															</td>
 															<td>
-																<input type="text" class="form-control numeric onBlurGetEfficiency producedMin_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Produced Minutes" value="<?php echo $row->producedmin; ?>">
+																<input type="text" class="form-control numeric producedMin_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Produced Minutes" value="<?php echo $row->producedmin; ?>">
 															</td>
 															<td>
-																<input type="text" class="form-control numeric onBlurGetEfficiency pieces_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Pieces" value="<?php echo $row->pieces; ?>">
+																<input type="text" class="form-control numeric pieces_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Pieces" value="<?php echo $row->pieces; ?>">
 															</td>
 															<td>
-																<input type="text" class="form-control numeric onBlurGetEfficiency sam_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="SAM" value="<?php echo $row->sam; ?>">
+																<input type="text" class="form-control numeric sam_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="SAM" value="<?php echo $row->sam; ?>">
 															</td>
 															<td>
-																<input type="text" class="form-control numeric onBlurGetEfficiency shiftHrs_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Shift Hours" value="<?php echo $row->shifthrs; ?>">
+																<input type="text" class="form-control numeric shiftHrs_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Shift Hours" value="<?php echo $row->shifthrs; ?>">
 															</td>
 															<td>
-																<input type="text" class="form-control numeric onBlurGetEfficiency otHours_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="OT Hours" value="<?php echo $row->othours; ?>">
-															</td>
-															<td>
-																<input type="text" class="form-control efficiency_<?php echo $cnt; ?>" disabled="" placeholder="Efficiency" value="<?php echo $row->efficiency; ?>">
+																<input type="text" class="form-control numeric otHours_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="OT Hours" value="<?php echo $row->othours; ?>">
 															</td>
 															<td>
 																<button type="button" title="Delete" class="btn btn-danger btn-xs btn-perspective delEmpDtl"><i class="fa fa-close"></i></button>
@@ -311,22 +307,19 @@
 			str += '</select>';
 			str += '</td>';
 			str += '<td>';
-			str += '<input type="text" class="form-control numeric onBlurGetEfficiency producedMin_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Produced Minutes">';
+			str += '<input type="text" class="form-control numeric producedMin_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Produced Minutes">';
 			str += '</td>';
 			str += '<td>';
-			str += '<input type="text" class="form-control numeric onBlurGetEfficiency pieces_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Pieces">';
+			str += '<input type="text" class="form-control numeric pieces_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Pieces">';
 			str += '</td>';
 			str += '<td>';
-			str += '<input type="text" class="form-control numeric onBlurGetEfficiency sam_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="SAM">';
+			str += '<input type="text" class="form-control numeric sam_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="SAM">';
 			str += '</td>';
 			str += '<td>';
-			str += '<input type="text" class="form-control numeric onBlurGetEfficiency shiftHrs_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Shift Hours">';
+			str += '<input type="text" class="form-control numeric shiftHrs_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Shift Hours">';
 			str += '</td>';
 			str += '<td>';
-			str += '<input type="text" class="form-control numeric onBlurGetEfficiency otHours_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="OT Hours">';
-			str += '</td>';
-			str += '<td>';
-			str += '<input type="text" class="form-control efficiency_'+parseInt(rowNo)+'" disabled="" placeholder="Efficiency">';
+			str += '<input type="text" class="form-control numeric otHours_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="OT Hours">';
 			str += '</td>';
 			str += '<td>';
 			str += '<button type="button" title="Delete" class="btn btn-danger btn-xs btn-perspective delEmpDtl"><i class="fa fa-close"></i></button>';
@@ -339,33 +332,6 @@
 			$("select").select2();
 		}
 	}
-	
-	$(document).on('blur','.onBlurGetEfficiency',function()
-	{
-		var rowNo = $(this).attr('rowNo');
-		if(rowNo > 0)
-		{
-			var producedMin = $(".producedMin_"+rowNo).val();
-			var pieces = $(".pieces_"+rowNo).val();
-			var sam = $(".sam_"+rowNo).val();
-			var shiftHrs = $(".shiftHrs_"+rowNo).val();
-			var otHours = $(".otHours_"+rowNo).val();
-			
-			producedMin = producedMin ? producedMin : 0;
-			pieces = pieces ? pieces : 0;
-			sam = sam ? sam : 0;
-			shiftHrs = shiftHrs ? shiftHrs : 0;
-			otHours = otHours ? otHours : 0;
-			
-			var efficiency = 0;
-			var totalHrs = parseFloat(shiftHrs + otHours);
-			if(totalHrs > 0)
-			{
-				efficiency = (parseFloat(producedMin) * parseFloat(pieces * sam)) / totalHrs;
-			}
-			$(".efficiency_"+rowNo).val(parseFloat(efficiency).toFixed(2));
-		}
-	});
 	
 	$(document).on('click','.delEmpDtl',function()
 	{
@@ -399,7 +365,6 @@
 			var sam = $(".sam_"+rowNo).val();
 			var shiftHrs = $(".shiftHrs_"+rowNo).val();
 			var otHours = $(".otHours_"+rowNo).val();
-			var efficiency = $(".efficiency_"+rowNo).val();
 			
 			if(empId > 0 && operationId > 0 && producedMin > 0 && pieces > 0 && sam > 0 && shiftHrs > 0)
 			{
@@ -411,7 +376,6 @@
 				cri["sam"] = sam;
 				cri["shiftHrs"] = shiftHrs;
 				cri["otHours"] = otHours;
-				cri["efficiency"] = efficiency;
 				
 				dtlArr.push(cri);
 			}

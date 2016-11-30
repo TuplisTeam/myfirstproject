@@ -693,7 +693,7 @@ public function saveSkillMatrix($skillMatrixId, $entryDate, $lineName, $dtlArr)
 					empid = '".$row->empId."', operationid = '".$row->operationId."', 
 					producedmin = '".$row->producedMin."', pieces = '".$row->pieces."', 
 					sam = '".$row->sam."', shifthrs = '".$row->shiftHrs."', 
-					othours = '".$row->otHours."', efficiency = '".$row->efficiency."'";
+					othours = '".$row->otHours."'";
 		$this->db->query($sql1);
 	}
 }
