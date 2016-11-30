@@ -1056,6 +1056,89 @@ public function delMachinery()
 	echo json_encode($data);
 }
 
+public function skillmatrix_empwise($skillMatrixId = '')
+{
+	$data["skillMatrixId"] = $skillMatrixId;
+	
+	$data["empDtls"] = $this->adminmodel->getEmployeeDetails();
+	$data["operationDtls"] = $this->adminmodel->getOperationDetails();
+	
+	$res = $this->adminmodel->getSkillMatrixEmpWise_HdrDetails($skillMatrixId);
+	
+	$data["entryDate"] = "";
+	$data["lineName"] = "";
+	$data["dtlArr"] = array();
+	
+	if($skillMatrixId > 0)
+	{
+		foreach($res as $row)
+		{
+			$data["entryDate"] = $row->entrydate;
+			$data["lineName"] = $row->linename;
+			$data["dtlArr"] = $this->adminmodel->getSkillMatrixEmpWise_EmpDetails($skillMatrixId);
+		}
+	}
+	else
+	{
+		$data["allDetails"] = $res;
+	}
+	
+	$this->load->view('header');
+	$this->load->view('skillmatrix_empwise', $data);
+	$this->load->view('footer');
+}
+
+public function saveSkillMatrixEmpWise()
+{
+	$skillMatrixId = $this->input->post('skillMatrixId');
+	$entryDate = $this->input->post('entryDate');
+	$lineName = $this->input->post('lineName');
+	$dtlArr = $this->input->post('dtlArr');
+	$dtlArr = json_decode($dtlArr);
+	
+	$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
+	
+	if($entryDate != "" && $lineName != "" && count($dtlArr) > 0)
+	{
+		$this->adminmodel->saveSkillMatrixEmpWise($skillMatrixId, $entryDate, $lineName, $dtlArr);
+		
+		$data["isError"] = FALSE;
+		if($skillMatrixId > 0)
+		{
+			$data["msg"] = "Skill Matrix Emp Wise Updated Successfully.";
+		}
+		else
+		{
+			$data["msg"] = "Skill Matrix Emp Wise Created Successfully.";
+		}
+	}
+	else
+	{
+		$data["isError"] = FALSE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
+}
+
+public function delSkillMatrixEmpWise()
+{
+	$skillMatrixId = $this->input->post('skillMatrixId');
+	
+	if($skillMatrixId > 0)
+	{
+		$this->adminmodel->delSkillMatrixEmpWise($skillMatrixId);
+		
+		$data["isError"] = FALSE;
+		$data["msg"] = "Skill Matrix (Employee Wise) Removed Successfully.";
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
+}
+
 /*Common Function Starts*/
 
 public function downloadAsPDF($str='')

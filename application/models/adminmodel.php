@@ -635,6 +635,75 @@ public function delMachinery($machineryId)
 	$this->db->query($sql);
 }
 
+public function getSkillMatrixEmpWise_HdrDetails($skillMatrixId = '')
+{
+	$sql = "SELECT h.*, DATE_FORMAT(h.entry_date,'%d-%m-%Y') AS entrydate
+			FROM 
+				skillmatrix_empwise_hdr h 
+			WHERE h.status <> 'inactive'";
+	if($skillMatrixId > 0)
+	{
+		$sql .= " AND h.id = $skillMatrixId";
+	}
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function getSkillMatrixEmpWise_EmpDetails($skillMatrixId)
+{
+	$sql = "SELECT d.*
+			FROM 
+				skillmatrix_empwise_hdr h 
+				INNER JOIN skillmatrix_empwise_dtl d ON h.id = d.skillmatrix_emp_id
+			WHERE h.status <> 'inactive' AND h.id = $skillMatrixId";
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function saveSkillMatrixEmpWise($skillMatrixId, $entryDate, $lineName, $dtlArr)
+{
+	if($skillMatrixId > 0)
+	{
+		$sql = "UPDATE skillmatrix_empwise_hdr SET 
+					entry_date = '".$entryDate."', 
+					linename = '".$lineName."', 
+					modified_on = NOW(), 
+					modified_by = '".$this->session->userdata('userid')."'
+				WHERE id = $skillMatrixId";
+		$this->db->query($sql);
+	}
+	else
+	{
+		$sql = "INSERT INTO skillmatrix_empwise_hdr SET 
+					entry_date = '".$entryDate."', 
+					linename = '".$lineName."', 
+					created_on = NOW(), 
+					created_by = '".$this->session->userdata('userid')."'";
+		$this->db->query($sql);
+		$skillMatrixId = $this->db->insert_id();
+	}
+	
+	$sqlDel = "DELETE FROM skillmatrix_empwise_dtl WHERE skillmatrix_emp_id = $skillMatrixId";
+	$this->db->query($sqlDel);
+	
+	foreach($dtlArr as $row)
+	{
+		$sql1 = "INSERT INTO skillmatrix_empwise_dtl SET 
+					skillmatrix_emp_id = $skillMatrixId, 
+					empid = '".$row->empId."', operationid = '".$row->operationId."', 
+					producedmin = '".$row->producedMin."', pieces = '".$row->pieces."', 
+					sam = '".$row->sam."', shifthrs = '".$row->shiftHrs."', 
+					othours = '".$row->otHours."', efficiency = '".$row->efficiency."'";
+		$this->db->query($sql1);
+	}
+}
+
+public function delSkillMatrixEmpWise($skillMatrixId)
+{
+	$sql = "UPDATE skillmatrix_empwise_hdr SET status = 'inactive' WHERE id = $skillMatrixId";
+	$this->db->query($sql);
+}
+
 /*Manju Ends*/
 
 /*Pratheep Starts*/
