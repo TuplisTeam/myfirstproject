@@ -635,11 +635,11 @@ public function delMachinery($machineryId)
 	$this->db->query($sql);
 }
 
-public function getSkillMatrixEmpWise_HdrDetails($skillMatrixId = '')
+public function getSkillMatrix_HdrDetails($skillMatrixId = '')
 {
 	$sql = "SELECT h.*, DATE_FORMAT(h.entry_date,'%d-%m-%Y') AS entrydate
 			FROM 
-				skillmatrix_empwise_hdr h 
+				skillmatrix_hdr h 
 			WHERE h.status <> 'inactive'";
 	if($skillMatrixId > 0)
 	{
@@ -649,22 +649,22 @@ public function getSkillMatrixEmpWise_HdrDetails($skillMatrixId = '')
 	return $res->result();
 }
 
-public function getSkillMatrixEmpWise_EmpDetails($skillMatrixId)
+public function getSkillMatrix_EmpDetails($skillMatrixId)
 {
 	$sql = "SELECT d.*
 			FROM 
-				skillmatrix_empwise_hdr h 
-				INNER JOIN skillmatrix_empwise_dtl d ON h.id = d.skillmatrix_emp_id
+				skillmatrix_hdr h 
+				INNER JOIN skillmatrix_dtl d ON h.id = d.skillmatrix_id
 			WHERE h.status <> 'inactive' AND h.id = $skillMatrixId";
 	$res = $this->db->query($sql);
 	return $res->result();
 }
 
-public function saveSkillMatrixEmpWise($skillMatrixId, $entryDate, $lineName, $dtlArr)
+public function saveSkillMatrix($skillMatrixId, $entryDate, $lineName, $dtlArr)
 {
 	if($skillMatrixId > 0)
 	{
-		$sql = "UPDATE skillmatrix_empwise_hdr SET 
+		$sql = "UPDATE skillmatrix_hdr SET 
 					entry_date = '".$entryDate."', 
 					linename = '".$lineName."', 
 					modified_on = NOW(), 
@@ -674,7 +674,7 @@ public function saveSkillMatrixEmpWise($skillMatrixId, $entryDate, $lineName, $d
 	}
 	else
 	{
-		$sql = "INSERT INTO skillmatrix_empwise_hdr SET 
+		$sql = "INSERT INTO skillmatrix_hdr SET 
 					entry_date = '".$entryDate."', 
 					linename = '".$lineName."', 
 					created_on = NOW(), 
@@ -683,13 +683,13 @@ public function saveSkillMatrixEmpWise($skillMatrixId, $entryDate, $lineName, $d
 		$skillMatrixId = $this->db->insert_id();
 	}
 	
-	$sqlDel = "DELETE FROM skillmatrix_empwise_dtl WHERE skillmatrix_emp_id = $skillMatrixId";
+	$sqlDel = "DELETE FROM skillmatrix_dtl WHERE skillmatrix_id = $skillMatrixId";
 	$this->db->query($sqlDel);
 	
 	foreach($dtlArr as $row)
 	{
-		$sql1 = "INSERT INTO skillmatrix_empwise_dtl SET 
-					skillmatrix_emp_id = $skillMatrixId, 
+		$sql1 = "INSERT INTO skillmatrix_dtl SET 
+					skillmatrix_id = $skillMatrixId, 
 					empid = '".$row->empId."', operationid = '".$row->operationId."', 
 					producedmin = '".$row->producedMin."', pieces = '".$row->pieces."', 
 					sam = '".$row->sam."', shifthrs = '".$row->shiftHrs."', 
@@ -698,9 +698,9 @@ public function saveSkillMatrixEmpWise($skillMatrixId, $entryDate, $lineName, $d
 	}
 }
 
-public function delSkillMatrixEmpWise($skillMatrixId)
+public function delSkillMatrix($skillMatrixId)
 {
-	$sql = "UPDATE skillmatrix_empwise_hdr SET status = 'inactive' WHERE id = $skillMatrixId";
+	$sql = "UPDATE skillmatrix_hdr SET status = 'inactive' WHERE id = $skillMatrixId";
 	$this->db->query($sql);
 }
 

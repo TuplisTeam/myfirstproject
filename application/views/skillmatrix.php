@@ -1,8 +1,8 @@
 <div class="page-inner">
     <div class="page-title">
         <h3>
-			<a href="<?php echo base_url(); ?>admin/skillmatrix_empwise" style="text-decoration: none;">
-				Skill Matrix (Employee Wise)
+			<a href="<?php echo base_url(); ?>admin/skillmatrix" style="text-decoration: none;">
+				Skill Matrix
 			</a>
 		</h3>
     </div>
@@ -23,7 +23,7 @@
 			<div class="col-md-12">
 				<div class="panel panel-white">
                     <div class="panel-heading clearfix">
-                        <h4 class="panel-title">Skill Matrix (Employee Wise) Details</h4>
+                        <h4 class="panel-title">Skill Matrix Details</h4>
 						<button class="btn btn-success pull-right newEntry">
 							New Entry
 						</button>
@@ -69,7 +69,7 @@
 			<div class="col-md-12">
 				<div class="panel panel-white">
 	                <div class="panel-heading clearfix">
-	                    <h4 class="panel-title">Skill Matrix (Employee Wise) Form</h4>
+	                    <h4 class="panel-title">Skill Matrix Form</h4>
 	                </div>
 	                <div class="panel-body">
 	                    <form class="form-horizontal" id="skillMatrixForm" method="POST">
@@ -441,7 +441,7 @@
 					"lineName" : lineName,
 					"dtlArr" : JSON.stringify(dtlArr)
 				};
-				req.url = "admin/saveSkillMatrixEmpWise";
+				req.url = "admin/saveSkillMatrix";
 				RequestHandler(req, showResponse);
 			}
 			else
@@ -468,7 +468,7 @@
 		var skillMatrixId = $(this).attr('skillMatrixId');
 		if(skillMatrixId > 0)
 		{
-			location.href = '<?php echo base_url(); ?>admin/skillmatrix_empwise/'+skillMatrixId;
+			location.href = '<?php echo base_url(); ?>admin/skillmatrix/'+skillMatrixId;
 		}
 	});
 	
@@ -485,7 +485,7 @@
 				{
 					"skillMatrixId" : skillMatrixId
 				};
-				req.url = "admin/delSkillMatrixEmpWise";
+				req.url = "admin/delSkillMatrix";
 				RequestHandler(req, showResponse);
 			}
 			else
@@ -521,7 +521,7 @@
 			str += 'WELL DONE! ' + msg;
 			str += '</div>';
 			
-			redirectURL = '<?php echo base_url(); ?>admin/skillmatrix_empwise';
+			redirectURL = '<?php echo base_url(); ?>admin/skillmatrix';
 		}
 		$("#responseMsg").html(str);
 		if(!isError)
@@ -536,7 +536,7 @@
 	$(".resetBtn").click(function()
 	{
 		$("#responseMsg").html('');
-		location.href = '<?php echo base_url(); ?>admin/skillmatrix_empwise/';
+		location.href = '<?php echo base_url(); ?>admin/skillmatrix/';
 	});
 	
 </script>

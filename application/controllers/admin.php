@@ -1056,14 +1056,14 @@ public function delMachinery()
 	echo json_encode($data);
 }
 
-public function skillmatrix_empwise($skillMatrixId = '')
+public function skillmatrix($skillMatrixId = '')
 {
 	$data["skillMatrixId"] = $skillMatrixId;
 	
 	$data["empDtls"] = $this->adminmodel->getEmployeeDetails();
 	$data["operationDtls"] = $this->adminmodel->getOperationDetails();
 	
-	$res = $this->adminmodel->getSkillMatrixEmpWise_HdrDetails($skillMatrixId);
+	$res = $this->adminmodel->getSkillMatrix_HdrDetails($skillMatrixId);
 	
 	$data["entryDate"] = "";
 	$data["lineName"] = "";
@@ -1075,7 +1075,7 @@ public function skillmatrix_empwise($skillMatrixId = '')
 		{
 			$data["entryDate"] = $row->entrydate;
 			$data["lineName"] = $row->linename;
-			$data["dtlArr"] = $this->adminmodel->getSkillMatrixEmpWise_EmpDetails($skillMatrixId);
+			$data["dtlArr"] = $this->adminmodel->getSkillMatrix_EmpDetails($skillMatrixId);
 		}
 	}
 	else
@@ -1084,11 +1084,11 @@ public function skillmatrix_empwise($skillMatrixId = '')
 	}
 	
 	$this->load->view('header');
-	$this->load->view('skillmatrix_empwise', $data);
+	$this->load->view('skillmatrix', $data);
 	$this->load->view('footer');
 }
 
-public function saveSkillMatrixEmpWise()
+public function saveSkillMatrix()
 {
 	$skillMatrixId = $this->input->post('skillMatrixId');
 	$entryDate = $this->input->post('entryDate');
@@ -1100,16 +1100,16 @@ public function saveSkillMatrixEmpWise()
 	
 	if($entryDate != "" && $lineName != "" && count($dtlArr) > 0)
 	{
-		$this->adminmodel->saveSkillMatrixEmpWise($skillMatrixId, $entryDate, $lineName, $dtlArr);
+		$this->adminmodel->saveSkillMatrix($skillMatrixId, $entryDate, $lineName, $dtlArr);
 		
 		$data["isError"] = FALSE;
 		if($skillMatrixId > 0)
 		{
-			$data["msg"] = "Skill Matrix Emp Wise Updated Successfully.";
+			$data["msg"] = "Skill Matrix Updated Successfully.";
 		}
 		else
 		{
-			$data["msg"] = "Skill Matrix Emp Wise Created Successfully.";
+			$data["msg"] = "Skill Matrix Created Successfully.";
 		}
 	}
 	else
@@ -1120,16 +1120,16 @@ public function saveSkillMatrixEmpWise()
 	echo json_encode($data);
 }
 
-public function delSkillMatrixEmpWise()
+public function delSkillMatrix()
 {
 	$skillMatrixId = $this->input->post('skillMatrixId');
 	
 	if($skillMatrixId > 0)
 	{
-		$this->adminmodel->delSkillMatrixEmpWise($skillMatrixId);
+		$this->adminmodel->delSkillMatrix($skillMatrixId);
 		
 		$data["isError"] = FALSE;
-		$data["msg"] = "Skill Matrix (Employee Wise) Removed Successfully.";
+		$data["msg"] = "Skill Matrix Removed Successfully.";
 	}
 	else
 	{
