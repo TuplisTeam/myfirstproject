@@ -1237,6 +1237,96 @@ public function delNoWorkTime()
 	echo json_encode($data);
 }
 
+public function assemblyloading($assemblyLoadingId = '')
+{
+	$data["assemblyLoadingId"] = $assemblyLoadingId;
+	
+	$data["empDtls"] = $this->adminmodel->getEmployeeDetails();
+	$res = $this->adminmodel->getAssemblyLoading_HdrDetails($assemblyLoadingId);
+	
+	$data["entryDate"] = "";
+	$data["lineName"] = "";
+	$data["dtlArr"] = array();
+	
+	if($assemblyLoadingId > 0)
+	{
+		foreach($res as $row)
+		{
+			$data["entryDate"] = $row->entrydate;
+			$data["lineName"] = $row->linename;
+			$data["dtlArr"] = $this->adminmodel->getAssemblyLoading_EmpDetails($assemblyLoadingId);
+		}
+	}
+	else
+	{
+		$data["allDetails"] = $res;
+	}
+	
+	$this->load->view('header');
+	$this->load->view('assemblyloading', $data);
+	$this->load->view('footer');
+}
+
+public function saveAssemblyLoading()
+{
+	$assemblyLoadingId = $this->input->post('assemblyLoadingId');
+	$entryDate = $this->input->post('entryDate');
+	$lineName = $this->input->post('lineName');
+	$dtlArr = $this->input->post('dtlArr');
+	$dtlArr = json_decode($dtlArr);
+	
+	$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
+	
+	if($entryDate != "" && $lineName != "" && count($dtlArr) > 0)
+	{
+		$availRes = $this->adminmodel->checkDateLineNameAvailability_AssemblyLoading($assemblyLoadingId, $entryDate, $lineName);
+		if($availRes > 0)
+		{
+			$data["isError"] = TRUE;
+			$data["msg"] = "Date and Line name is already available. Please check.";
+		}
+		else
+		{
+			$this->adminmodel->saveAssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $dtlArr);
+		
+			$data["isError"] = FALSE;
+			if($assemblyLoadingId > 0)
+			{
+				$data["msg"] = "Assembly Loading Updated Successfully.";
+			}
+			else
+			{
+				$data["msg"] = "Assembly Loading Created Successfully.";
+			}
+		}
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
+}
+
+public function delAssemblyLoading()
+{
+	$entryId = $this->input->post('entryId');
+	
+	if($entryId > 0)
+	{
+		$this->adminmodel->delAssemblyLoading($entryId);
+		
+		$data["isError"] = FALSE;
+		$data["msg"] = "Assembly Loading Removed Successfully.";
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
+}
+
 /*Report Starts*/
 
 public function skillmatrixreport()
@@ -1373,6 +1463,68 @@ public function getIndividualPerformanceReport()
 	
 	$this->load->view('reports/header');
 	$this->load->view('reports/individualperformance_reportprint',$data);
+	$this->load->view('reports/footer');
+}
+
+public function pricerateincentivereport()
+{
+	$data["empDtls"] = $this->adminmodel->getEmployeeDetails();
+	
+	$this->load->view('header');
+	$this->load->view('reports/pricerateincentive', $data);
+	$this->load->view('footer');
+}
+
+public function getPriceRateIncentiveReport()
+{
+	$fromDate = $this->input->post('fromDate');
+	$toDate = $this->input->post('toDate');
+	$employeeId = $this->input->post('employeeId');
+	
+	if($fromDate != "")
+	{
+		$fromDate = substr($fromDate,6,4).'-'.substr($fromDate,3,2).'-'.substr($fromDate,0,2);
+	}
+	if($toDate != "")
+	{
+		$toDate = substr($toDate,6,4).'-'.substr($toDate,3,2).'-'.substr($toDate,0,2);
+	}
+	
+	$exportAsCSV = $this->input->post('checkValue');
+	
+	$data["title"] = "PRICE RATE INCENTIVE REPORT";
+	$data["subtitle"] = "Price Rate Incentive Report";
+	$data["filterBy"] = $filterBy;
+	
+	$res = $this->adminmodel->getPriceRateIncentiveReport($fromDate, $toDate, $employeeId);
+	
+	$data["datas"] = $res;
+	
+	if($exportAsCSV == 1)
+	{
+		$str = "Sl No.,Entry Date,Line Name,Employee No.,Employee Name,Target Pieces,Sewing Pieces,Incentive Pieces,Amount\n";
+	  	$i=0;
+	  	if(count($res) > 0)
+		{
+		  	foreach($res as $row)
+			{
+			   	$i++;
+				
+				$str .= $i.',"'.$row->entrydt.'","'.$row->linename.'","'.$row->empno.'","'.$row->empname.'","'.$row->target.'","'.$row->sewing.'","'.$row->incentive.'","'.$row->amount.'"'."\n";
+		  	}
+		}
+		else
+		{
+			$str .= "No Data\'s Found...";
+		}
+	  	header('Content-Type: application/csv');
+	  	header('Content-Disposition: attachement; filename="PriceRateIncentiveReport.csv"');
+	  	echo $str; 
+		return;
+	}
+	
+	$this->load->view('reports/header');
+	$this->load->view('reports/pricerateincentive_reportprint',$data);
 	$this->load->view('reports/footer');
 }
 

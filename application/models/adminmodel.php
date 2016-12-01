@@ -798,6 +798,97 @@ public function delNoWorkTime($noWorkId)
 	$this->db->query($sql);
 }
 
+public function getAssemblyLoading_HdrDetails($assemblyLoadingId = '')
+{
+	$sql = "SELECT h.*, DATE_FORMAT(h.entry_date,'%d-%m-%Y') AS entrydate
+			FROM 
+				assemblyloading_hdr h 
+			WHERE h.status <> 'inactive'";
+	if($assemblyLoadingId > 0)
+	{
+		$sql .= " AND h.id = $assemblyLoadingId";
+	}
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function getAssemblyLoading_EmpDetails($assemblyLoadingId)
+{
+	$sql = "SELECT d.*
+			FROM 
+				assemblyloading_hdr h 
+				INNER JOIN assemblyloading_dtl d ON h.id = d.assemblyloading_id
+			WHERE h.status <> 'inactive' AND h.id = $assemblyLoadingId";
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function checkDateLineNameAvailability_AssemblyLoading($assemblyLoadingId, $entryDate, $lineName)
+{
+	$sql = "SELECT * FROM assemblyloading_hdr 
+			WHERE 
+				STATUS <> 'inactive' AND entry_date = '".$entryDate."' AND 
+				linename = '".$lineName."'";
+	if($assemblyLoadingId > 0)
+	{
+		$sql .= " AND id <> $assemblyLoadingId";
+	}
+	$res = $this->db->query($sql);
+	return $res->num_rows();
+}
+
+public function saveAssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $dtlArr)
+{
+	if($assemblyLoadingId > 0)
+	{
+		$sql = "UPDATE assemblyloading_hdr SET 
+					entry_date = '".$entryDate."', 
+					linename = '".$lineName."', 
+					modified_on = NOW(), 
+					modified_by = '".$this->session->userdata('userid')."'
+				WHERE id = $assemblyLoadingId";
+		$this->db->query($sql);
+	}
+	else
+	{
+		$sql = "INSERT INTO assemblyloading_hdr SET 
+					entry_date = '".$entryDate."', 
+					linename = '".$lineName."', 
+					created_on = NOW(), 
+					created_by = '".$this->session->userdata('userid')."'";
+		$this->db->query($sql);
+		$assemblyLoadingId = $this->db->insert_id();
+	}
+	
+	$sqlDel = "DELETE FROM assemblyloading_dtl WHERE assemblyloading_id = $assemblyLoadingId";
+	$this->db->query($sqlDel);
+	
+	foreach($dtlArr as $row)
+	{
+		$sql1 = "INSERT INTO assemblyloading_dtl SET 
+					assemblyloading_id = $assemblyLoadingId, 
+					empid = '".$row->empId."',  
+					target = '".$row->target."',  
+					hour_1 = '".$row->hour1."',  
+					hour_2 = '".$row->hour2."',  
+					hour_3 = '".$row->hour3."',  
+					hour_4 = '".$row->hour4."',  
+					hour_5 = '".$row->hour5."',  
+					hour_6 = '".$row->hour6."',  
+					hour_7 = '".$row->hour7."',  
+					hour_8 = '".$row->hour8."',  
+					ot_pieces = '".$row->otPieces."', 
+					totalpieces = '".$row->totalPieces."'";
+		$this->db->query($sql1);
+	}
+}
+
+public function delAssemblyLoading($entryId)
+{
+	$sql = "UPDATE assemblyloading_hdr SET status = 'inactive' WHERE id = $entryId";
+	$this->db->query($sql);
+}
+
 /*Report Starts*/
 
 public function getSkillMatrixReport($fromDate, $toDate, $employeeId, $filterBy)
@@ -857,6 +948,43 @@ public function getSkillMatrixReport($fromDate, $toDate, $employeeId, $filterBy)
 }
 
 public function getIndividualPerformanceReport($fromDate, $toDate, $employeeId)
+{
+	$whrStr = '';
+	if($fromDate != "")
+	{
+		$whrStr .= " AND h.entry_date >= '".$fromDate."'";
+	}
+	if($toDate != "")
+	{
+		$whrStr .= " AND h.entry_date <= '".$toDate."'";
+	}
+	if($employeeId > 0)
+	{
+		$whrStr .= " AND d.empid = $employeeId";
+	}
+	
+	$sql = "SELECT 
+				DATE_FORMAT(h.entry_date,'%d-%m-%Y') AS entrydt, h.linename, 
+				d.empid, e.empno, e.empname, d.operationid, o.operationname, 
+				SUM(d.producedmin) AS producedmin, SUM(d.pieces) AS pieces,
+				SUM(d.sam) AS sam, SUM(d.shifthrs) AS shifthrs, 
+				SUM(d.othours) AS othours, 
+				ROUND(((SUM(d.producedmin) * SUM(d.pieces) * SUM(d.sam))/(SUM(d.shifthrs) + SUM(d.othours))),2) AS efficiency, 0 AS amount
+			FROM 
+				skillmatrix_hdr h 
+				INNER JOIN skillmatrix_dtl d ON h.id = d.skillmatrix_id
+				INNER JOIN employee e ON d.empid = e.id
+				INNER JOIN operations o ON d.operationid = o.id
+			WHERE 
+				h.status <> 'inactive' AND e.status <> 'inactive' AND 
+				o.status <> 'inactive' $whrStr
+			GROUP BY h.entry_date, h.linename, d.empid
+			ORDER BY d.empid, h.entry_date";
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function getPriceRateIncentiveReport($fromDate, $toDate, $employeeId)
 {
 	$whrStr = '';
 	if($fromDate != "")
