@@ -1100,7 +1100,7 @@ public function saveSkillMatrix()
 	
 	if($entryDate != "" && $lineName != "" && count($dtlArr) > 0)
 	{
-		$availRes = $this->adminmodel->checkDateLineNameAvailability($skillMatrixId, $entryDate, $lineName);
+		$availRes = $this->adminmodel->checkDateLineNameAvailability_SkillMatrix($skillMatrixId, $entryDate, $lineName);
 		if($availRes > 0)
 		{
 			$data["isError"] = TRUE;
@@ -1139,6 +1139,95 @@ public function delSkillMatrix()
 		
 		$data["isError"] = FALSE;
 		$data["msg"] = "Skill Matrix Removed Successfully.";
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
+}
+
+public function noworktime($noWorkId = '')
+{
+	$data["noWorkId"] = $noWorkId;
+	
+	$res = $this->adminmodel->getNoWork_HdrDetails($noWorkId);
+	
+	$data["entryDate"] = "";
+	$data["lineName"] = "";
+	$data["dtlArr"] = array();
+	
+	if($noWorkId > 0)
+	{
+		foreach($res as $row)
+		{
+			$data["entryDate"] = $row->entrydate;
+			$data["lineName"] = $row->linename;
+			$data["dtlArr"] = $this->adminmodel->getNoWork_ReasonDetails($noWorkId);
+		}
+	}
+	else
+	{
+		$data["allDetails"] = $res;
+	}
+	
+	$this->load->view('header');
+	$this->load->view('noworktime', $data);
+	$this->load->view('footer');
+}
+
+public function saveNoWorkTime()
+{
+	$noWorkId = $this->input->post('noWorkId');
+	$entryDate = $this->input->post('entryDate');
+	$lineName = $this->input->post('lineName');
+	$dtlArr = $this->input->post('dtlArr');
+	$dtlArr = json_decode($dtlArr);
+	
+	$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
+	
+	if($entryDate != "" && $lineName != "" && count($dtlArr) > 0)
+	{
+		$availRes = $this->adminmodel->checkDateLineNameAvailability_NoWork($noWorkId, $entryDate, $lineName);
+		if($availRes > 0)
+		{
+			$data["isError"] = TRUE;
+			$data["msg"] = "This Date and Line name is already available. Please check.";
+		}
+		else
+		{
+			$this->adminmodel->saveNoWorkTime($noWorkId, $entryDate, $lineName, $dtlArr);
+			
+			$data["isError"] = FALSE;
+			if($noWorkId > 0)
+			{
+				$data["msg"] = "No Work Time Updated Successfully.";
+			}
+			else
+			{
+				$data["msg"] = "No Work Time Created Successfully.";
+			}
+		}
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
+}
+
+public function delNoWorkTime()
+{
+	$noWorkId = $this->input->post('noWorkId');
+	
+	if($noWorkId > 0)
+	{
+		$this->adminmodel->delNoWorkTime($noWorkId);
+		
+		$data["isError"] = FALSE;
+		$data["msg"] = "No Work Time Removed Successfully.";
 	}
 	else
 	{

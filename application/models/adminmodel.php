@@ -660,7 +660,7 @@ public function getSkillMatrix_EmpDetails($skillMatrixId)
 	return $res->result();
 }
 
-public function checkDateLineNameAvailability($skillMatrixId, $entryDate, $lineName)
+public function checkDateLineNameAvailability_SkillMatrix($skillMatrixId, $entryDate, $lineName)
 {
 	$sql = "SELECT * FROM skillmatrix_hdr 
 			WHERE 
@@ -715,6 +715,86 @@ public function saveSkillMatrix($skillMatrixId, $entryDate, $lineName, $dtlArr)
 public function delSkillMatrix($skillMatrixId)
 {
 	$sql = "UPDATE skillmatrix_hdr SET status = 'inactive' WHERE id = $skillMatrixId";
+	$this->db->query($sql);
+}
+
+public function getNoWork_HdrDetails($noWorkId = '')
+{
+	$sql = "SELECT h.*, DATE_FORMAT(h.entry_date,'%d-%m-%Y') AS entrydate
+			FROM 
+				nowork_hdr h 
+			WHERE h.status <> 'inactive'";
+	if($noWorkId > 0)
+	{
+		$sql .= " AND h.id = $noWorkId";
+	}
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function getNoWork_ReasonDetails($noWorkId)
+{
+	$sql = "SELECT d.*
+			FROM 
+				nowork_hdr h 
+				INNER JOIN nowork_dtl d ON h.id = d.noworkid
+			WHERE h.status <> 'inactive' AND h.id = $noWorkId";
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function checkDateLineNameAvailability_NoWork($noWorkId, $entryDate, $lineName)
+{
+	$sql = "SELECT * FROM nowork_hdr 
+			WHERE 
+				STATUS <> 'inactive' AND entry_date = '".$entryDate."' AND 
+				linename = '".$lineName."'";
+	if($noWorkId > 0)
+	{
+		$sql .= " AND id <> $noWorkId";
+	}
+	$res = $this->db->query($sql);
+	return $res->num_rows();
+}
+
+public function saveNoWorkTime($noWorkId, $entryDate, $lineName, $dtlArr)
+{
+	if($noWorkId > 0)
+	{
+		$sql = "UPDATE nowork_hdr SET 
+					entry_date = '".$entryDate."', 
+					linename = '".$lineName."', 
+					modified_on = NOW(), 
+					modified_by = '".$this->session->userdata('userid')."'
+				WHERE id = $noWorkId";
+		$this->db->query($sql);
+	}
+	else
+	{
+		$sql = "INSERT INTO nowork_hdr SET 
+					entry_date = '".$entryDate."', 
+					linename = '".$lineName."', 
+					created_on = NOW(), 
+					created_by = '".$this->session->userdata('userid')."'";
+		$this->db->query($sql);
+		$noWorkId = $this->db->insert_id();
+	}
+	
+	$sqlDel = "DELETE FROM nowork_dtl WHERE noworkid = $noWorkId";
+	$this->db->query($sqlDel);
+	
+	foreach($dtlArr as $row)
+	{
+		$sql1 = "INSERT INTO nowork_dtl SET 
+					noworkid = $noWorkId, 
+					reason = '".$row->reason."', noworktime = '".$row->noWorkTime."'";
+		$this->db->query($sql1);
+	}
+}
+
+public function delNoWorkTime($noWorkId)
+{
+	$sql = "UPDATE nowork_hdr SET status = 'inactive' WHERE id = $noWorkId";
 	$this->db->query($sql);
 }
 
