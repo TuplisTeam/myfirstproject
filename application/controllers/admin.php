@@ -1314,6 +1314,68 @@ public function getSkillMatrixReport()
 	$this->load->view('reports/footer');
 }
 
+public function individualperformancereport()
+{
+	$data["empDtls"] = $this->adminmodel->getEmployeeDetails();
+	
+	$this->load->view('header');
+	$this->load->view('reports/individualperformance', $data);
+	$this->load->view('footer');
+}
+
+public function getIndividualPerformanceReport()
+{
+	$fromDate = $this->input->post('fromDate');
+	$toDate = $this->input->post('toDate');
+	$employeeId = $this->input->post('employeeId');
+	
+	if($fromDate != "")
+	{
+		$fromDate = substr($fromDate,6,4).'-'.substr($fromDate,3,2).'-'.substr($fromDate,0,2);
+	}
+	if($toDate != "")
+	{
+		$toDate = substr($toDate,6,4).'-'.substr($toDate,3,2).'-'.substr($toDate,0,2);
+	}
+	
+	$exportAsCSV = $this->input->post('checkValue');
+	
+	$data["title"] = "INDIVIDUAL PERFORMANCE REPORT";
+	$data["subtitle"] = "Individual Performance Report";
+	$data["filterBy"] = $filterBy;
+	
+	$res = $this->adminmodel->getIndividualPerformanceReport($fromDate, $toDate, $employeeId);
+	
+	$data["datas"] = $res;
+	
+	if($exportAsCSV == 1)
+	{
+		$str = "Sl No.,Entry Date,Line Name,Employee No.,Employee Name,Total Pieces,Efficiency,Amount\n";
+	  	$i=0;
+	  	if(count($res) > 0)
+		{
+		  	foreach($res as $row)
+			{
+			   	$i++;
+				
+				$str .= $i.',"'.$row->entrydt.'","'.$row->linename.'","'.$row->empno.'","'.$row->empname.'","'.$row->pieces.'","'.$row->efficiency.'","'.$row->amount.'"'."\n";
+		  	}
+		}
+		else
+		{
+			$str .= "No Data\'s Found...";
+		}
+	  	header('Content-Type: application/csv');
+	  	header('Content-Disposition: attachement; filename="IndividualPerformanceReport.csv"');
+	  	echo $str; 
+		return;
+	}
+	
+	$this->load->view('reports/header');
+	$this->load->view('reports/individualperformance_reportprint',$data);
+	$this->load->view('reports/footer');
+}
+
 /*Report Ends*/
 
 /*Common Function Starts*/

@@ -856,6 +856,43 @@ public function getSkillMatrixReport($fromDate, $toDate, $employeeId, $filterBy)
 	return $res->result();
 }
 
+public function getIndividualPerformanceReport($fromDate, $toDate, $employeeId)
+{
+	$whrStr = '';
+	if($fromDate != "")
+	{
+		$whrStr .= " AND h.entry_date >= '".$fromDate."'";
+	}
+	if($toDate != "")
+	{
+		$whrStr .= " AND h.entry_date <= '".$toDate."'";
+	}
+	if($employeeId > 0)
+	{
+		$whrStr .= " AND d.empid = $employeeId";
+	}
+	
+	$sql = "SELECT 
+				DATE_FORMAT(h.entry_date,'%d-%m-%Y') AS entrydt, h.linename, 
+				d.empid, e.empno, e.empname, d.operationid, o.operationname, 
+				SUM(d.producedmin) AS producedmin, SUM(d.pieces) AS pieces,
+				SUM(d.sam) AS sam, SUM(d.shifthrs) AS shifthrs, 
+				SUM(d.othours) AS othours, 
+				ROUND(((SUM(d.producedmin) * SUM(d.pieces) * SUM(d.sam))/(SUM(d.shifthrs) + SUM(d.othours))),2) AS efficiency, 0 AS amount
+			FROM 
+				skillmatrix_hdr h 
+				INNER JOIN skillmatrix_dtl d ON h.id = d.skillmatrix_id
+				INNER JOIN employee e ON d.empid = e.id
+				INNER JOIN operations o ON d.operationid = o.id
+			WHERE 
+				h.status <> 'inactive' AND e.status <> 'inactive' AND 
+				o.status <> 'inactive' $whrStr
+			GROUP BY h.entry_date, h.linename, d.empid
+			ORDER BY d.empid, h.entry_date";
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
 /*Report Ends*/
 
 /*Manju Ends*/
