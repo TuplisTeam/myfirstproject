@@ -109,9 +109,9 @@
 				                        			<tr>
 				                        				<th width="15%">Employee Name</th>
 				                        				<th width="15%">Operation</th>
-				                        				<th width="15%">Produced Minutes</th>
-				                        				<th width="15%">Pieces</th>
-				                        				<th width="15%">SAM</th>
+				                        				<th width="10%">Produced Minutes</th>
+				                        				<th width="10%">Pieces</th>
+				                        				<th width="10%">SAM</th>
 				                        				<th width="15%">Shift Hrs Worked</th>
 				                        				<th width="15%">OT Hrs Worked</th>
 				                        				<th width="10%">Manage</th>

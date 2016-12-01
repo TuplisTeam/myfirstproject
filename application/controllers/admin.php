@@ -1100,21 +1100,30 @@ public function saveSkillMatrix()
 	
 	if($entryDate != "" && $lineName != "" && count($dtlArr) > 0)
 	{
-		$this->adminmodel->saveSkillMatrix($skillMatrixId, $entryDate, $lineName, $dtlArr);
-		
-		$data["isError"] = FALSE;
-		if($skillMatrixId > 0)
+		$availRes = $this->adminmodel->checkDateLineNameAvailability($skillMatrixId, $entryDate, $lineName);
+		if($availRes > 0)
 		{
-			$data["msg"] = "Skill Matrix Updated Successfully.";
+			$data["isError"] = TRUE;
+			$data["msg"] = "This Date and Line name is already available. Please check.";
 		}
 		else
 		{
-			$data["msg"] = "Skill Matrix Created Successfully.";
+			$this->adminmodel->saveSkillMatrix($skillMatrixId, $entryDate, $lineName, $dtlArr);
+		
+			$data["isError"] = FALSE;
+			if($skillMatrixId > 0)
+			{
+				$data["msg"] = "Skill Matrix Updated Successfully.";
+			}
+			else
+			{
+				$data["msg"] = "Skill Matrix Created Successfully.";
+			}
 		}
 	}
 	else
 	{
-		$data["isError"] = FALSE;
+		$data["isError"] = TRUE;
 		$data["msg"] = "Please Fill All Details.";
 	}
 	echo json_encode($data);
@@ -1138,6 +1147,85 @@ public function delSkillMatrix()
 	}
 	echo json_encode($data);
 }
+
+/*Report Starts*/
+
+public function skillmatrixreport()
+{
+	$data["empDtls"] = $this->adminmodel->getEmployeeDetails();
+	
+	$this->load->view('header');
+	$this->load->view('reports/skillmatrix', $data);
+	$this->load->view('footer');
+}
+
+public function getSkillMatrixReport()
+{
+	$fromDate = $this->input->post('fromDate');
+	$toDate = $this->input->post('toDate');
+	$employeeId = $this->input->post('employeeId');
+	$filterBy = $this->input->post('filterBy');
+	
+	if($fromDate != "")
+	{
+		$fromDate = substr($fromDate,6,4).'-'.substr($fromDate,3,2).'-'.substr($fromDate,0,2);
+	}
+	if($toDate != "")
+	{
+		$toDate = substr($toDate,6,4).'-'.substr($toDate,3,2).'-'.substr($toDate,0,2);
+	}
+	
+	$exportAsCSV = $this->input->post('checkValue');
+	
+	$data["title"] = "SKILL MATRIX REPORT";
+	$data["subtitle"] = "Skill Matrix Report";
+	$data["filterBy"] = $filterBy;
+	
+	$res = $this->adminmodel->getSkillMatrixReport($fromDate, $toDate, $employeeId, $filterBy);
+	
+	$data["datas"] = $res;
+	
+	if($exportAsCSV == 1)
+	{
+		$str = "Sl No.,Entry Date,Line Name";
+		if($filterBy == "EmployeeWise")
+		{
+			$str .= ",Employee No.,Employee Name";
+		}
+		$str .= ",Operation Name,Produced Minutes,Pieces,SAM,Shift Hours,OT Hours,Efficiency\n";
+	  	$i=0;
+	  	if(count($res) > 0)
+		{
+		  	foreach($res as $row)
+			{
+			   	$i++;
+				
+				if($filterBy == "EmployeeWise")
+				{
+					$str .= $i.',"'.$row->entrydt.'","'.$row->linename.'","'.$row->empno.'","'.$row->empname.'","'.$row->operationname.'","'.$row->producedmin.'","'.$row->pieces.'","'.$row->sam.'","'.$row->shifthrs.'","'.$row->othours.'","'.$row->efficiency.'"'."\n";
+				}
+				else if($filterBy == "OperationWise")
+				{
+					$str .= $i.',"'.$row->entrydt.'","'.$row->linename.'","'.$row->operationname.'","'.$row->producedmin.'","'.$row->pieces.'","'.$row->sam.'","'.$row->shifthrs.'","'.$row->othours.'","'.$row->efficiency.'"'."\n";
+				}
+		  	}
+		}
+		else
+		{
+			$str .= "No Data\'s Found...";
+		}
+	  	header('Content-Type: application/csv');
+	  	header('Content-Disposition: attachement; filename="SkillMatrixReport.csv"');
+	  	echo $str; 
+		return;
+	}
+	
+	$this->load->view('reports/header');
+	$this->load->view('reports/skillmatrix_reportprint',$data);
+	$this->load->view('reports/footer');
+}
+
+/*Report Ends*/
 
 /*Common Function Starts*/
 
