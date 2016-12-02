@@ -35,6 +35,9 @@
 	                                <tr>
 	                                    <th>Entry Date</th>
 	                                    <th>Line Name</th>
+	                                    <th>Shift Name</th>
+	                                    <th>Total Workers</th>
+	                                    <th>Total Pieces</th>
 	                                    <th>Manage</th>
 	                                </tr>
 	                            </thead>
@@ -46,6 +49,9 @@
 									<tr>
 										<td><?php echo $row->entrydate; ?></td>
 										<td><?php echo $row->linename; ?></td>
+										<td><?php echo $row->shift; ?></td>
+										<td><?php echo $row->totalworkers; ?></td>
+										<td><?php echo $row->totalpieces; ?></td>
 										<td>
 											<button class="btn btn-sm btn-success editEntry" entryId="<?php echo $row->id; ?>" title="Edit">
 												<span class="fa fa-pencil"></span>
@@ -91,6 +97,18 @@
 										</label>
 			                            <div class="col-sm-4">
 			                                <input type="text" class="form-control" id="lineName" name="lineName" placeholder="Line Name" value="<?php echo $lineName; ?>" required="">
+			                            </div>
+			                        </div>
+	                    		</div>
+	                    	</div>
+	                    	<div class="row">
+	                    		<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											Shift Name&nbsp;<span style="color: red;">*</span>
+										</label>
+			                            <div class="col-sm-4">
+			                                <input type="text" class="form-control" id="shiftName" name="shiftName" placeholder="Shift Name" value="<?php echo $shiftName; ?>" required="">
 			                            </div>
 			                        </div>
 	                    		</div>
@@ -195,6 +213,28 @@
 			                        	</div>
 		                        	</div>
 		                        </div>
+	                    	</div>
+	                    	<div class="row">
+	                    		<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											Total Workers&nbsp;<span style="color: red;">*</span>
+										</label>
+			                            <div class="col-sm-4">
+			                                <input type="text" class="form-control" id="totalWorkers" name="totalWorkers" placeholder="Total Workers" value="<?php echo $totalWorkers; ?>" disabled="">
+			                            </div>
+			                        </div>
+	                    		</div>
+								<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											Total Pieces&nbsp;<span style="color: red;">*</span>
+										</label>
+			                            <div class="col-sm-4">
+			                                <input type="text" class="form-control" id="totalPieces" name="totalPieces" placeholder="Total Pieces" value="<?php echo $totalPieces; ?>" disabled="">
+			                            </div>
+			                        </div>
+	                    		</div>
 	                    	</div>
 	                        <div class="row">
 	                    		<div class="col-md-12">
@@ -356,7 +396,7 @@
 		$(this).select();
 	});
 	
-	$(document).on('click','.onBlurPieces',function()
+	$(document).on('blur','.onBlurPieces',function()
 	{
 		var rowNo = $(this).attr('rowNo');
 		if(rowNo > 0)
@@ -381,8 +421,29 @@
 								parseFloat(hour8 ? hour8 : 0) + 
 								parseFloat(otPieces ? otPieces : 0) ;
 			$(".totalPieces_"+rowNo).val(totalPieces);
+			
+			calculateConsolidatedCounts();
 		}
 	});
+	
+	function calculateConsolidatedCounts()
+	{
+		var totalPieces = 0;
+		var totalWorkers = 0;
+		$("tr.detailsTR").each(function()
+		{
+			var rowNo = $(this).attr('rowNo');
+			if(rowNo > 0)
+			{
+				var totalPiecesTR = $(".totalPieces_"+rowNo).val();
+				totalPieces += parseFloat(totalPiecesTR);
+				totalWorkers++;
+			}
+		});
+		
+		$("#totalWorkers").val(totalWorkers);
+		$("#totalPieces").val(totalPieces);
+	}
 	
 	$(document).on('click','.delDtl',function()
 	{
@@ -401,6 +462,9 @@
 		var assemblyLoadingId = '<?php echo $assemblyLoadingId; ?>';
 		var entryDate = $("#entryDate").val();
 		var lineName = $("#lineName").val();
+		var shiftName = $("#shiftName").val();
+		var totalWorkers = $("#totalWorkers").val();
+		var totalPieces = $("#totalPieces").val();
 		
 		var dtlArr = [];
 		
@@ -420,9 +484,9 @@
 			var hour7 = $(".hour7_"+rowNo).val();
 			var hour8 = $(".hour8_"+rowNo).val();
 			var otPieces = $(".otPieces_"+rowNo).val();
-			var totalPieces = $(".totalPieces_"+rowNo).val();
+			var totalPiecesTR = $(".totalPieces_"+rowNo).val();
 			
-			if(empId > 0 && target > 0 && (hour1 > 0 || hour2 > 0 || hour3 > 0 || hour4 > 0 || hour5 > 0 || hour6 > 0 || hour7 > 0 || hour8 > 0 || otPieces > 0) && totalPieces > 0)
+			if(empId > 0 && target > 0 && (hour1 > 0 || hour2 > 0 || hour3 > 0 || hour4 > 0 || hour5 > 0 || hour6 > 0 || hour7 > 0 || hour8 > 0 || otPieces > 0) && totalPiecesTR > 0)
 			{
 				var cri = {};
 				cri["empId"] = empId;
@@ -436,7 +500,7 @@
 				cri["hour7"] = hour7;
 				cri["hour8"] = hour8;
 				cri["otPieces"] = otPieces;
-				cri["totalPieces"] = totalPieces;
+				cri["totalPieces"] = totalPiecesTR;
 				
 				dtlArr.push(cri);
 			}
@@ -452,7 +516,7 @@
 			return;
 		}
 		
-		if(entryDate != "" && lineName != "" && dtlArr.length > 0)
+		if(entryDate != "" && lineName != "" && totalWorkers > 0 && totalPieces > 0 && dtlArr.length > 0)
 		{
 			$("#responseMsg").html('');
 			
@@ -464,6 +528,9 @@
 					"assemblyLoadingId" : assemblyLoadingId,
 					"entryDate" : entryDate,
 					"lineName" : lineName,
+					"shiftName" : shiftName, 
+					"totalWorkers" : totalWorkers, 
+					"totalPieces" : totalPieces, 
 					"dtlArr" : JSON.stringify(dtlArr)
 				};
 				req.url = "admin/saveAssemblyLoading";

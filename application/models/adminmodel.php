@@ -823,12 +823,12 @@ public function getAssemblyLoading_EmpDetails($assemblyLoadingId)
 	return $res->result();
 }
 
-public function checkDateLineNameAvailability_AssemblyLoading($assemblyLoadingId, $entryDate, $lineName)
+public function checkDateLineNameAvailability_AssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $shiftName)
 {
 	$sql = "SELECT * FROM assemblyloading_hdr 
 			WHERE 
 				STATUS <> 'inactive' AND entry_date = '".$entryDate."' AND 
-				linename = '".$lineName."'";
+				linename = '".$lineName."' AND shift = '".$shiftName."'";
 	if($assemblyLoadingId > 0)
 	{
 		$sql .= " AND id <> $assemblyLoadingId";
@@ -837,13 +837,16 @@ public function checkDateLineNameAvailability_AssemblyLoading($assemblyLoadingId
 	return $res->num_rows();
 }
 
-public function saveAssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $dtlArr)
+public function saveAssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $shiftName, $totalWorkers, $totalPieces, $dtlArr)
 {
 	if($assemblyLoadingId > 0)
 	{
 		$sql = "UPDATE assemblyloading_hdr SET 
 					entry_date = '".$entryDate."', 
 					linename = '".$lineName."', 
+					shift = '".$shiftName."', 
+					totalworkers = '".$totalWorkers."', 
+					totalpieces = '".$totalPieces."', 
 					modified_on = NOW(), 
 					modified_by = '".$this->session->userdata('userid')."'
 				WHERE id = $assemblyLoadingId";
@@ -854,6 +857,9 @@ public function saveAssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $
 		$sql = "INSERT INTO assemblyloading_hdr SET 
 					entry_date = '".$entryDate."', 
 					linename = '".$lineName."', 
+					shift = '".$shiftName."', 
+					totalworkers = '".$totalWorkers."', 
+					totalpieces = '".$totalPieces."', 
 					created_on = NOW(), 
 					created_by = '".$this->session->userdata('userid')."'";
 		$this->db->query($sql);

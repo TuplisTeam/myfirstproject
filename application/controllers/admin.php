@@ -1246,6 +1246,9 @@ public function assemblyloading($assemblyLoadingId = '')
 	
 	$data["entryDate"] = "";
 	$data["lineName"] = "";
+	$data["shiftName"] = "";
+	$data["totalWorkers"] = "";
+	$data["totalPieces"] = "";
 	$data["dtlArr"] = array();
 	
 	if($assemblyLoadingId > 0)
@@ -1254,6 +1257,9 @@ public function assemblyloading($assemblyLoadingId = '')
 		{
 			$data["entryDate"] = $row->entrydate;
 			$data["lineName"] = $row->linename;
+			$data["shiftName"] = $row->shift;
+			$data["totalWorkers"] = $row->totalworkers;
+			$data["totalPieces"] = $row->totalpieces;
 			$data["dtlArr"] = $this->adminmodel->getAssemblyLoading_EmpDetails($assemblyLoadingId);
 		}
 	}
@@ -1272,14 +1278,17 @@ public function saveAssemblyLoading()
 	$assemblyLoadingId = $this->input->post('assemblyLoadingId');
 	$entryDate = $this->input->post('entryDate');
 	$lineName = $this->input->post('lineName');
+	$shiftName = $this->input->post('shiftName');
+	$totalWorkers = $this->input->post('totalWorkers');
+	$totalPieces = $this->input->post('totalPieces');
 	$dtlArr = $this->input->post('dtlArr');
 	$dtlArr = json_decode($dtlArr);
 	
 	$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
 	
-	if($entryDate != "" && $lineName != "" && count($dtlArr) > 0)
+	if($entryDate != "" && $lineName != "" && $shiftName != "" && $totalWorkers > 0 && $totalPieces > 0 && count($dtlArr) > 0)
 	{
-		$availRes = $this->adminmodel->checkDateLineNameAvailability_AssemblyLoading($assemblyLoadingId, $entryDate, $lineName);
+		$availRes = $this->adminmodel->checkDateLineNameAvailability_AssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $shiftName);
 		if($availRes > 0)
 		{
 			$data["isError"] = TRUE;
@@ -1287,7 +1296,7 @@ public function saveAssemblyLoading()
 		}
 		else
 		{
-			$this->adminmodel->saveAssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $dtlArr);
+			$this->adminmodel->saveAssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $shiftName, $totalWorkers, $totalPieces, $dtlArr);
 		
 			$data["isError"] = FALSE;
 			if($assemblyLoadingId > 0)
