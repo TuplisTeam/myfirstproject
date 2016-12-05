@@ -1,8 +1,8 @@
 <div class="page-inner">
     <div class="page-title">
         <h3>
-			<a href="<?php echo base_url(); ?>admin/skillmatrixreport" style="text-decoration: none;">
-				Skill Matrix Report
+			<a href="<?php echo base_url(); ?>admin/hourlyproductionreport" style="text-decoration: none;">
+				Hourly Production Report
 			</a>
 		</h3>
     </div>
@@ -11,10 +11,10 @@
 			<div class="col-md-12">
 				<div class="panel panel-white">
 	                <div class="panel-heading clearfix">
-	                    <h4 class="panel-title">Skill Matrix Report</h4>
+	                    <h4 class="panel-title">Hourly Production Report</h4>
 	                </div>
 	                <div class="panel-body">
-	                    <form class="form-horizontal" id="skillMatrixReportForm" method="POST" action="<?php echo base_url(); ?>admin/getSkillMatrixReport" target="_blank">
+	                    <form class="form-horizontal" id="reportForm" method="POST" action="<?php echo base_url(); ?>admin/getHourlyProductionReport" target="_blank">
 	                    	<div class="row">
 	                    		<div class="col-md-6">
 	                    			<div class="form-group">
@@ -44,7 +44,7 @@
 											Employee
 										</label>
 			                            <div class="col-sm-6">
-			                                <select class="form-control" style="width: 100%;" id="employeeId" name="employeeId">
+			                                <select class="form-control" style="display: none; width: 100%" id="employeeId" name="employeeId">
 												<option value="">All</option>
 												<?php
 												foreach($empDtls as $row)
@@ -53,19 +53,6 @@
 													echo '>'.$row->empno.' - '.$row->empname.'</option>';
 												}
 												?>
-											</select>
-			                            </div>
-			                        </div>
-			                    </div>
-			                    <div class="col-md-6">
-									<div class="form-group">
-			                            <label class="col-sm-3 control-label">
-											Filter By&nbsp;<span style="color: red;">*</span>
-										</label>
-			                            <div class="col-sm-6">
-			                                <select class="form-control" style="display: none; width: 100%" id="filterBy" name="filterBy" required="">
-												<option value="EmployeeWise">Employee Wise</option>
-												<option value="OperationWise">Operation Wise</option>
 											</select>
 			                            </div>
 			                        </div>
@@ -117,7 +104,7 @@
 	
 	$(".resetBtn").click(function()
 	{
-		location.href = "<?php echo base_url(); ?>admin/skillmatrixreport";
+		location.href = "<?php echo base_url(); ?>admin/hourlyproductionreport";
 	});
 	
 </script>

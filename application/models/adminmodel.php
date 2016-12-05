@@ -837,7 +837,7 @@ public function checkDateLineNameAvailability_AssemblyLoading($assemblyLoadingId
 	return $res->num_rows();
 }
 
-public function saveAssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $shiftName, $totalWorkers, $totalPieces, $dtlArr)
+public function saveAssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $shiftName, $totalWorkers, $totalPieces, $totalTarget, $dtlArr)
 {
 	if($assemblyLoadingId > 0)
 	{
@@ -847,6 +847,7 @@ public function saveAssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $
 					shift = '".$shiftName."', 
 					totalworkers = '".$totalWorkers."', 
 					totalpieces = '".$totalPieces."', 
+					totaltarget = '".$totalTarget."', 
 					modified_on = NOW(), 
 					modified_by = '".$this->session->userdata('userid')."'
 				WHERE id = $assemblyLoadingId";
@@ -860,6 +861,7 @@ public function saveAssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $
 					shift = '".$shiftName."', 
 					totalworkers = '".$totalWorkers."', 
 					totalpieces = '".$totalPieces."', 
+					totaltarget = '".$totalTarget."', 
 					created_on = NOW(), 
 					created_by = '".$this->session->userdata('userid')."'";
 		$this->db->query($sql);
@@ -892,6 +894,83 @@ public function saveAssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $
 public function delAssemblyLoading($entryId)
 {
 	$sql = "UPDATE assemblyloading_hdr SET status = 'inactive' WHERE id = $entryId";
+	$this->db->query($sql);
+}
+
+public function getHourlyProductionLineWiseDetails($lineId = '')
+{
+	$sql = "SELECT *, DATE_FORMAT(entry_date,'%d-%m-%Y') AS entrydt 
+			FROM hourlyproduction_linewise 
+			WHERE status <> 'inactive'";
+	if($lineId > 0)
+	{
+		$sql .= " AND id = $lineId";
+	}
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function checkDateLineNameAvailability_HourlyProduction_Linewise($lineId, $entryDate, $lineName, $shiftName)
+{
+	$sql = "SELECT * FROM hourlyproduction_linewise 
+			WHERE 
+				STATUS <> 'inactive' AND entry_date = '".$entryDate."' AND 
+				linename = '".$lineName."' AND shift = '".$shiftName."'";
+	if($lineId > 0)
+	{
+		$sql .= " AND id <> $lineId";
+	}
+	$res = $this->db->query($sql);
+	return $res->num_rows();
+}
+
+public function saveHourlyProduction_LineWise($lineId, $entryDate, $lineName, $shiftName, $operationId, $noOfWorkers, $daysTarget, $targetPerHour, $noOfOperators, $availMinutes, $currentTarget, $issues, $wip, $idleTime, $breakDownTime, $reworkTime, $noWorkTime, $lineEfficiency)
+{
+	if($lineId > 0)
+	{
+		$sql = "UPDATE hourlyproduction_linewise SET 
+					entry_date = '".$entryDate."', linename = '".$lineName."', 
+					shift = '".$shiftName."', operationid = '".$operationId."', 
+					no_of_workers = '".$noOfWorkers."', days_target = '".$daysTarget."', 
+					target_per_hr = '".$targetPerHour."', no_of_operators = '".$noOfOperators."', 
+					avail_min = '".$availMinutes."', current_target = '".$currentTarget."', 
+					issues = '".$issues."', wip = '".$wip."', idletime = '".$idleTime."', 
+					breakdown_time = '".$breakDownTime."', rework_time = '".$reworkTime."', 
+					nowork_time = '".$noWorkTime."', line_efficiency = '".$lineEfficiency."', 
+					modified_on = NOW(), 
+					modified_by = '".$this->session->userdata('userid')."'
+				WHERE id = $lineId";
+	}
+	else
+	{
+		$sql = "INSERT INTO hourlyproduction_linewise SET 
+					entry_date = '".$entryDate."', linename = '".$lineName."', 
+					shift = '".$shiftName."', operationid = '".$operationId."', 
+					no_of_workers = '".$noOfWorkers."', days_target = '".$daysTarget."', 
+					target_per_hr = '".$targetPerHour."', no_of_operators = '".$noOfOperators."', 
+					avail_min = '".$availMinutes."', current_target = '".$currentTarget."', 
+					issues = '".$issues."', wip = '".$wip."', idletime = '".$idleTime."', 
+					breakdown_time = '".$breakDownTime."', rework_time = '".$reworkTime."', 
+					nowork_time = '".$noWorkTime."', line_efficiency = '".$lineEfficiency."', 
+					created_on = NOW(), 
+					created_by = '".$this->session->userdata('userid')."'";
+	}
+	$this->db->query($sql);
+}
+
+public function getLineDetails($entryDate, $lineName, $shift)
+{
+	$sql = "SELECT * FROM assemblyloading_hdr 
+			WHERE 
+				STATUS <> 'inactive' AND entry_date = '".$entryDate."' AND 
+				linename = '".$lineName."' AND shift = '".$shift."'";
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function delHourlyProductionLineWise($entryId)
+{
+	$sql = "UPDATE hourlyproduction_linewise SET status = 'inactive' WHERE id = $entryId";
 	$this->db->query($sql);
 }
 
@@ -1007,22 +1086,128 @@ public function getPriceRateIncentiveReport($fromDate, $toDate, $employeeId)
 	}
 	
 	$sql = "SELECT 
-				DATE_FORMAT(h.entry_date,'%d-%m-%Y') AS entrydt, h.linename, 
-				d.empid, e.empno, e.empname, d.operationid, o.operationname, 
-				SUM(d.producedmin) AS producedmin, SUM(d.pieces) AS pieces,
-				SUM(d.sam) AS sam, SUM(d.shifthrs) AS shifthrs, 
-				SUM(d.othours) AS othours, 
-				ROUND(((SUM(d.producedmin) * SUM(d.pieces) * SUM(d.sam))/(SUM(d.shifthrs) + SUM(d.othours))),2) AS efficiency, 0 AS amount
+				DATE_FORMAT(h.entry_date,'%d-%m-%Y') AS entrydt, h.linename, h.shift, 
+				d.empid, e.empno, e.empname, 
+				d.target, d.totalpieces, 
+				IF(d.target - d.totalpieces < 0, d.target, d.totalpieces) AS sewing, 
+				IF(d.target - d.totalpieces < 0, ABS(d.target - d.totalpieces), 0) AS incentive, 
+				0 AS amount
 			FROM 
-				skillmatrix_hdr h 
-				INNER JOIN skillmatrix_dtl d ON h.id = d.skillmatrix_id
+				assemblyloading_hdr h 
+				INNER JOIN assemblyloading_dtl d ON h.id = d.assemblyloading_id
 				INNER JOIN employee e ON d.empid = e.id
-				INNER JOIN operations o ON d.operationid = o.id
-			WHERE 
-				h.status <> 'inactive' AND e.status <> 'inactive' AND 
-				o.status <> 'inactive' $whrStr
-			GROUP BY h.entry_date, h.linename, d.empid
-			ORDER BY d.empid, h.entry_date";
+			WHERE h.status <> 'inactive' AND e.status <> 'inactive' $whrStr 
+			ORDER BY h.entry_date, h.linename, h.shift, d.empid";
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function getHourlyProductionReport($fromDate, $toDate, $employeeId)
+{
+	$whrStr = '';
+	if($fromDate != "")
+	{
+		$whrStr .= " AND h.entry_date >= '".$fromDate."'";
+	}
+	if($toDate != "")
+	{
+		$whrStr .= " AND h.entry_date <= '".$toDate."'";
+	}
+	if($employeeId > 0)
+	{
+		$whrStr .= " AND d.empid = $employeeId";
+	}
+	
+	$sql = "SELECT 
+				DATE_FORMAT(h.entry_date,'%d-%m-%Y') AS entrydt, h.linename, h.shift, 
+				d.empid, e.empno, e.empname, 
+				d.target, d.hour_1, d.hour_2, d.hour_3, d.hour_4, 
+				d.hour_5, d.hour_6, d.hour_7, d.hour_8, 
+				d.ot_pieces, d.totalpieces, 
+				IF(d.target - d.totalpieces < 0, d.target, d.totalpieces) AS sewing, 
+				IF(d.target - d.totalpieces < 0, ABS(d.target - d.totalpieces), 0) AS incentive, 
+				0 AS amount
+			FROM 
+				assemblyloading_hdr h 
+				INNER JOIN assemblyloading_dtl d ON h.id = d.assemblyloading_id
+				INNER JOIN employee e ON d.empid = e.id
+			WHERE h.status <> 'inactive' AND e.status <> 'inactive' $whrStr 
+			ORDER BY h.entry_date, h.linename, h.shift, d.empid";
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function getHourlyProductionLineWiseReport($fromDate, $toDate)
+{
+	$whrStr = '';
+	if($fromDate != "")
+	{
+		$whrStr .= " AND h.entry_date >= '".$fromDate."'";
+	}
+	if($toDate != "")
+	{
+		$whrStr .= " AND h.entry_date <= '".$toDate."'";
+	}
+	
+	$sql = "SELECT 
+				DATE_FORMAT(entry_date,'%d-%m-%Y') AS entrydt, h.linename, h.shift, 
+				h.operationid, o.operationname, h.no_of_workers, 
+				h.days_target, h.target_per_hr, h.no_of_operators, 
+				h.avail_min, h.current_target, h.issues, 
+				a.hour_1, a.hour_2, a.hour_3, a.hour_4, 
+				a.hour_5, a.hour_6, a.hour_7, a.hour_8, a.ot_pieces, a.totalpieces, 
+				h.wip, h.idletime, h.breakdown_time, h.rework_time, 
+				h.nowork_time, h.line_efficiency
+			FROM 
+				hourlyproduction_linewise h 
+				INNER JOIN operations o ON h.operationid = o.id
+				INNER JOIN 
+					(SELECT 
+						h.id, h.linename, h.shift, 
+						SUM(d.hour_1) AS hour_1, SUM(d.hour_2) AS hour_2, 
+						SUM(d.hour_3) AS hour_3, SUM(d.hour_4) AS hour_4, 
+						SUM(d.hour_5) AS hour_5, SUM(d.hour_6) AS hour_6, 
+						SUM(d.hour_7) AS hour_7, SUM(d.hour_8) AS hour_8, 
+						SUM(d.ot_pieces) AS ot_pieces, 
+						SUM(d.totalpieces) AS totalpieces
+					FROM 
+						assemblyloading_hdr h 
+						INNER JOIN assemblyloading_dtl d ON h.id = d.assemblyloading_id
+					WHERE h.status <> 'inactive'
+					GROUP BY h.entry_date, h.linename, h.shift) a 
+					ON h.linename = a.linename AND h.shift = a.shift
+			WHERE h.status <> 'inactive' AND o.status <> 'inactive' $whrStr";
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function getAssemblyLoadingReport($fromDate, $toDate, $employeeId)
+{
+	$whrStr = '';
+	if($fromDate != "")
+	{
+		$whrStr .= " AND h.entry_date >= '".$fromDate."'";
+	}
+	if($toDate != "")
+	{
+		$whrStr .= " AND h.entry_date <= '".$toDate."'";
+	}
+	if($employeeId > 0)
+	{
+		$whrStr .= " AND d.empid = $employeeId";
+	}
+	
+	$sql = "SELECT 
+				DATE_FORMAT(entry_date,'%d-%m-%Y') AS entrydt, h.linename, h.shift, 
+				d.empid, e.empno, e.empname, 
+				d.hour_1, d.hour_2, d.hour_3, d.hour_4, 
+				d.hour_5, d.hour_6, d.hour_7, d.hour_8, d.ot_pieces, d.totalpieces
+			FROM 
+				assemblyloading_hdr h 
+				INNER JOIN assemblyloading_dtl d ON h.id = d.assemblyloading_id
+				INNER JOIN employee e ON d.empid = e.id
+			WHERE h.status <> 'inactive' AND e.status <> 'inactive' $whrStr 
+			ORDER BY h.entry_date, h.shift, d.empid";
 	$res = $this->db->query($sql);
 	return $res->result();
 }

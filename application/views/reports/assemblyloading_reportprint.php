@@ -21,10 +21,16 @@
 									<th>Shift</th>
 									<th>Employee No.</th>
 									<th>Employee Name</th>
-									<th>Target Pieces</th>
-									<th>Sewing Pieces</th>
-									<th>Incentive Pieces</th>
-									<th>Amount</th>
+									<th>Hour 1</th>
+									<th>Hour 2</th>
+									<th>Hour 3</th>
+									<th>Hour 4</th>
+									<th>Hour 5</th>
+									<th>Hour 6</th>
+									<th>Hour 7</th>
+									<th>Hour 8</th>
+									<th>OT Pieces</th>
+									<th>Total Output</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -43,17 +49,23 @@
 										<td><?php echo $row->shift; ?></td>
 										<td><?php echo $row->empno; ?></td>
 										<td><?php echo $row->empname; ?></td>
-										<td><?php echo $row->target; ?></td>
-										<td><?php echo $row->sewing; ?></td>
-										<td><?php echo $row->incentive; ?></td>
-										<td><?php echo $row->amount; ?></td>
+										<td><?php echo $row->hour_1; ?></td>
+										<td><?php echo $row->hour_2; ?></td>
+										<td><?php echo $row->hour_3; ?></td>
+										<td><?php echo $row->hour_4; ?></td>
+										<td><?php echo $row->hour_5; ?></td>
+										<td><?php echo $row->hour_6; ?></td>
+										<td><?php echo $row->hour_7; ?></td>
+										<td><?php echo $row->hour_8; ?></td>
+										<td><?php echo $row->ot_pieces; ?></td>
+										<td><?php echo $row->totalpieces; ?></td>
 									</tr>
 									<?php
 									}
 								}
 								else
 								{
-									echo '<tr><td colspan="10">No Data Found.</td></tr>';
+									echo '<tr><td colspan="16">No Data Found.</td></tr>';
 								}
 								?>
 							</tbody>

@@ -465,6 +465,7 @@
 		var shiftName = $("#shiftName").val();
 		var totalWorkers = $("#totalWorkers").val();
 		var totalPieces = $("#totalPieces").val();
+		var totalTarget = 0;
 		
 		var dtlArr = [];
 		
@@ -502,6 +503,8 @@
 				cri["otPieces"] = otPieces;
 				cri["totalPieces"] = totalPiecesTR;
 				
+				totalTarget += parseFloat(target);
+				
 				dtlArr.push(cri);
 			}
 			else
@@ -531,6 +534,7 @@
 					"shiftName" : shiftName, 
 					"totalWorkers" : totalWorkers, 
 					"totalPieces" : totalPieces, 
+					"totalTarget" : totalTarget, 
 					"dtlArr" : JSON.stringify(dtlArr)
 				};
 				req.url = "admin/saveAssemblyLoading";
