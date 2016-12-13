@@ -1027,7 +1027,7 @@ public function getOperationBulletin_OperationDetails($bulletinId)
 	$sql = "SELECT d.*
 			FROM 
 				operationbulletin_hdr h 
-				INNER JOIN operationbulletin_operation_dtl s ON h.id = d.bulletinid 
+				INNER JOIN operationbulletin_operation_dtl d ON h.id = d.bulletinid 
 			WHERE h.status <> 'inactive' AND h.id = $bulletinId";
 	$res = $this->db->query($sql);
 	return $res->result();
@@ -1038,7 +1038,7 @@ public function getOperationBulletin_MachineryDetails($bulletinId)
 	$sql = "SELECT d.*
 			FROM 
 				operationbulletin_hdr h 
-				INNER JOIN operationbulletin_machinery_dtl s ON h.id = d.bulletinid 
+				INNER JOIN operationbulletin_machinery_dtl d ON h.id = d.bulletinid 
 			WHERE h.status <> 'inactive' AND h.id = $bulletinId";
 	$res = $this->db->query($sql);
 	return $res->result();
@@ -1049,7 +1049,7 @@ public function getOperationBulletin_ManualWorkDetails($bulletinId)
 	$sql = "SELECT d.*
 			FROM 
 				operationbulletin_hdr h 
-				INNER JOIN operationbulletin_manual_dtl s ON h.id = d.bulletinid 
+				INNER JOIN operationbulletin_manual_dtl d ON h.id = d.bulletinid 
 			WHERE h.status <> 'inactive' AND h.id = $bulletinId";
 	$res = $this->db->query($sql);
 	return $res->result();
