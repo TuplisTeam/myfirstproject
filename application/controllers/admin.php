@@ -1490,6 +1490,244 @@ public function delHourlyProductionLineWise()
 	echo json_encode($data);
 }
 
+public function style($styleId = '')
+{
+	$data["styleId"] = $styleId;
+	
+	$data["styleNo"] = '';
+	$data["styleDesc"] = '';
+	
+	$res = $this->adminmodel->getStyleDetails($styleId);
+	
+	if($styleId > 0)
+	{
+		if(count($res) > 0)
+		{
+			foreach($res as $row)
+			{
+				$data["styleNo"] = $row->styleno;
+				$data["styleDesc"] = $row->styledesc;
+			}
+		}
+	}
+	else
+	{
+		$data["allStyles"] = $res;
+	}
+	
+	$this->load->view('header');
+	$this->load->view('style', $data);
+	$this->load->view('footer');
+}
+
+public function saveStyle()
+{
+	$styleId = $this->input->post('styleId');
+	$styleNo = $this->input->post('styleNo');
+	$styleDesc = $this->input->post('styleDesc');
+	
+	if($styleNo != "" && $styleDesc != "")
+	{
+		$this->adminmodel->saveStyle($styleId, $styleNo, $styleDesc);
+		
+		$data["isError"] = FALSE;
+		if($styleId > 0)
+		{
+			$data["msg"] = "Style Details Updated Successfully.";
+		}
+		else
+		{
+			$data["msg"] = "Style Details Saved Successfully.";
+		}
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
+}
+
+public function operationbulletin($bulletinId = '')
+{
+	$data["bulletinId"] = $bulletinId;
+	
+	$data["styleDtls"] = $this->adminmodel->getStyleDetails();
+	
+	$res = $this->adminmodel->getOperationBulletinDetails($bulletinId);
+	
+	$data["styleId"] = "";
+	$data["stdNoOfWorkStations"] = "";
+	$data["stdNoOfOperators"] = "";
+	$data["stdNoOfHelpers"] = "";
+	$data["totalSAM"] = "";
+	$data["machineSAM"] = "";
+	$data["manualSAM"] = "";
+	$data["possibleDailyOutput"] = "";
+	$data["expectedPeakEfficiency"] = "";
+	$data["expectedOutput"] = "";
+	$data["expectedAvgEfficiency"] = "";
+	$data["expectedDailyOutput"] = "";
+	$data["avgOutputPerMachine"] = "";
+	
+	$data["mc_TotalNumbers"] = "";
+	$data["mc_TotalSMV"] = "";
+	
+	$data["operationDtls"] = array();
+	$data["machineryDtls"] = array();
+	$data["manualWorkDtls"] = array();
+	
+	if($bulletinId > 0)
+	{
+		if(count($res) > 0)
+		{
+			$data["operationDtls"] = $this->adminmodel->getOperationBulletin_OperationDetails($bulletinId);
+			$data["machineryDtls"] = $this->adminmodel->getOperationBulletin_MachineryDetails($bulletinId);
+			$data["manualWorkDtls"] = $this->adminmodel->getOperationBulletin_ManualWorkDetails($bulletinId);
+			
+			foreach($res as $row)
+			{
+				$data["styleId"] = $row->styleid;
+				$data["stdNoOfWorkStations"] = $row->workstations;
+				$data["stdNoOfOperators"] = $row->operators_in_line;
+				$data["stdNoOfHelpers"] = $row->helpers_in_line;
+				$data["totalSAM"] = $row->total_sam;
+				$data["machineSAM"] = $row->machine_sam;
+				$data["manualSAM"] = $row->manual_sam;
+				$data["possibleDailyOutput"] = $row->daily_output;
+				$data["expectedPeakEfficiency"] = $row->expected_peak_eff;
+				$data["expectedOutput"] = $row->expected_output;
+				$data["expectedAvgEfficiency"] = $row->expected_avg_eff;
+				$data["expectedDailyOutput"] = $row->expected_daily_output;
+				$data["avgOutputPerMachine"] = $row->avg_output_per_mc;
+				
+				$data["mc_TotalNumbers"] = $row->mc_totalnumbers;
+				$data["mc_TotalSMV"] = $row->mc_totalsmv;
+			}
+		}
+	}
+	else
+	{
+		$data["allDetails"] = $res;
+	}
+	
+	$this->load->view('header');
+	$this->load->view('operationbulletin', $data);
+	$this->load->view('footer');
+}
+
+public function saveOperationBulletin()
+{
+	$bulletinId = $this->input->post('bulletinId');
+	$styleId = $this->input->post('styleId');
+	$stdNoOfWorkStations = $this->input->post('stdNoOfWorkStations');
+	$stdNoOfOperators = $this->input->post('stdNoOfOperators');
+	$stdNoOfHelpers = $this->input->post('stdNoOfHelpers');
+	$totalSAM = $this->input->post('totalSAM');
+	$machineSAM = $this->input->post('machineSAM');
+	$manualSAM = $this->input->post('manualSAM');
+	$possibleDailyOutput = $this->input->post('possibleDailyOutput');
+	$expectedPeakEfficiency = $this->input->post('expectedPeakEfficiency');
+	$expectedOutput = $this->input->post('expectedOutput');
+	$expectedAvgEfficiency = $this->input->post('expectedAvgEfficiency');
+	$expectedDailyOutput = $this->input->post('expectedDailyOutput');
+	$avgOutputPerMachine = $this->input->post('avgOutputPerMachine');
+	
+	$mc_TotalNumbers = $this->input->post('mc_TotalNumbers');
+	$mc_TotalSMV = $this->input->post('mc_TotalSMV');
+	
+	$operationDtlArr = $this->input->post('operationDtlArr');
+	$machineryDtlArr = $this->input->post('machineryDtlArr');
+	$manualWorkDtlArr = $this->input->post('manualWorkDtlArr');
+	$operationDtlArr = json_decode($operationDtlArr);
+	$machineryDtlArr = json_decode($machineryDtlArr);
+	$manualWorkDtlArr = json_decode($manualWorkDtlArr);
+	
+	if($styleId > 0 && count($operationDtlArr) > 0 && count($machineryDtlArr) > 0 && count($manualWorkDtlArr) > 0)
+	{
+		$this->adminmodel->saveOperationBulletin($bulletinId, $styleId, $stdNoOfWorkStations, $stdNoOfOperators, $stdNoOfHelpers, $totalSAM, $machineSAM, $manualSAM, $possibleDailyOutput, $expectedPeakEfficiency, $expectedOutput, $expectedAvgEfficiency, $expectedDailyOutput, $avgOutputPerMachine, $mc_TotalNumbers, $mc_TotalSMV, $operationDtlArr, $machineryDtlArr, $manualWorkDtlArr);
+		
+		if($bulletinId > 0)
+		{
+			$data["isError"] = FALSE;
+			$data["msg"] = "Operation Bulletin Details Updated Successfully";
+		}
+		else
+		{
+			$data["isError"] = FALSE;
+			$data["msg"] = "Operation Bulletin Details Saved Successfully";
+		}
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
+}
+
+public function operationbulletinprint($bulletinId = '')
+{
+	$data["bulletinId"] = $bulletinId;
+	
+	$res = $this->adminmodel->getOperationBulletinDetails($bulletinId);
+	
+	$data["styleId"] = "";
+	$data["stdNoOfWorkStations"] = "";
+	$data["stdNoOfOperators"] = "";
+	$data["stdNoOfHelpers"] = "";
+	$data["totalSAM"] = "";
+	$data["machineSAM"] = "";
+	$data["manualSAM"] = "";
+	$data["possibleDailyOutput"] = "";
+	$data["expectedPeakEfficiency"] = "";
+	$data["expectedOutput"] = "";
+	$data["expectedAvgEfficiency"] = "";
+	$data["expectedDailyOutput"] = "";
+	$data["avgOutputPerMachine"] = "";
+	
+	$data["mc_TotalNumbers"] = "";
+	$data["mc_TotalSMV"] = "";
+	
+	$data["operationDtls"] = array();
+	$data["machineryDtls"] = array();
+	$data["manualWorkDtls"] = array();
+	
+	if($bulletinId > 0)
+	{
+		if(count($res) > 0)
+		{
+			$data["operationDtls"] = $this->adminmodel->getOperationBulletin_OperationDetails($bulletinId);
+			$data["machineryDtls"] = $this->adminmodel->getOperationBulletin_MachineryDetails($bulletinId);
+			$data["manualWorkDtls"] = $this->adminmodel->getOperationBulletin_ManualWorkDetails($bulletinId);
+			
+			foreach($res as $row)
+			{
+				$data["styleId"] = $row->styleid;
+				$data["stdNoOfWorkStations"] = $row->workstations;
+				$data["stdNoOfOperators"] = $row->operators_in_line;
+				$data["stdNoOfHelpers"] = $row->helpers_in_line;
+				$data["totalSAM"] = $row->total_sam;
+				$data["machineSAM"] = $row->machine_sam;
+				$data["manualSAM"] = $row->manual_sam;
+				$data["possibleDailyOutput"] = $row->daily_output;
+				$data["expectedPeakEfficiency"] = $row->expected_peak_eff;
+				$data["expectedOutput"] = $row->expected_output;
+				$data["expectedAvgEfficiency"] = $row->expected_avg_eff;
+				$data["expectedDailyOutput"] = $row->expected_daily_output;
+				$data["avgOutputPerMachine"] = $row->avg_output_per_mc;
+				
+				$data["mc_TotalNumbers"] = $row->mc_totalnumbers;
+				$data["mc_TotalSMV"] = $row->mc_totalsmv;
+			}
+		}
+	}
+	
+	$this->load->view('reports/header');
+	$this->load->view('operationbulletinprint',$data);
+	$this->load->view('reports/footer');
+}
+
 /*Report Starts*/
 
 public function skillmatrixreport()
@@ -1884,6 +2122,26 @@ public function downloadAsPDF($str='')
 		$str = $str;
 	}
 	downloadPDFByContent($str);
+}
+
+public function delEntry()
+{
+	$entryId = $this->input->post('entryId');
+	$tableName = $this->input->post('tableName');
+	
+	if($entryId > 0)
+	{
+		$this->adminmodel->delEntry($entryId, $tableName);
+		
+		$data["isError"] = FALSE;
+		$data["msg"] = "Entry Removed Successfully.";
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
 }
 
 /*Common Function Ends*/

@@ -974,6 +974,154 @@ public function delHourlyProductionLineWise($entryId)
 	$this->db->query($sql);
 }
 
+public function getStyleDetails($styleId = '')
+{
+	$sql = "SELECT * FROM style WHERE status <> 'inactive'";
+	if($styleId > 0)
+	{
+		$sql .= " AND id = $styleId";	
+	}
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function saveStyle($styleId, $styleNo, $styleDesc)
+{
+	if($styleId > 0)
+	{
+		$sql = "UPDATE style SET 
+					styleno = '".$styleNo."', 
+					styledesc = '".$styleDesc."', 
+					modified_on = NOW(), 
+					modified_by = '".$this->session->userdata('userid')."'
+				WHERE id = $styleId";
+	}
+	else
+	{
+		$sql = "INSERT INTO style SET 
+					styleno = '".$styleNo."', 
+					styledesc = '".$styleDesc."', 
+					created_on = NOW(), 
+					created_by = '".$this->session->userdata('userid')."'";
+	}
+	$this->db->query($sql);
+}
+
+public function getOperationBulletinDetails($bulletinId = '')
+{
+	$sql = "SELECT h.*, s.styleno
+			FROM 
+				operationbulletin_hdr h 
+				INNER JOIN style s ON h.styleid = s.id 
+			WHERE h.status <> 'inactive' AND s.status <> 'inactive'";
+	if($bulletinId > 0)
+	{
+		$sql .= " AND h.id = $bulletinId";
+	}
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function getOperationBulletin_OperationDetails($bulletinId)
+{
+	$sql = "SELECT d.*
+			FROM 
+				operationbulletin_hdr h 
+				INNER JOIN operationbulletin_operation_dtl s ON h.id = d.bulletinid 
+			WHERE h.status <> 'inactive' AND h.id = $bulletinId";
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function getOperationBulletin_MachineryDetails($bulletinId)
+{
+	$sql = "SELECT d.*
+			FROM 
+				operationbulletin_hdr h 
+				INNER JOIN operationbulletin_machinery_dtl s ON h.id = d.bulletinid 
+			WHERE h.status <> 'inactive' AND h.id = $bulletinId";
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function getOperationBulletin_ManualWorkDetails($bulletinId)
+{
+	$sql = "SELECT d.*
+			FROM 
+				operationbulletin_hdr h 
+				INNER JOIN operationbulletin_manual_dtl s ON h.id = d.bulletinid 
+			WHERE h.status <> 'inactive' AND h.id = $bulletinId";
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function saveOperationBulletin($bulletinId, $styleId, $stdNoOfWorkStations, $stdNoOfOperators, $stdNoOfHelpers, $totalSAM, $machineSAM, $manualSAM, $possibleDailyOutput, $expectedPeakEfficiency, $expectedOutput, $expectedAvgEfficiency, $expectedDailyOutput, $avgOutputPerMachine, $mc_TotalNumbers, $mc_TotalSMV, $operationDtlArr, $machineryDtlArr, $manualWorkDtlArr)
+{
+	$sql = "INSERT INTO operationbulletin_hdr SET 
+				styleid = '".$styleId."', workstations = '".$stdNoOfWorkStations."', 
+				operators_in_line = '".$stdNoOfOperators."', 
+				helpers_in_line = '".$stdNoOfHelpers."', 
+				total_sam = '".$totalSAM."', machine_sam = '".$machineSAM."', 
+				manual_sam = '".$manualSAM."', 
+				daily_output = '".$possibleDailyOutput."', 
+				expected_peak_eff = '".$expectedPeakEfficiency."', 
+				expected_output = '".$expectedOutput."', 
+				expected_avg_eff = '".$expectedAvgEfficiency."', 
+				expected_daily_output = '".$expectedDailyOutput."', 
+				avg_output_per_mc = '".$avgOutputPerMachine."', 
+				mc_totalnumbers = '".$mc_TotalNumbers."', 
+				mc_totalsmv = '".$mc_TotalSMV."', 
+				created_on = NOW(), 
+				created_by = '".$this->session->userdata('userid')."'";
+	$this->db->query($sql);
+	$entryId = $this->db->insert_id();
+	
+	foreach($operationDtlArr as $row)
+	{
+		$sql = "INSERT INTO operationbulletin_operation_dtl SET 
+					bulletinid = $entryId, 
+					operation_desc = '".$row->operationDesc."', 
+					frequency = '".$row->frequency."', 
+					machine = '".$row->machine."', 
+					smv = '".$row->smv."', 
+					no_of_workers = '".$row->noOfWorkers."', 
+					balanced_workers = '".$row->balancedWorkers."', 
+					sec_per_unit = '".$row->secPerUnit."', 
+					folders_clips_guides = '".$row->folders."'";
+		$this->db->query($sql);
+	}
+	
+	foreach($machineryDtlArr as $row)
+	{
+		$sql = "INSERT INTO operationbulletin_machinery_dtl SET 
+					bulletinid = $entryId, 
+					machinery_requirement = '".$row->machineryRequirement."', 
+					numbers = '".$row->numbers."', 
+					smv = '".$row->smv."'";
+		$this->db->query($sql);
+	}
+	
+	foreach($manualWorkDtlArr as $row)
+	{
+		$sql = "INSERT INTO operationbulletin_manual_dtl SET 
+					bulletinid = $entryId, 
+					manualwork = '".$row->manualWork."', 
+					numbers = '".$row->numbers."', 
+					smv = '".$row->smv."'";
+		$this->db->query($sql);
+	}
+}
+
+/*Common Function Starts*/
+
+public function delEntry($entryId, $tableName)
+{
+	$sql = "UPDATE $tableName SET status = 'inactive' WHERE id = $entryId";
+	$this->db->query($sql);
+}
+
+/*Common Function Ends*/
+
 /*Report Starts*/
 
 public function getSkillMatrixReport($fromDate, $toDate, $employeeId, $filterBy)
