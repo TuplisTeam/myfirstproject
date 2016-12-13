@@ -279,12 +279,6 @@ public function saveBarcodeGeneration($barcodeId, $barcodeName, $receiptDate, $o
 	$this->db->query($sql);
 }
 
-public function delBarcode($barcodeId)
-{
-	$sql = "UPDATE barcode SET status = 'inactive' WHERE id = $barcodeId";
-	$this->db->query($sql);
-}
-
 public function getDeliveryNoteHeaderDetails($deliveryNoteId = '')
 {
 	$sql = "SELECT *, DATE_FORMAT(dcdate,'%d/%m/%Y') AS dcdt 
@@ -714,12 +708,6 @@ public function saveMachinery($machineryId, $machineryName, $machineryDesc)
 					created_on = NOW(), 
 					created_by = '".$this->session->userdata('userid')."'";
 	}
-	$this->db->query($sql);
-}
-
-public function delMachinery($machineryId)
-{
-	$sql = "UPDATE machineries SET status = 'inactive' WHERE id = $machineryId";
 	$this->db->query($sql);
 }
 

@@ -163,6 +163,8 @@ public function saveUser()
 
 public function barcodegeneration($barcodeId = '')
 {
+	$data["menuId"] = 8;
+	
 	$data["barcodeId"] = $barcodeId;
 	
 	$data["barcodeName"] = '';
@@ -237,6 +239,7 @@ public function checkBarcodeAvailability()
 
 public function saveBarcodeGeneration()
 {
+	$menuId = $this->input->post('menuId');
 	$barcodeId = $this->input->post('barcodeId');
 	$barcodeName = $this->input->post('barcodeName');
 	$receiptDate = $this->input->post('receiptDate');
@@ -250,6 +253,16 @@ public function saveBarcodeGeneration()
 	$size = $this->input->post('size');
 	
 	$receiptDate = substr($receiptDate,6,4).'-'.substr($receiptDate,3,2).'-'.substr($receiptDate,0,2);
+	
+	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $barcodeId);
+	
+	if($permissions["isError"])
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = $permissions["msg"];
+		echo json_encode($data);
+		return;
+	}
 	
 	if($barcodeName != "" && $receiptDate != "" && $orderNo != "" && $process != "" && $style != "" && $item != "" && $rate != "" && $buyerName != "" && $color != "" && $size != "")
 	{
@@ -279,24 +292,6 @@ public function saveBarcodeGeneration()
 	{
 		$data["isError"] = TRUE;
 		$data["msg"] = "Please Fill All Fields";
-	}
-	echo json_encode($data);
-}
-
-public function delBarcode()
-{
-	$barcodeId = $this->input->post('barcodeId');
-	if($barcodeId > 0)
-	{
-		$this->adminmodel->delBarcode($barcodeId);
-		
-		$data["isError"] = FALSE;
-		$data["msg"] = "Barcode Details Removed Successfully.";
-	}
-	else
-	{
-		$data["isError"] = TRUE;
-		$data["msg"] = "Please Fill All Details.";
 	}
 	echo json_encode($data);
 }
@@ -995,6 +990,8 @@ public function delOperation()
 
 public function machinery($machineryId = '')
 {
+	$data["menuId"] = 6;
+	
 	$data["machineryId"] = $machineryId;
 	
 	$data["machineryName"] = '';
@@ -1025,9 +1022,20 @@ public function machinery($machineryId = '')
 
 public function saveMachinery()
 {
+	$menuId = $this->input->post('menuId');
 	$machineryId = $this->input->post('machineryId');
 	$machineryName = $this->input->post('machineryName');
 	$machineryDesc = $this->input->post('machineryDesc');
+	
+	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $machineryId);
+	
+	if($permissions["isError"])
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = $permissions["msg"];
+		echo json_encode($data);
+		return;
+	}
 	
 	if($machineryName != "")
 	{
@@ -1042,25 +1050,6 @@ public function saveMachinery()
 		{
 			$data["msg"] = "Machinery Details Saved Successfully.";
 		}
-	}
-	else
-	{
-		$data["isError"] = TRUE;
-		$data["msg"] = "Please Fill All Details.";
-	}
-	echo json_encode($data);
-}
-
-public function delMachinery()
-{
-	$machineryId = $this->input->post('machineryId');
-	
-	if($machineryId > 0)
-	{
-		$this->adminmodel->delMachinery($machineryId);
-		
-		$data["isError"] = FALSE;
-		$data["msg"] = "Machinery Details Removed Successfully.";
 	}
 	else
 	{
@@ -1506,6 +1495,8 @@ public function delHourlyProductionLineWise()
 
 public function style($styleId = '')
 {
+	$data["menuId"] = 7;
+	
 	$data["styleId"] = $styleId;
 	
 	$data["styleNo"] = '';
@@ -1536,9 +1527,20 @@ public function style($styleId = '')
 
 public function saveStyle()
 {
+	$menuId = $this->input->post('menuId');
 	$styleId = $this->input->post('styleId');
 	$styleNo = $this->input->post('styleNo');
 	$styleDesc = $this->input->post('styleDesc');
+	
+	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $styleId);
+	
+	if($permissions["isError"])
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = $permissions["msg"];
+		echo json_encode($data);
+		return;
+	}
 	
 	if($styleNo != "" && $styleDesc != "")
 	{
@@ -1687,6 +1689,8 @@ public function operationbulletinprint($bulletinId = '')
 	$res = $this->adminmodel->getOperationBulletinDetails($bulletinId);
 	
 	$data["styleId"] = "";
+	$data["styleDesc"] = "";
+	$data["createdOn"] = "";
 	$data["stdNoOfWorkStations"] = "";
 	$data["stdNoOfOperators"] = "";
 	$data["stdNoOfHelpers"] = "";
@@ -1718,6 +1722,8 @@ public function operationbulletinprint($bulletinId = '')
 			foreach($res as $row)
 			{
 				$data["styleId"] = $row->styleid;
+				$data["styleDesc"] = $row->styledesc;
+				$data["createdOn"] = $row->createdOn;
 				$data["stdNoOfWorkStations"] = $row->workstations;
 				$data["stdNoOfOperators"] = $row->operators_in_line;
 				$data["stdNoOfHelpers"] = $row->helpers_in_line;

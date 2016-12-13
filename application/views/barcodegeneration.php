@@ -64,7 +64,7 @@
 											<button class="btn btn-sm btn-success editEntry" barcodeId="<?php echo $row->id; ?>" title="Edit">
 												<span class="fa fa-pencil"></span>
 											</button>
-											<button class="btn btn-sm btn-danger delEntry" barcodeId="<?php echo $row->id; ?>" title="Edit">
+											<button class="btn btn-sm btn-danger delEntry" entryId="<?php echo $row->id; ?>" title="Edit">
 												<span class="fa fa-close"></span>
 											</button>
 											<button class="btn btn-sm btn-warning printEntry" barcodeId="<?php echo $row->id; ?>" title="Print">
@@ -326,6 +326,7 @@
 				var req = new Request();
 				req.data = 
 				{
+					"menuId" : '<?php echo $menuId; ?>', 
 					"barcodeId" : barcodeId,
 					"barcodeName" : barcodeName,
 					"receiptDate" : receiptDate,
@@ -371,23 +372,22 @@
 	
 	$(".delEntry").on("click",function()
 	{
-		var barcodeId = $(this).attr('barcodeId');
-		if(barcodeId > 0)
+		var entryId = $(this).attr('entryId');
+		if(entryId > 0)
 		{
-			var bool = confirm("Do you want to remove this Barcode Detail?");
+			var bool = confirm("Are You Sure Want To Remove This Entry?");
 			if(bool)
 			{
 				var req = new Request();
-				req.data =
+				req.data = 
 				{
-					"barcodeId" : barcodeId
+					"menuId" : '<?php echo $menuId; ?>', 
+					"entryId" : entryId, 
+					"tableName" : "barcode", 
+					"columnName" : "id"
 				};
-				req.url = "admin/delBarcode";
+				req.url = "admin/delEntry";
 				RequestHandler(req, showResponse);
-			}
-			else
-			{
-				return;
 			}
 		}
 		else

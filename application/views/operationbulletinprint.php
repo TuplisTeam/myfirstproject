@@ -17,62 +17,169 @@
                         <table class="table table-bordered">
                             <thead>
 								<tr>
-									<th>Sl No.</th>
-									<th>Entry Date</th>
-									<th>Line Name</th>
-									<th>Shift</th>
-									<th>Employee No.</th>
-									<th>Employee Name</th>
-									<th>Hour 1</th>
-									<th>Hour 2</th>
-									<th>Hour 3</th>
-									<th>Hour 4</th>
-									<th>Hour 5</th>
-									<th>Hour 6</th>
-									<th>Hour 7</th>
-									<th>Hour 8</th>
-									<th>OT Pieces</th>
-									<th>Total Output</th>
+									<td>Style No</td>
+									<td><?php echo $styleId; ?></td>
+									<td>Created By</td>
+									<td><?php echo $createdOn; ?></td>
+								</tr>
+								<tr>
+									<td>Style Desc</td>
+									<td><?php echo $styleDesc; ?></td>
+									<td>Planned Factory</td>
+									<td></td>
+								</tr>
+								<tr>
+									<td>Colour</td>
+									<td></td>
+									<td>Prepared On</td>
+									<td>11/15/2016</td>
+								</tr>
+								<tr>
+									<td>Size</td>
+									<td></td>
+									<td>Revised On</td>
+									<td></td>
+								</tr>
+								<tr>
+									<td></td>
+									<td></td>
+									<td>Revision No</td>
+									<td></td>
 								</tr>
 							</thead>
-							<tbody>
-								<?php
-								if(count($datas) > 0)
-								{
-									$i = 0;
-									foreach($datas as $row)
-									{
-									$i++;
-									?>
-									<tr>
-										<td><?php echo $i; ?></td>
-										<td><?php echo $row->entrydt; ?></td>
-										<td><?php echo $row->linename; ?></td>
-										<td><?php echo $row->shift; ?></td>
-										<td><?php echo $row->empno; ?></td>
-										<td><?php echo $row->empname; ?></td>
-										<td><?php echo $row->hour_1; ?></td>
-										<td><?php echo $row->hour_2; ?></td>
-										<td><?php echo $row->hour_3; ?></td>
-										<td><?php echo $row->hour_4; ?></td>
-										<td><?php echo $row->hour_5; ?></td>
-										<td><?php echo $row->hour_6; ?></td>
-										<td><?php echo $row->hour_7; ?></td>
-										<td><?php echo $row->hour_8; ?></td>
-										<td><?php echo $row->ot_pieces; ?></td>
-										<td><?php echo $row->totalpieces; ?></td>
-									</tr>
-									<?php
-									}
-								}
-								else
-								{
-									echo '<tr><td colspan="16">No Data Found.</td></tr>';
-								}
-								?>
-							</tbody>
                         </table>
                     </div>
+					<div class="table-responsive">
+						<table class="table table-bordered">
+							<tr>
+								<td>Standard No Of Workstations</td>
+								<td><?php echo $stdNoOfWorkStations; ?></td>
+								<td>Total SAM</td>
+								<td><?php echo $totalSAM; ?></td>
+							</tr>
+							<tr>
+								<td>Standard No Of Operators in Line</td>
+								<td><?php echo $stdNoOfOperators; ?></td>
+								<td>Machine SAM</td>
+								<td><?php echo $machineSAM; ?></td>
+							</tr>
+							<tr>
+								<td>Standard No Of Non operators in Line</td>
+								<td><?php echo $stdNoOfHelpers; ?></td>
+								<td>Manual SAM</td>
+								<td><?php echo $manualSAM; ?></td>
+							</tr>
+						</table>
+					</div>
+					<div class="table-responsive">
+						<table class="table table-bordered">
+							<tr>
+								<td>Possible Daily Output @ 100%</td>
+								<td><?php echo $possibleDailyOutput; ?></td>
+								<td>Expected Average Efficiency </td>
+								<td><?php echo $expectedAvgEfficiency; ?></td>
+							</tr>
+							<tr>
+								<td>Expected Peak Efficiency</td>
+								<td><?php echo $expectedPeakEfficiency; ?></td>
+								<td>Expected Daily Output @ Average Efficiency</td>
+								<td><?php echo $expectedDailyOutput; ?></td>
+							</tr>
+							<tr>
+								<td>Expected Output @ Peak Efficiency</td>
+								<td><?php echo $expectedOutput; ?></td>
+								<td>Average Output per Machine</td>
+								<td><?php echo $avgOutputPerMachine; ?></td>
+							</tr>
+						</table>
+					</div>
+					<div class="table-responsive">
+						<table class="table table-bordered">
+							<tr>
+								<td></td>
+								<td>@ PE</td>
+								<td>@ AE</td>
+								<td>@ 100%</td>
+							</tr>
+							<tr>
+								<td>Target/Head/Shift</td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td>Target/Machine/Shift</td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+						</table>
+					</div>
+					<div class="table-responsive">
+						<table class="table table-bordered">
+							<tr>
+								<th>Opr #</th>
+								<th>Operation Description</th>
+								<th>Freq</th>
+								<th>Machine</th>
+								<th>SMV</th>
+								<th>No Of W/s</th>
+								<th>Balanced W/s</th>
+								<th>sec / unit</th>
+								<th>Folders / clips / guides</th>
+							</tr>
+							<?php
+								$i = 1;
+							 foreach($operationDtls as $res)
+							{ ?>
+								<tr>
+									<td><?php echo $i; ?></td>
+									<td><?php echo $res->operation_desc; ?></td>
+									<td><?php echo $res->frequency; ?></td>
+									<td><?php echo $res->machine; ?></td>
+									<td><?php echo $res->smv; ?></td>
+									<td><?php echo $res->no_of_workers; ?></td>
+									<td><?php echo $res->balanced_workers; ?></td>
+									<td><?php echo $res->sec_per_unit; ?></td>
+									<td><?php echo $res->folders_clips_guides; ?></td>
+								</tr>
+							<?php $i++; } ?>
+						</table>
+					</div>
+					<div class="table-responsive">
+						<table class="table table-bordered">
+							<tr>
+								<th>MACHINERY  REQUIRMENT</th>
+								<th>NO'S</th>
+								<th>SMV</th>
+							</tr>
+							<?php foreach($machineryDtls as $res)
+							{ ?>
+								<tr>
+									<td><?php echo $row->machinery_requirement; ?></td>
+									<td><?php echo $row->numbers; ?></td>
+									<td><?php echo $row->smv; ?></td>
+								</tr>
+							<?php } ?>
+						</table>
+					</div>
+					<div class="table-responsive">
+						<table class="table table-bordered">
+							<tr>
+								<th>Manual Work</th>
+								<th>NO'S</th>
+								<th>SMV</th>
+							</tr>
+							<?php foreach($manualWorkDtls as $res)
+							{ ?>
+								<tr>
+									<td><?php echo $res->manualwork; ?></td>
+									<td><?php echo $res->numbers; ?></td>
+									<td><?php echo $res->smv; ?></td>
+								</tr>
+							<?php } ?>
+						</table>
+					</div>
                 </div>
             </div>
 		</div>

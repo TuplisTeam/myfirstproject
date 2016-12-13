@@ -181,7 +181,7 @@
 		var entryId = $(this).attr('entryId');
 		if(entryId > 0)
 		{
-			var bool = confirm("Are You Sure Want To Remove This User?");
+			var bool = confirm("Are You Sure Want To Remove This Entry?");
 			if(bool)
 			{
 				var req = new Request();

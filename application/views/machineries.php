@@ -51,7 +51,7 @@
 										<button class="btn btn-primary btn-xs editEntry" machineryId="<?php echo $row->id; ?>">
 											Edit
 										</button>
-										<button class="btn btn-danger btn-xs delEntry" machineryId="<?php echo $row->id; ?>">
+										<button class="btn btn-danger btn-xs delEntry" entryId="<?php echo $row->id; ?>">
 											Del
 										</button>
 									</td>
@@ -147,6 +147,7 @@
 			var req = new Request();
 			req.data = 
 			{
+				"menuId" : '<?php echo $menuId; ?>', 
 				"machineryId" : machineryId,
 				"machineryName" : machineryName, 
 				"machineryDesc" : machineryDesc
@@ -177,23 +178,22 @@
 	
 	$(".delEntry").on("click",function()
 	{
-		var machineryId = $(this).attr('machineryId');
-		if(machineryId > 0)
+		var entryId = $(this).attr('entryId');
+		if(entryId > 0)
 		{
-			var bool = confirm("Do you want to remove this Machinery?");
+			var bool = confirm("Are You Sure Want To Remove This Entry?");
 			if(bool)
 			{
 				var req = new Request();
-				req.data =
+				req.data = 
 				{
-					"machineryId" : machineryId
+					"menuId" : '<?php echo $menuId; ?>', 
+					"entryId" : entryId, 
+					"tableName" : "machineries", 
+					"columnName" : "id"
 				};
-				req.url = "admin/delMachinery";
-				RequestHandler(req,showResponse);
-			}
-			else
-			{
-				return;
+				req.url = "admin/delEntry";
+				RequestHandler(req, showResponse);
 			}
 		}
 		else
