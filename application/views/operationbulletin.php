@@ -984,14 +984,18 @@
 	
 	$(".calculateExpectedDailyOutput").blur(function()
 	{
+		calculateExpectedDailyOutput();
+		calculateAvgOutputPerMachine();
+	});
+	
+	function calculateExpectedDailyOutput()
+	{
 		var possibleDailyOutput = $("#possibleDailyOutput").val();
 		var expectedAvgEfficiency = $("#expectedAvgEfficiency").val();
 		
 		var expectedDailyOutput = parseFloat(possibleDailyOutput ? possibleDailyOutput : 0) * parseFloat(expectedAvgEfficiency ? expectedAvgEfficiency : 0);
 		$("#expectedDailyOutput").val(expectedDailyOutput);
-		
-		calculateAvgOutputPerMachine();
-	});
+	}
 	
 	function calculateAvgOutputPerMachine()
 	{
@@ -1011,6 +1015,7 @@
 		$("#possibleDailyOutput").val(parseFloat(possibleDailyOutput ? possibleDailyOutput : 0));
 		
 		calculateExpectedOutput();
+		calculateExpectedDailyOutput();
 	}
 	
 	$(".calculateExpectedOutput").blur(function()
