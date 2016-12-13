@@ -349,6 +349,7 @@ public function printBarcode($barcodeId, $isprint = FALSE)
 
 public function deliverynote($deliveryNoteId = '')
 {
+	$data["menuId"] = 9;
 	$data["deliveryNoteId"] = $deliveryNoteId;
 	
 	$data["deliveryNo"] = '';
@@ -416,6 +417,7 @@ public function getBarcodeDetails()
 
 public function saveDeliveryNote()
 {
+	$menuId = $this->input->post('menuId');
 	$deliveryNoteId = $this->input->post('deliveryNoteId');
 	$deliveryNo = $this->input->post('deliveryNo');
 	$dcDate = $this->input->post('dcDate');
@@ -429,6 +431,16 @@ public function saveDeliveryNote()
 	$dtlArr = json_decode($dtlArr);
 	
 	$dcDate = substr($dcDate,6,4).'-'.substr($dcDate,3,2).'-'.substr($dcDate,0,2);
+	
+	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $deliveryNoteId);
+	
+	if($permissions["isError"])
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = $permissions["msg"];
+		echo json_encode($data);
+		return;
+	}
 	
 	if($deliveryNo != "" && $dcDate != "" && $supplierName != "" && $supplierAddress != "" && $customerName != "" && $receiverName != "" && $totalAmount > 0 && count($dtlArr) > 0)
 	{
@@ -444,24 +456,6 @@ public function saveDeliveryNote()
 			$data["isError"] = FALSE;
 			$data["msg"] = "Delivery Note Details Saved Successfully";
 		}
-	}
-	else
-	{
-		$data["isError"] = TRUE;
-		$data["msg"] = "Please Fill All Details.";
-	}
-	echo json_encode($data);
-}
-
-public function delDeliveryChallan()
-{
-	$deliveryNoteId = $this->input->post('deliveryNoteId');
-	if($deliveryNoteId > 0)
-	{
-		$this->adminmodel->delDeliveryChallan($deliveryNoteId);
-		
-		$data["isError"] = FALSE;
-		$data["msg"] = "Delivery Challan Details Removed Successfully.";
 	}
 	else
 	{
@@ -1689,8 +1683,11 @@ public function operationbulletinprint($bulletinId = '')
 	$res = $this->adminmodel->getOperationBulletinDetails($bulletinId);
 	
 	$data["styleId"] = "";
+	$data["styleNo"] = "";
 	$data["styleDesc"] = "";
-	$data["createdOn"] = "";
+	$data["createdBy"] = "";
+	$data["preparedOn"] = "";
+	$data["revisedOn"] = "";
 	$data["stdNoOfWorkStations"] = "";
 	$data["stdNoOfOperators"] = "";
 	$data["stdNoOfHelpers"] = "";
@@ -1705,6 +1702,9 @@ public function operationbulletinprint($bulletinId = '')
 	$data["avgOutputPerMachine"] = "";
 	
 	$data["mc_TotalNumbers"] = "";
+	$data["mc_TotalSMV"] = "";
+	
+	$data["mn_TotalNumbers"] = "";
 	$data["mc_TotalSMV"] = "";
 	
 	$data["operationDtls"] = array();
@@ -1722,8 +1722,11 @@ public function operationbulletinprint($bulletinId = '')
 			foreach($res as $row)
 			{
 				$data["styleId"] = $row->styleid;
+				$data["styleNo"] = $row->styleno;
 				$data["styleDesc"] = $row->styledesc;
-				$data["createdOn"] = $row->createdOn;
+				$data["createdBy"] = $row->firstname;
+				$data["preparedOn"] = $row->preparedon;
+				$data["revisedOn"] = $row->revisedon;
 				$data["stdNoOfWorkStations"] = $row->workstations;
 				$data["stdNoOfOperators"] = $row->operators_in_line;
 				$data["stdNoOfHelpers"] = $row->helpers_in_line;
@@ -1739,6 +1742,9 @@ public function operationbulletinprint($bulletinId = '')
 				
 				$data["mc_TotalNumbers"] = $row->mc_totalnumbers;
 				$data["mc_TotalSMV"] = $row->mc_totalsmv;
+				
+				$data["mn_TotalNumbers"] = $row->mn_totalnumbers;
+				$data["mc_TotalSMV"] = $row->mn_totalsmv;
 			}
 		}
 	}
@@ -2163,7 +2169,7 @@ public function delEntry()
 	
 	if($menuId > 0 && $entryId > 0 && $tableName != "" && $columnName != "")
 	{
-		$this->loginmodel->delEntry($entryId, $tableName, $columnName);
+		$this->adminmodel->delEntry($entryId, $tableName, $columnName);
 		
 		$data["isError"] = FALSE;
 		$data["msg"] = "Entry Removed Successfully...";

@@ -871,7 +871,7 @@
 		var entryId = $(this).attr('entryId');
 		if(entryId > 0)
 		{
-			location.href = '<?php echo base_url(); ?>admin/operationbulletinprint/'+entryId;
+			window.open('<?php echo base_url(); ?>admin/operationbulletinprint/'+entryId);
 		}
 	});
 	

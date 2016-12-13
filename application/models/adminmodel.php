@@ -360,12 +360,6 @@ public function saveDeliveryNote($deliveryNoteId, $deliveryNo, $dcDate, $supplie
 	}
 }
 
-public function delDeliveryChallan($deliveryNoteId)
-{
-	$sql = "UPDATE deliverynote_hdr SET status = 'inactive' WHERE id = $deliveryNoteId";
-	$this->db->query($sql);
-}
-
 public function getReceptionCheckDetails($receptionCheckId = '')
 {
 	$sql = "SELECT 
@@ -1085,11 +1079,17 @@ public function saveStyle($styleId, $styleNo, $styleDesc)
 
 public function getOperationBulletinDetails($bulletinId = '')
 {
-	$sql = "SELECT h.*, s.styleno, s.styleno, s.styledesc
+	$sql = "SELECT 
+				h.*, DATE_FORMAT(h.created_on,'%d %b, %Y') AS preparedon, 
+				DATE_FORMAT(h.modified_on,'%d %b, %Y') AS revisedon, 
+				s.styleno, s.styleno, s.styledesc, u.firstname
 			FROM 
 				operationbulletin_hdr h 
 				INNER JOIN style s ON h.styleid = s.id 
-			WHERE h.status <> 'inactive' AND s.status <> 'inactive'";
+				INNER JOIN users u ON h.created_by = u.userid
+			WHERE 
+				h.status <> 'inactive' AND s.status <> 'inactive' AND 
+				u.status <> 'inactive'";
 	if($bulletinId > 0)
 	{
 		$sql .= " AND h.id = $bulletinId";
