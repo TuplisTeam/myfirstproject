@@ -27,7 +27,7 @@ if(count($editpage) > 1)
         
         <ul class="menu accordion-menu">
 			<?php
-			$myMenus = $this->adminmodel->getMenus();
+			$myMenus = $this->adminmodel->getMenuDetails_User($this->session->userdata('userid'));
 			if(count($myMenus) > 0)
 			{
 				foreach($myMenus as $row)
@@ -94,128 +94,6 @@ if(count($editpage) > 1)
 			}
 			?>
 			
-			<?php
-			/*if($curpage == "admin")
-			{
-				echo '<li class="active">';
-			}
-			else
-			{
-				echo '<li>';
-			}
-			?>
-				<a href="<?php echo base_url(); ?>admin/" class="waves-effect waves-button">
-					<span class="menu-icon glyphicon glyphicon-home"></span>
-					<p>Dashboard</p>
-				</a>
-			<?php
-			echo '</li>';
-			if($curpage == "admin/users")
-			{
-				echo '<li class="active">';
-			}
-			else
-			{
-				echo '<li>';
-			}
-			?>
-				<a href="<?php echo base_url(); ?>admin/users" class="waves-effect waves-button">
-					<span class="menu-icon glyphicon glyphicon-user"></span>
-					<p>Users</p>
-				</a>
-			<?php
-			echo '</li>';
-			if($curpage == "admin/barcodegeneration")
-			{
-				echo '<li class="active">';
-			}
-			else
-			{
-				echo '<li>';
-			}
-			?>
-				<a href="<?php echo base_url(); ?>admin/barcodegeneration" class="waves-effect waves-button">
-					<span class="menu-icon glyphicon glyphicon-barcode"></span>
-					<p>Barcode Generation</p>
-				</a>
-			<?php
-			echo '</li>';
-			if($curpage == "admin/deliverynote")
-			{
-				echo '<li class="active">';
-			}
-			else
-			{
-				echo '<li>';
-			}
-			?>
-				<a href="<?php echo base_url(); ?>admin/deliverynote" class="waves-effect waves-button">
-					<span class="menu-icon glyphicon glyphicon-book"></span>
-					<p>Delivery Note</p>
-				</a>
-			<?php
-			echo '</li>';
-			if($curpage == "admin/receptioncheck")
-			{
-				echo '<li class="active">';
-			}
-			else
-			{
-				echo '<li>';
-			}
-			?>
-				<a href="<?php echo base_url(); ?>admin/receptioncheck" class="waves-effect waves-button">
-					<span class="menu-icon glyphicon glyphicon-check"></span>
-					<p>Reception Check</p>
-				</a>
-			<?php
-			echo '</li>';
-			if($curpage == "admin/scan")
-			{
-				echo '<li class="active">';
-			}
-			else
-			{
-				echo '<li>';
-			}
-			?>
-				<a href="<?php echo base_url(); ?>admin/scan" class="waves-effect waves-button">
-					<span class="menu-icon glyphicon glyphicon-user"></span>
-					<p>Scan</p>
-				</a>
-			<?php
-			echo '</li>';
-			if($curpage == "admin/search")
-			{
-				echo '<li class="active">';
-			}
-			else
-			{
-				echo '<li>';
-			}
-			?>
-				<a href="<?php echo base_url(); ?>admin/search" class="waves-effect waves-button">
-					<span class="menu-icon glyphicon glyphicon-search"></span>
-					<p>Search</p>
-				</a>
-			<?php
-			echo '</li>';
-			if($curpage == "admin/receivedgoods")
-			{
-				echo '<li class="active">';
-			}
-			else
-			{
-				echo '<li>';
-			}
-			?>
-				<a href="<?php echo base_url(); ?>admin/receivedgoods" class="waves-effect waves-button">
-					<span class="menu-icon glyphicon glyphicon-send"></span>
-					<p>Received Goods</p>
-				</a>
-			<?php
-			echo '</li>';*/
-			?>
         </ul>
     </div><!-- Page Sidebar Inner -->
 </div><!-- Page Sidebar -->

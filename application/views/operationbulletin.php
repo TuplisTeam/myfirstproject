@@ -1025,6 +1025,7 @@
 		
 		var expectedOutput = parseFloat(possibleDailyOutput ? possibleDailyOutput : 0) * parseFloat(expectedPeakEfficiency ? expectedPeakEfficiency : 0)
 		$("#expectedOutput").val(expectedOutput);
+		calculateNumberOfWorkers();
 	}
 	
 	function calculateManualSAM()

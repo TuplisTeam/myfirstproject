@@ -9,65 +9,146 @@ public function __construct()
 
 /*Manju Starts*/
 
-public function getMenus()
+public function getMenuDetails()
 {
-	$sql = "SELECT * FROM menu_mas WHERE STATUS <> 'inactive' ORDER BY slno";
+	if($this->session->userdata('usertype') == "admin")
+	{
+		$sql = "SELECT * FROM menu_mas WHERE STATUS <> 'inactive' 
+				ORDER BY slno, menu_level";
+	}
+	else
+	{
+		$sql = "SELECT 
+					m.*, 
+					IFNULL(um.save_access,'no') AS save_access, 
+					IFNULL(um.edit_access,'no') AS edit_access, 
+					IFNULL(um.delete_access,'no') AS delete_access
+				FROM 
+					menu_mas m 
+					LEFT OUTER JOIN 
+						(SELECT * FROM user_vs_menu 
+						WHERE userid = '".$this->session->userdata('userid')."') um 
+						ON m.menu_id = um.menu_id
+				WHERE 
+					m.status <> 'inactive'
+				ORDER BY m.slno, m.menu_level";
+	}
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function getMenuDetails_User($userId = '')
+{
+	$whrStr = "";
+	if($this->session->userdata('usertype') != "admin")
+	{
+		if($userId > 0)
+		{
+			$whrStr = " AND um.userid = $userId";
+		}
+	}
+	$sql = "SELECT DISTINCT 
+				m.*, 
+				IFNULL(um.save_access,'no') AS save_access, 
+				IFNULL(um.edit_access,'no') AS edit_access, 
+				IFNULL(um.delete_access,'no') AS delete_access
+			FROM 
+				menu_mas m 
+				LEFT OUTER JOIN user_vs_menu um ON m.menu_id = um.menu_id
+			WHERE 
+				m.status <> 'inactive' $whrStr
+			ORDER BY m.slno, m.menu_level";
 	$res = $this->db->query($sql);
 	return $res->result();
 }
 
 public function checkLogin($email, $password, $store)
 {
-	$sql = "SELECT *, COUNT(*) AS rows FROM users 
-			WHERE email = '".$email."' AND password = '".md5($password)."'";
-	$res = $this->db->query($sql);
+	$res = array();
 	
-	$rows = 0;
-	$status = 0;
-	if($res->num_rows() > 0)
+	$sql = "SELECT * FROM users 
+			WHERE email = '".$email."' AND password = '".md5($password)."'";
+	$result = $this->db->query($sql);
+	
+	foreach($result->result() as $user)
 	{
-		foreach($res->result() as $row)
+		$a = array();
+		$sql1 = "";
+		if($user->usertype == "admin")
 		{
-			$rows = $row->rows;
-			$status = $row->status;
-			
-			if($status == "active")
-			{
-				$sql = "UPDATE users SET lastlogin = NOW() WHERE email='".$row->email."'";
-				$this->db->query($sql);
-				
-				$userData = array(
-		    		'userid' => $row->userid,
-					'email' => $row->email,
-					'firstname' => $row->firstname,
-					'usertype' => $row->usertype,
-		    		'status' => $row->status,
-					'loggedin'=> TRUE
-		    	);
-				$this->session->set_userdata($userData);
-			}
+			$sql1 = "SELECT *,
+						'yes' AS save_access, 
+						'yes' AS edit_access, 
+						'yes' AS delete_access
+					FROM menu_mas WHERE STATUS <> 'inactive' 
+					ORDER BY slno, menu_level";
 		}
+		else
+		{
+			$sql1 = "SELECT DISTINCT 
+						m.*, 
+						IFNULL(um.save_access,'no') AS save_access, 
+						IFNULL(um.edit_access,'no') AS edit_access, 
+						IFNULL(um.delete_access,'no') AS delete_access
+					FROM 
+						menu_mas m 
+						LEFT OUTER JOIN user_vs_menu um ON m.menu_id = um.menu_id
+					WHERE 
+						m.status <> 'inactive' AND 
+						um.userid = '".$user->userid."'
+					ORDER BY m.slno, m.menu_level";
+		}
+		$result1 = $this->db->query($sql1);
+		foreach($result1->result() as $menu)
+		{
+			$arr = array("save"=>$menu->save_access,
+						  "edit" => $menu->edit_access,
+						  "delete"=> $menu->delete_access);
+			array_push($a[$menu->menu_id] = $arr,$arr);         
+		}
+		
+		$userdata = array(
+    		'userid' => $user->userid,
+			'username' => $user->email,
+			'firstname' => $user->firstname,
+    		'usertype' => $user->usertype,
+    		'status'=> $user->status,
+			'loggedin'=> TRUE,
+			'menudata' => $a
+    	);
+		
+		if($user->status == 'inactive')
+		{
+			$res["isError"] = TRUE;
+			$res["msg"] = "Account in InActive Mode.. Please Contact Administrator.";
+			echo json_encode($res);
+			return;
+		}		
+				
+		$sql = "UPDATE users SET lastlogin = NOW() WHERE userid = '".$user->userid."'";
+		$this->db->query($sql);		
+	
+		$this->session->set_userdata($userdata);
+		
+		$res["isError"] = FALSE;
+		$res["msg"] = "Successfully login";	
+		echo json_encode($res);
+		return;	
 	}
 	
-	$resArr["rowCount"] = $rows;
-	$resArr["status"] = $status;
-	return $resArr;
+	$res["isError"] = TRUE;
+	$res["msg"] = "Invalid Login";
+	echo json_encode($res);
+	return;
 }
 
-public function getUsers($userId = '')
+public function getUserDetails($userId = '')
 {
-	$userType = $this->session->userdata('usertype');
-	
-	$sql = "SELECT * FROM users WHERE usertype <> 'admin'";
-	if($userType != "admin")
-	{
-		$sql .= " AND STATUS <> 'inactive' AND userid = '".$this->session->userdata('userid')."'";
-	}
+	$sql = "SELECT * FROM users WHERE status <> 'inactive' AND usertype <> 'admin'";
 	if($userId > 0)
 	{
 		$sql .= " AND userid = $userId";
 	}
-	$sql .= " ORDER BY firstname, status";
 	$res = $this->db->query($sql);
 	return $res->result();
 }
@@ -84,13 +165,13 @@ public function checkUserAvailability($userId, $userEmail)
 	return $res->num_rows();
 }
 
-public function saveUser($userId, $userName, $userEmail)
+public function saveUser($userId, $userName, $userEmail, $userType, $menuPermissionsArr)
 {
 	if($userId > 0)
 	{
 		$sql = "UPDATE users SET 
-					email = '".$userEmail."', 
-					firstname = '".$userName."', usertype = 'user', 
+					email = '".$userEmail."', password = md5(123), 
+					firstname = '".$userName."', usertype = '".$userType."', 
 					modified_on = NOW(), 
 					modified_by = '".$this->session->userdata('userid')."'
 				WHERE userid = $userId";
@@ -99,19 +180,26 @@ public function saveUser($userId, $userName, $userEmail)
 	else
 	{
 		$sql = "INSERT INTO users SET 
-					email = '".$userEmail."', password = md5('123'), 
-					firstname = '".$userName."', usertype = 'user', 
+					email = '".$userEmail."', 
+					firstname = '".$userName."', usertype = '".$userType."', 
 					created_on = NOW(), 
 					created_by = '".$this->session->userdata('userid')."'";
 		$this->db->query($sql);
 		$userId = $this->db->insert_id();
 	}
-}
-
-public function updateUserStatus($userId,$status)
-{
-	$sql = "UPDATE users SET status = '$status' WHERE userid = $userId";
-	$this->db->query($sql);
+	
+	$sqlDel = "DELETE FROM user_vs_menu WHERE userid = $userId";
+	$this->db->query($sqlDel);
+	
+	foreach($menuPermissionsArr as $row)
+	{
+		$sql = "INSERT INTO user_vs_menu SET 
+					userid = $userId, menu_id = '".$row->menuId."', 
+					save_access = '".$row->saveAccess."', 
+					edit_access = '".$row->editAccess."', 
+					delete_access = '".$row->delAccess."'";
+		$this->db->query($sql);
+	}
 }
 
 public function updatePassword($userId, $newPassword)
@@ -1009,7 +1097,7 @@ public function saveStyle($styleId, $styleNo, $styleDesc)
 
 public function getOperationBulletinDetails($bulletinId = '')
 {
-	$sql = "SELECT h.*, s.styleno
+	$sql = "SELECT h.*, s.styleno, s.styleno, s.styledesc
 			FROM 
 				operationbulletin_hdr h 
 				INNER JOIN style s ON h.styleid = s.id 
@@ -1114,11 +1202,12 @@ public function saveOperationBulletin($bulletinId, $styleId, $stdNoOfWorkStation
 
 /*Common Function Starts*/
 
-public function delEntry($entryId, $tableName)
+public function delEntry($entryId, $tableName, $columnName)
 {
-	$sql = "UPDATE $tableName SET status = 'inactive' WHERE id = $entryId";
+	$sql = "UPDATE $tableName SET status = 'inactive' WHERE $columnName = $entryId";
 	$this->db->query($sql);
 }
+
 
 /*Common Function Ends*/
 

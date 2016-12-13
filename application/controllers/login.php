@@ -37,35 +37,16 @@ public function checkLogin()
 	
 	if($email != "" && $password != "" && $store != "")
 	{
-		$res = $this->adminmodel->checkLogin($email, $password, $store);
-		$rowCount = $res["rowCount"];
-		$status = $res["status"];
-		
-		if($rowCount == 1 && $status == "active")
-		{
-			$data["isError"] = FALSE;
-			$data["msg"] = "You Are Logged In Successfully.";
-		}
-		else
-		{
-			if($status == "inactive")
-			{
-				$data["isError"] = TRUE;
-				$data["msg"] = "Your Account Has Been Suspended By Admin. Please Contact Admin.";
-			}
-			else
-			{
-				$data["isError"] = TRUE;
-				$data["msg"] = "Email Or Password Is Not Matched.";
-			}
-		}
+		$this->adminmodel->checkLogin($email, $password, $store);
 	}
 	else
 	{
 		$data["isError"] = TRUE;
 		$data["msg"] = "Please Fill All Details.";
+		
+		echo json_encode($data);
+		return;
 	}
-	echo json_encode($data);
 }
 
 /*Manju Ends*/

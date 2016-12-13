@@ -51,7 +51,7 @@ public function updatePassword()
 	
 	if($newPassword != "")
 	{
-		$result = $this->adminmodel->getUsers($userId);
+		$result = $this->adminmodel->getUserDetails($userId);
 		$checkPassword = '';
 		foreach($result as $row)
 		{
@@ -79,37 +79,58 @@ public function updatePassword()
 }
 
 public function users($userId = '')
-{	
+{
+	$data["menuId"] = 3;
 	$data['userId'] = $userId;
-	$data['userName'] = '';
-	$data['userEmail'] = '';
 	
-	$allUsers = $this->adminmodel->getUsers($userId);	
+	$res = $this->adminmodel->getUserDetails($userId);
+	$data["menuDtls"] = $this->adminmodel->getMenuDetails();
+	$data["userPermissions"] = $this->adminmodel->getMenuDetails_User($userId);
+	
+	$data["userName"] = "";
+	$data["userEmail"] = "";
+	$data["userType"] = "";
+	
 	if($userId > 0)
 	{
-		foreach($allUsers as $row)
+		foreach($res as $row)
 		{
-			$data['userName'] = $row->firstname;
-			$data['userEmail'] = $row->email;
+			$data["userName"] = $row->firstname;
+			$data["userEmail"] = $row->email;
+			$data["userType"] = $row->usertype;
 		}
 	}
 	else
 	{
-		$data['allUsers'] = $allUsers;
+		$data["allUsers"] = $res;
 	}
 	
 	$this->load->view('header');
-	$this->load->view('users',$data);
+	$this->load->view('users', $data);
 	$this->load->view('footer');
 }
 
 public function saveUser()
 {
+	$menuId = $this->input->post('menuId');
 	$userId = $this->input->post('userId');
 	$userName = $this->input->post('userName');
 	$userEmail = $this->input->post('userEmail');
+	$userType = $this->input->post('userType');
+	$menuPermissionsArr = $this->input->post('menuPermissionsArr');
+	$menuPermissionsArr = json_decode($menuPermissionsArr);
 	
-	if($userName != "" && $userEmail != "")
+	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $userId);
+	
+	if($permissions["isError"])
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = $permissions["msg"];
+		echo json_encode($data);
+		return;
+	}
+	
+	if($userName != "" && $userEmail != "" && $userType != "")
 	{
 		$resCheck = $this->adminmodel->checkUserAvailability($userId, $userEmail);
 		if($resCheck > 0)
@@ -119,42 +140,23 @@ public function saveUser()
 		}
 		else
 		{
-			$res = $this->adminmodel->saveUser($userId, $userName, $userEmail);
+			$this->adminmodel->saveUser($userId, $userName, $userEmail, $userType, $menuPermissionsArr);
+			
+			$data["isError"] = FALSE;
 			if($userId > 0)
 			{
-				$data["isError"] = FALSE;
-				$data["msg"] = "User Updated Successfully.";
+				$data["msg"] = "User Updated Successfully...";
 			}
 			else
 			{
-				$data["isError"] = FALSE;
-				$data["msg"] = "User Created Successfully.";
+				$data["msg"] = "User Created Successfully...";
 			}
 		}
 	}
 	else
 	{
 		$data["isError"] = TRUE;
-		$data["msg"] = "Please fill all fields";
-	}
-	echo json_encode($data);
-}
-
-public function delUser()
-{
-	$userId = $this->input->post('userId');
-	
-	if($userId > 0)
-	{
-		$this->adminmodel->updateUserStatus($userId,'inactive');
-		
-		$data["isError"] = FALSE;
-		$data["msg"] = "User Removed Successfully.";
-	}
-	else
-	{
-		$data["isError"] = TRUE;
-		$data["msg"] = "Please fill all fields";
+		$data["msg"] = "Please Fill All Fields";
 	}
 	echo json_encode($data);
 }
@@ -827,6 +829,7 @@ public function delRackDisplay()
 
 public function employee($empId = '')
 {
+	$data["menuId"] = 4;
 	$data["empId"] = $empId;
 	
 	$data["empNo"] = '';
@@ -857,9 +860,20 @@ public function employee($empId = '')
 
 public function saveEmployee()
 {
+	$menuId = $this->input->post('menuId');
 	$empId = $this->input->post('empId');
 	$empNo = $this->input->post('empNo');
 	$empName = $this->input->post('empName');
+	
+	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $empId);
+	
+	if($permissions["isError"])
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = $permissions["msg"];
+		echo json_encode($data);
+		return;
+	}
 	
 	if($empNo != "" && $empName != "")
 	{
@@ -2126,22 +2140,71 @@ public function downloadAsPDF($str='')
 
 public function delEntry()
 {
+	$menuId = $this->input->post('menuId');
 	$entryId = $this->input->post('entryId');
 	$tableName = $this->input->post('tableName');
+	$columnName = $this->input->post('columnName');
 	
-	if($entryId > 0)
+	$permissions = $this->checkScreenPermissionAvailability($menuId, 'delete');
+	
+	if($permissions["isError"])
 	{
-		$this->adminmodel->delEntry($entryId, $tableName);
+		$data["isError"] = TRUE;
+		$data["msg"] = $permissions["msg"];
+		echo json_encode($data);
+		return;
+	}
+	
+	if($menuId > 0 && $entryId > 0 && $tableName != "" && $columnName != "")
+	{
+		$this->loginmodel->delEntry($entryId, $tableName, $columnName);
 		
 		$data["isError"] = FALSE;
-		$data["msg"] = "Entry Removed Successfully.";
+		$data["msg"] = "Entry Removed Successfully...";
 	}
 	else
 	{
 		$data["isError"] = TRUE;
-		$data["msg"] = "Please Fill All Details.";
+		$data["msg"] = "Please Fill All Fields";
 	}
 	echo json_encode($data);
+}
+
+public function checkScreenPermissionAvailability($menuId, $type, $id = '')
+{
+	$r = $this->session->userdata('menudata');
+	
+	$data["isError"] = FALSE;
+	$data["msg"] = "";
+	
+	if($menuId > 0 && $type != "")
+	{
+		if($type == "save_update")
+		{
+			if(($id == "" && $r[$menuId]["save"] == "yes") || ($id != "" && $r[$menuId]["edit"] == "yes"))
+			{	
+			}
+			else
+			{
+				$data["isError"] = TRUE;
+				$data["msg"] = "You Have No Rights to Do this Insert / Update...";
+			}
+		}
+		else if($type == "delete")
+		{
+			if($r[$menuId]["delete"] != 'yes')
+			{
+				$data["isError"] = TRUE;
+				$data["msg"] = "You Have No Rights to Delete This Entry.";
+			}
+		}
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Menu Id Is Not Valid.";
+	}
+	return $data;
 }
 
 /*Common Function Ends*/
