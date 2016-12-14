@@ -147,12 +147,24 @@ public function checkLogin($email, $password, $store)
 	return;
 }
 
-public function getUserDetails($userId = '')
+public function getUserDetails($userType = '', $userId = '')
 {
-	$sql = "SELECT * FROM users WHERE status <> 'inactive' AND usertype <> 'admin'";
+	$sql = "SELECT u.*, IFNULL(cb.firstname,'') AS createdby
+			FROM 
+				users u 
+				LEFT OUTER JOIN 
+					(SELECT * FROM users WHERE status <> 'inactive') cb 
+					ON u.created_by = cb.userid
+			WHERE 
+				u.status <> 'inactive'";
+	if($userType != "all")
+	{
+		$sql .= " AND u.usertype <> 'admin'";
+		$sql .= " AND u.created_by = '".$this->session->userdata('userid')."'";
+	}
 	if($userId > 0)
 	{
-		$sql .= " AND userid = $userId";
+		$sql .= " AND u.userid = $userId";
 	}
 	$res = $this->db->query($sql);
 	return $res->result();

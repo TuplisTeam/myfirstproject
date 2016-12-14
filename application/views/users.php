@@ -35,7 +35,8 @@
                                 <tr>
                                     <th>User Name</th>
                                     <th>User Email</th>
-                                    <th>User Status</th>
+                                    <th>User Type</th>
+                                    <th>Created By</th>
                                     <th>Manage</th>
                                 </tr>
                             </thead>
@@ -49,21 +50,15 @@
 									<tr>
 										<td><?php echo $row->firstname; ?></td>
 										<td><?php echo $row->email; ?></td>
-										<td><?php echo ucwords($row->status); ?></td>
+										<td><?php echo ucwords($row->usertype); ?></td>
+										<td><?php echo $row->createdby; ?></td>
 										<td>
-											<?php
-											if($row->status != "inactive")
-											{
-											?>
 											<button class="btn btn-primary btn-xs editUser" userId="<?php echo $row->userid; ?>">
 												Edit
 											</button>
 											<button class="btn btn-danger btn-xs delEntry" entryId="<?php echo $row->userid; ?>">
 												Inactivate
 											</button>
-											<?php
-											}
-											?>
 										</td>
 									</tr>
 								<?php

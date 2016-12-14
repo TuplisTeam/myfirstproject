@@ -51,7 +51,7 @@ public function updatePassword()
 	
 	if($newPassword != "")
 	{
-		$result = $this->adminmodel->getUserDetails($userId);
+		$result = $this->adminmodel->getUserDetails('all', $userId);
 		$checkPassword = '';
 		foreach($result as $row)
 		{
@@ -83,7 +83,7 @@ public function users($userId = '')
 	$data["menuId"] = 3;
 	$data['userId'] = $userId;
 	
-	$res = $this->adminmodel->getUserDetails($userId);
+	$res = $this->adminmodel->getUserDetails('others', $userId);
 	$data["menuDtls"] = $this->adminmodel->getMenuDetails();
 	
 	$data["userPermissions"] = array();
