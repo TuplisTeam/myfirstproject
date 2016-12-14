@@ -85,7 +85,12 @@ public function users($userId = '')
 	
 	$res = $this->adminmodel->getUserDetails($userId);
 	$data["menuDtls"] = $this->adminmodel->getMenuDetails();
-	$data["userPermissions"] = $this->adminmodel->getMenuDetails_User($userId);
+	
+	$data["userPermissions"] = array();
+	if($userId > 0)
+	{
+		$data["userPermissions"] = $this->adminmodel->getMenuDetails_User($userId);
+	}
 	
 	$data["userName"] = "";
 	$data["userEmail"] = "";

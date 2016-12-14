@@ -27,7 +27,15 @@ if(count($editpage) > 1)
         
         <ul class="menu accordion-menu">
 			<?php
-			$myMenus = $this->adminmodel->getMenuDetails_User($this->session->userdata('userid'));
+			$myMenus = array();
+        	if($this->session->userdata('usertype') == "admin")
+        	{
+				$myMenus = $this->adminmodel->getMenuDetails();
+			}
+        	else
+        	{
+				$myMenus = $this->adminmodel->getMenuDetails_User($this->session->userdata('userid'));
+			}
 			if(count($myMenus) > 0)
 			{
 				foreach($myMenus as $row)

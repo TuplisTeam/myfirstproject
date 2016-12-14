@@ -13,7 +13,11 @@ public function getMenuDetails()
 {
 	if($this->session->userdata('usertype') == "admin")
 	{
-		$sql = "SELECT * FROM menu_mas WHERE STATUS <> 'inactive' 
+		$sql = "SELECT *,
+					'yes' AS save_access, 
+					'yes' AS edit_access, 
+					'yes' AS delete_access
+				FROM menu_mas WHERE STATUS <> 'inactive' 
 				ORDER BY slno, menu_level";
 	}
 	else
@@ -30,7 +34,7 @@ public function getMenuDetails()
 						WHERE userid = '".$this->session->userdata('userid')."') um 
 						ON m.menu_id = um.menu_id
 				WHERE 
-					m.status <> 'inactive'
+					m.status <> 'inactive' AND m.is_admin_menu = 'no'
 				ORDER BY m.slno, m.menu_level";
 	}
 	$res = $this->db->query($sql);
@@ -42,10 +46,11 @@ public function getMenuDetails_User($userId = '')
 	$whrStr = "";
 	if($this->session->userdata('usertype') != "admin")
 	{
-		if($userId > 0)
-		{
-			$whrStr = " AND um.userid = $userId";
-		}
+		$whrStr .= " AND m.is_admin_menu = 'no'";
+	}
+	if($userId > 0)
+	{
+		$whrStr .= " AND um.userid = $userId";
 	}
 	$sql = "SELECT DISTINCT 
 				m.*, 
@@ -85,7 +90,7 @@ public function checkLogin($email, $password, $store)
 		}
 		else
 		{
-			$sql1 = "SELECT DISTINCT 
+			$sql1 = "SELECT 
 						m.*, 
 						IFNULL(um.save_access,'no') AS save_access, 
 						IFNULL(um.edit_access,'no') AS edit_access, 
@@ -94,7 +99,7 @@ public function checkLogin($email, $password, $store)
 						menu_mas m 
 						LEFT OUTER JOIN user_vs_menu um ON m.menu_id = um.menu_id
 					WHERE 
-						m.status <> 'inactive' AND 
+						m.status <> 'inactive' AND m.is_admin_menu = 'no' AND 
 						um.userid = '".$user->userid."'
 					ORDER BY m.slno, m.menu_level";
 		}
