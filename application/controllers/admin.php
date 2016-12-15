@@ -518,6 +518,7 @@ public function printDeliveryNote($deliveryNoteId, $isprint=FALSE)
 
 public function receptioncheck($receptionCheckId = '')
 {
+	$data["menuId"] = 10;
 	$data["receptionCheckId"] = $receptionCheckId;
 	
 	$data["fromName"] = '';
@@ -576,6 +577,7 @@ public function receptioncheck($receptionCheckId = '')
 
 public function saveReceptionCheck()
 {
+	$menuId = $this->input->post('menuId');
 	$receptionCheckId = $this->input->post('receptionCheckId');
 	$fromName = $this->input->post('fromName');
 	$toName = $this->input->post('toName');
@@ -594,38 +596,30 @@ public function saveReceptionCheck()
 	
 	$rcDate = substr($rcDate,6,4).'-'.substr($rcDate,3,2).'-'.substr($rcDate,0,2);
 	
+	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $receptionCheckId);
+	
+	if($permissions["isError"])
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = $permissions["msg"];
+		echo json_encode($data);
+		return;
+	}
+	
 	if($fromName != "" && $toName != "" && $dcNo > 0 && $lotNo != "" && $vehicleNo != "" && $rcDate != "" && $unitName != "" && $checkedBy != "" && $incharge != "")
 	{
 		$this->adminmodel->saveReceptionCheck($receptionCheckId, $fromName, $toName, $dcNo, $lotNo, $vehicleNo, $rcDate, $unitName, $descCheck1, $descCheck2, $descCheck3, $descCheck4, $checkedBy, $incharge, $remarks);
 		
-		if($deliveryNo > 0)
+		if($receptionCheckId > 0)
 		{
 			$data["isError"] = FALSE;
-			$data["msg"] = "Delivery Note Details Updated Successfully";
+			$data["msg"] = "Reception Check Details Updated Successfully";
 		}
 		else
 		{
 			$data["isError"] = FALSE;
-			$data["msg"] = "Delivery Note Details Saved Successfully";
+			$data["msg"] = "Reception Check Details Saved Successfully";
 		}
-	}
-	else
-	{
-		$data["isError"] = TRUE;
-		$data["msg"] = "Please Fill All Details.";
-	}
-	echo json_encode($data);
-}
-
-public function delReceptionCheck()
-{
-	$receptionCheckId = $this->input->post('receptionCheckId');
-	if($receptionCheckId > 0)
-	{
-		$this->adminmodel->delReceptionCheck($receptionCheckId);
-		
-		$data["isError"] = FALSE;
-		$data["msg"] = "Reception Check Details Removed Successfully.";
 	}
 	else
 	{
@@ -695,6 +689,8 @@ public function printReceptionCheck($receptionCheckId, $isprint = FALSE)
 
 public function scan()
 {
+	$data["menuId"] = 11;
+	
 	$res = $this->adminmodel->getDeliveryNoteItemDetails();
 	$data["dcDtls"] = $res;
 	$data["page"] = "scan";
@@ -706,6 +702,8 @@ public function scan()
 
 public function search()
 {
+	$data["menuId"] = 12;
+	
 	$res = $this->adminmodel->getDeliveryNoteItemDetails();
 	$data["dcDtls"] = $res;
 	$data["page"] = "search";
@@ -717,6 +715,8 @@ public function search()
 
 public function receivedgoods()
 {
+	$data["menuId"] = 13;
+	
 	$res = $this->adminmodel->getReceivedGoods();
 	$data["rcDtls"] = $res;
 	
@@ -727,7 +727,19 @@ public function receivedgoods()
 
 public function saveReceivedGoods()
 {
+	$menuId = $this->input->post('menuId');
 	$barcodeName = $this->input->post('barcodeName');
+	
+	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', '');
+	
+	if($permissions["isError"])
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = $permissions["msg"];
+		echo json_encode($data);
+		return;
+	}
+	
 	if($barcodeName != "")
 	{
 		$this->adminmodel->saveReceivedGoods($barcodeName);
@@ -745,6 +757,8 @@ public function saveReceivedGoods()
 
 public function rackdisplay($rackDisplayId = '')
 {
+	$data["menuId"] = 14;
+	
 	$data["rackDisplayId"] = $rackDisplayId;
 	
 	$data["entryDate"] = "";
@@ -779,6 +793,7 @@ public function rackdisplay($rackDisplayId = '')
 
 public function saveRackDetails()
 {
+	$menuId = $this->input->post('menuId');
 	$rackDisplayId = $this->input->post('rackDisplayId');
 	$entryDate = $this->input->post('entryDate');
 	$dtlArr = $this->input->post('dtlArr');
@@ -787,6 +802,16 @@ public function saveRackDetails()
 	$processInfoArr = json_decode($processInfoArr);
 	
 	$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
+	
+	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $rackDisplayId);
+	
+	if($permissions["isError"])
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = $permissions["msg"];
+		echo json_encode($data);
+		return;
+	}
 	
 	if($entryDate != "" && count($dtlArr) > 0)
 	{
@@ -798,24 +823,6 @@ public function saveRackDetails()
 	else
 	{
 		$data["isError"] = FALSE;
-		$data["msg"] = "Please Fill All Details.";
-	}
-	echo json_encode($data);
-}
-
-public function delRackDisplay()
-{
-	$rackDisplayId = $this->input->post('rackDisplayId');
-	if($rackDisplayId > 0)
-	{
-		$this->adminmodel->delRackDisplay($rackDisplayId);
-		
-		$data["isError"] = FALSE;
-		$data["msg"] = "Rack Display Details Removed Successfully.";
-	}
-	else
-	{
-		$data["isError"] = TRUE;
 		$data["msg"] = "Please Fill All Details.";
 	}
 	echo json_encode($data);
@@ -1060,6 +1067,8 @@ public function saveMachinery()
 
 public function skillmatrix($skillMatrixId = '')
 {
+	$data["menuId"] = 17;
+	
 	$data["skillMatrixId"] = $skillMatrixId;
 	
 	$data["empDtls"] = $this->adminmodel->getEmployeeDetails();
@@ -1092,6 +1101,7 @@ public function skillmatrix($skillMatrixId = '')
 
 public function saveSkillMatrix()
 {
+	$menuId = $this->input->post('menuId');
 	$skillMatrixId = $this->input->post('skillMatrixId');
 	$entryDate = $this->input->post('entryDate');
 	$lineName = $this->input->post('lineName');
@@ -1099,6 +1109,16 @@ public function saveSkillMatrix()
 	$dtlArr = json_decode($dtlArr);
 	
 	$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
+	
+	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $skillMatrixId);
+	
+	if($permissions["isError"])
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = $permissions["msg"];
+		echo json_encode($data);
+		return;
+	}
 	
 	if($entryDate != "" && $lineName != "" && count($dtlArr) > 0)
 	{
@@ -1131,27 +1151,10 @@ public function saveSkillMatrix()
 	echo json_encode($data);
 }
 
-public function delSkillMatrix()
-{
-	$skillMatrixId = $this->input->post('skillMatrixId');
-	
-	if($skillMatrixId > 0)
-	{
-		$this->adminmodel->delSkillMatrix($skillMatrixId);
-		
-		$data["isError"] = FALSE;
-		$data["msg"] = "Skill Matrix Removed Successfully.";
-	}
-	else
-	{
-		$data["isError"] = TRUE;
-		$data["msg"] = "Please Fill All Details.";
-	}
-	echo json_encode($data);
-}
-
 public function noworktime($noWorkId = '')
 {
+	$data["menuId"] = 20;
+	
 	$data["noWorkId"] = $noWorkId;
 	
 	$res = $this->adminmodel->getNoWork_HdrDetails($noWorkId);
@@ -1181,6 +1184,7 @@ public function noworktime($noWorkId = '')
 
 public function saveNoWorkTime()
 {
+	$menuId = $this->input->post('menuId');
 	$noWorkId = $this->input->post('noWorkId');
 	$entryDate = $this->input->post('entryDate');
 	$lineName = $this->input->post('lineName');
@@ -1188,6 +1192,16 @@ public function saveNoWorkTime()
 	$dtlArr = json_decode($dtlArr);
 	
 	$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
+	
+	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $noWorkId);
+	
+	if($permissions["isError"])
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = $permissions["msg"];
+		echo json_encode($data);
+		return;
+	}
 	
 	if($entryDate != "" && $lineName != "" && count($dtlArr) > 0)
 	{
@@ -1220,27 +1234,10 @@ public function saveNoWorkTime()
 	echo json_encode($data);
 }
 
-public function delNoWorkTime()
-{
-	$noWorkId = $this->input->post('noWorkId');
-	
-	if($noWorkId > 0)
-	{
-		$this->adminmodel->delNoWorkTime($noWorkId);
-		
-		$data["isError"] = FALSE;
-		$data["msg"] = "No Work Time Removed Successfully.";
-	}
-	else
-	{
-		$data["isError"] = TRUE;
-		$data["msg"] = "Please Fill All Details.";
-	}
-	echo json_encode($data);
-}
-
 public function assemblyloading($assemblyLoadingId = '')
 {
+	$data["menuId"] = 23;
+	
 	$data["assemblyLoadingId"] = $assemblyLoadingId;
 	
 	$data["empDtls"] = $this->adminmodel->getEmployeeDetails();
@@ -1277,6 +1274,7 @@ public function assemblyloading($assemblyLoadingId = '')
 
 public function saveAssemblyLoading()
 {
+	$menuId = $this->input->post('menuId');
 	$assemblyLoadingId = $this->input->post('assemblyLoadingId');
 	$entryDate = $this->input->post('entryDate');
 	$lineName = $this->input->post('lineName');
@@ -1288,6 +1286,16 @@ public function saveAssemblyLoading()
 	$dtlArr = json_decode($dtlArr);
 	
 	$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
+	
+	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $assemblyLoadingId);
+	
+	if($permissions["isError"])
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = $permissions["msg"];
+		echo json_encode($data);
+		return;
+	}
 	
 	if($entryDate != "" && $lineName != "" && $shiftName != "" && $totalWorkers > 0 && $totalPieces > 0 && $totalTarget > 0 && count($dtlArr) > 0)
 	{
@@ -1320,27 +1328,10 @@ public function saveAssemblyLoading()
 	echo json_encode($data);
 }
 
-public function delAssemblyLoading()
-{
-	$entryId = $this->input->post('entryId');
-	
-	if($entryId > 0)
-	{
-		$this->adminmodel->delAssemblyLoading($entryId);
-		
-		$data["isError"] = FALSE;
-		$data["msg"] = "Assembly Loading Removed Successfully.";
-	}
-	else
-	{
-		$data["isError"] = TRUE;
-		$data["msg"] = "Please Fill All Details.";
-	}
-	echo json_encode($data);
-}
-
 public function hourlyproduction_linewise($lineId = '')
 {
+	$data["menuId"] = 26;
+	
 	$data["lineId"] = $lineId;
 	
 	$data["operationDtls"] = $this->adminmodel->getOperationDetails();
@@ -1399,6 +1390,7 @@ public function hourlyproduction_linewise($lineId = '')
 
 public function saveHourlyProduction_LineWise()
 {
+	$menuId = $this->input->post('menuId');
 	$lineId = $this->input->post('lineId');
 	$entryDate = $this->input->post('entryDate');
 	$lineName = $this->input->post('lineName');
@@ -1419,6 +1411,16 @@ public function saveHourlyProduction_LineWise()
 	$lineEfficiency = $this->input->post('lineEfficiency');
 	
 	$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
+	
+	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $lineId);
+	
+	if($permissions["isError"])
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = $permissions["msg"];
+		echo json_encode($data);
+		return;
+	}
 	
 	if($entryDate != "" && $lineName != "" && $shiftName != "" && $operationId > 0 && $noOfWorkers > 0 && $daysTarget > 0 && $targetPerHour > 0 && $noOfOperators > 0 && $availMinutes > 0 && $currentTarget > 0)
 	{
@@ -1464,25 +1466,6 @@ public function getLineDetails()
 		$data["res"] = $res;
 		$data["isError"] = FALSE;
 		$data["msg"] = "Skill Matrix Removed Successfully.";
-	}
-	else
-	{
-		$data["isError"] = TRUE;
-		$data["msg"] = "Please Fill All Details.";
-	}
-	echo json_encode($data);
-}
-
-public function delHourlyProductionLineWise()
-{
-	$entryId = $this->input->post('entryId');
-	
-	if($entryId > 0)
-	{
-		$this->adminmodel->delHourlyProductionLineWise($entryId);
-		
-		$data["isError"] = FALSE;
-		$data["msg"] = "Line Details Removed Successfully.";
 	}
 	else
 	{
@@ -1565,6 +1548,8 @@ public function saveStyle()
 
 public function operationbulletin($bulletinId = '')
 {
+	$data["menuId"] = 29;
+	
 	$data["bulletinId"] = $bulletinId;
 	
 	$data["styleDtls"] = $this->adminmodel->getStyleDetails();
@@ -1633,6 +1618,7 @@ public function operationbulletin($bulletinId = '')
 
 public function saveOperationBulletin()
 {
+	$menuId = $this->input->post('menuId');
 	$bulletinId = $this->input->post('bulletinId');
 	$styleId = $this->input->post('styleId');
 	$stdNoOfWorkStations = $this->input->post('stdNoOfWorkStations');
@@ -1657,6 +1643,16 @@ public function saveOperationBulletin()
 	$operationDtlArr = json_decode($operationDtlArr);
 	$machineryDtlArr = json_decode($machineryDtlArr);
 	$manualWorkDtlArr = json_decode($manualWorkDtlArr);
+	
+	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $bulletinId);
+	
+	if($permissions["isError"])
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = $permissions["msg"];
+		echo json_encode($data);
+		return;
+	}
 	
 	if($styleId > 0 && count($operationDtlArr) > 0 && count($machineryDtlArr) > 0 && count($manualWorkDtlArr) > 0)
 	{

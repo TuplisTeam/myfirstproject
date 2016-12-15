@@ -118,6 +118,7 @@
 				var req = new Request();
 				req.data = 
 				{
+					"menuId" : '<?php echo $menuId; ?>', 
 					"barcodeName" : barcodeName
 				};
 				req.url = "admin/saveReceivedGoods";

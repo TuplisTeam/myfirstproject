@@ -528,6 +528,7 @@
 				var req = new Request();
 				req.data = 
 				{
+					"menuId" : '<?php echo $menuId; ?>', 
 					"assemblyLoadingId" : assemblyLoadingId,
 					"entryDate" : entryDate,
 					"lineName" : lineName,
@@ -573,20 +574,19 @@
 		var entryId = $(this).attr('entryId');
 		if(entryId > 0)
 		{
-			var bool = confirm("Do you want to remove this Assembly Loading Detail?");
+			var bool = confirm("Are You Sure Want To Remove This Entry?");
 			if(bool)
 			{
 				var req = new Request();
-				req.data =
+				req.data = 
 				{
-					"entryId" : entryId
+					"menuId" : '<?php echo $menuId; ?>', 
+					"entryId" : entryId, 
+					"tableName" : "assemblyloading_hdr", 
+					"columnName" : "id"
 				};
-				req.url = "admin/delAssemblyLoading";
+				req.url = "admin/delEntry";
 				RequestHandler(req, showResponse);
-			}
-			else
-			{
-				return;
 			}
 		}
 		else

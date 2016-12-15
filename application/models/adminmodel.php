@@ -432,12 +432,6 @@ public function saveReceptionCheck($receptionCheckId, $fromName, $toName, $dcNo,
 	$this->db->query($sql);
 }
 
-public function delReceptionCheck($receptionCheckId)
-{
-	$sql = "UPDATE receptioncheck SET status = 'inactive' WHERE id = $receptionCheckId";
-	$this->db->query($sql);
-}
-
 public function getReceivedGoods($deliveryNoteId = '')
 {
 	/*$sql = "SELECT 
@@ -605,12 +599,6 @@ public function saveRackDetails($rackDisplayId, $entryDate, $dtlArr, $processInf
 			}
 		}
 	}
-}
-
-public function delRackDisplay($rackDisplayId)
-{
-	$sql = "UPDATE rackhdr SET status = 'inactive' WHERE id = $rackDisplayId";
-	$this->db->query($sql);
 }
 
 public function getEmployeeDetails($empId = '')
@@ -799,12 +787,6 @@ public function saveSkillMatrix($skillMatrixId, $entryDate, $lineName, $dtlArr)
 	}
 }
 
-public function delSkillMatrix($skillMatrixId)
-{
-	$sql = "UPDATE skillmatrix_hdr SET status = 'inactive' WHERE id = $skillMatrixId";
-	$this->db->query($sql);
-}
-
 public function getNoWork_HdrDetails($noWorkId = '')
 {
 	$sql = "SELECT h.*, DATE_FORMAT(h.entry_date,'%d-%m-%Y') AS entrydate
@@ -877,12 +859,6 @@ public function saveNoWorkTime($noWorkId, $entryDate, $lineName, $dtlArr)
 					reason = '".$row->reason."', noworktime = '".$row->noWorkTime."'";
 		$this->db->query($sql1);
 	}
-}
-
-public function delNoWorkTime($noWorkId)
-{
-	$sql = "UPDATE nowork_hdr SET status = 'inactive' WHERE id = $noWorkId";
-	$this->db->query($sql);
 }
 
 public function getAssemblyLoading_HdrDetails($assemblyLoadingId = '')
@@ -978,12 +954,6 @@ public function saveAssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $
 	}
 }
 
-public function delAssemblyLoading($entryId)
-{
-	$sql = "UPDATE assemblyloading_hdr SET status = 'inactive' WHERE id = $entryId";
-	$this->db->query($sql);
-}
-
 public function getHourlyProductionLineWiseDetails($lineId = '')
 {
 	$sql = "SELECT *, DATE_FORMAT(entry_date,'%d-%m-%Y') AS entrydt 
@@ -1018,12 +988,18 @@ public function saveHourlyProduction_LineWise($lineId, $entryDate, $lineName, $s
 		$sql = "UPDATE hourlyproduction_linewise SET 
 					entry_date = '".$entryDate."', linename = '".$lineName."', 
 					shift = '".$shiftName."', operationid = '".$operationId."', 
-					no_of_workers = '".$noOfWorkers."', days_target = '".$daysTarget."', 
-					target_per_hr = '".$targetPerHour."', no_of_operators = '".$noOfOperators."', 
-					avail_min = '".$availMinutes."', current_target = '".$currentTarget."', 
-					issues = '".$issues."', wip = '".$wip."', idletime = '".$idleTime."', 
-					breakdown_time = '".$breakDownTime."', rework_time = '".$reworkTime."', 
-					nowork_time = '".$noWorkTime."', line_efficiency = '".$lineEfficiency."', 
+					no_of_workers = '".$noOfWorkers."', 
+					days_target = '".$daysTarget."', 
+					target_per_hr = '".$targetPerHour."', 
+					no_of_operators = '".$noOfOperators."', 
+					avail_min = '".$availMinutes."', 
+					current_target = '".$currentTarget."', 
+					issues = '".$issues."', wip = '".$wip."', 
+					idletime = '".$idleTime."', 
+					breakdown_time = '".$breakDownTime."', 
+					rework_time = '".$reworkTime."', 
+					nowork_time = '".$noWorkTime."', 
+					line_efficiency = '".$lineEfficiency."', 
 					modified_on = NOW(), 
 					modified_by = '".$this->session->userdata('userid')."'
 				WHERE id = $lineId";
@@ -1033,12 +1009,18 @@ public function saveHourlyProduction_LineWise($lineId, $entryDate, $lineName, $s
 		$sql = "INSERT INTO hourlyproduction_linewise SET 
 					entry_date = '".$entryDate."', linename = '".$lineName."', 
 					shift = '".$shiftName."', operationid = '".$operationId."', 
-					no_of_workers = '".$noOfWorkers."', days_target = '".$daysTarget."', 
-					target_per_hr = '".$targetPerHour."', no_of_operators = '".$noOfOperators."', 
-					avail_min = '".$availMinutes."', current_target = '".$currentTarget."', 
-					issues = '".$issues."', wip = '".$wip."', idletime = '".$idleTime."', 
-					breakdown_time = '".$breakDownTime."', rework_time = '".$reworkTime."', 
-					nowork_time = '".$noWorkTime."', line_efficiency = '".$lineEfficiency."', 
+					no_of_workers = '".$noOfWorkers."', 
+					days_target = '".$daysTarget."', 
+					target_per_hr = '".$targetPerHour."', 
+					no_of_operators = '".$noOfOperators."', 
+					avail_min = '".$availMinutes."', 
+					current_target = '".$currentTarget."', 
+					issues = '".$issues."', wip = '".$wip."', 
+					idletime = '".$idleTime."', 
+					breakdown_time = '".$breakDownTime."', 
+					rework_time = '".$reworkTime."', 
+					nowork_time = '".$noWorkTime."', 
+					line_efficiency = '".$lineEfficiency."', 
 					created_on = NOW(), 
 					created_by = '".$this->session->userdata('userid')."'";
 	}
@@ -1053,12 +1035,6 @@ public function getLineDetails($entryDate, $lineName, $shift)
 				linename = '".$lineName."' AND shift = '".$shift."'";
 	$res = $this->db->query($sql);
 	return $res->result();
-}
-
-public function delHourlyProductionLineWise($entryId)
-{
-	$sql = "UPDATE hourlyproduction_linewise SET status = 'inactive' WHERE id = $entryId";
-	$this->db->query($sql);
 }
 
 public function getStyleDetails($styleId = '')

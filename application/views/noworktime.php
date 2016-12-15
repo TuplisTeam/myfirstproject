@@ -50,7 +50,7 @@
 											<button class="btn btn-sm btn-success editEntry" entryId="<?php echo $row->id; ?>" title="Edit">
 												<span class="fa fa-pencil"></span>
 											</button>
-											<button class="btn btn-sm btn-danger delEntry" entryId="<?php echo $row->id; ?>" title="Edit">
+											<button class="btn btn-sm btn-danger delEntry" entryId="<?php echo $row->id; ?>" title="Delete">
 												<span class="fa fa-close"></span>
 											</button>
 										</td>
@@ -300,6 +300,7 @@
 				var req = new Request();
 				req.data = 
 				{
+					"menuId" : '<?php echo $menuId; ?>', 
 					"noWorkId" : noWorkId,
 					"entryDate" : entryDate,
 					"lineName" : lineName,
@@ -341,20 +342,19 @@
 		var entryId = $(this).attr('entryId');
 		if(entryId > 0)
 		{
-			var bool = confirm("Do you want to remove this No Work Time Detail?");
+			var bool = confirm("Are You Sure Want To Remove This Entry?");
 			if(bool)
 			{
 				var req = new Request();
-				req.data =
+				req.data = 
 				{
-					"noWorkId" : entryId
+					"menuId" : '<?php echo $menuId; ?>', 
+					"entryId" : entryId, 
+					"tableName" : "nowork_hdr", 
+					"columnName" : "id"
 				};
-				req.url = "admin/delNoWorkTime";
+				req.url = "admin/delEntry";
 				RequestHandler(req, showResponse);
-			}
-			else
-			{
-				return;
 			}
 		}
 		else

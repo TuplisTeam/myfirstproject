@@ -785,6 +785,7 @@
 				var req = new Request();
 				req.data = 
 				{
+					"menuId" : '<?php echo $menuId; ?>', 
 					"bulletinId" : bulletinId,
 					"styleId" : styleId,
 					"stdNoOfWorkStations" : stdNoOfWorkStations,
@@ -843,21 +844,19 @@
 		var entryId = $(this).attr('entryId');
 		if(entryId > 0)
 		{
-			var bool = confirm("Do you want to remove this Operation Bulletin Detail?");
+			var bool = confirm("Are You Sure Want To Remove This Entry?");
 			if(bool)
 			{
 				var req = new Request();
-				req.data =
+				req.data = 
 				{
+					"menuId" : '<?php echo $menuId; ?>', 
 					"entryId" : entryId, 
-					"delEntry" : "operationbulletin_hdr"
+					"tableName" : "operationbulletin_hdr", 
+					"columnName" : "id"
 				};
 				req.url = "admin/delEntry";
 				RequestHandler(req, showResponse);
-			}
-			else
-			{
-				return;
 			}
 		}
 		else
