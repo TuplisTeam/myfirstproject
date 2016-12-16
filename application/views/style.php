@@ -92,6 +92,23 @@
 	                            </div>
 	                        </div>
 	                        <div class="form-group">
+								<label class="col-sm-2 control-label">
+									Style Image
+								</label>
+								<div class="col-sm-6">
+									<input type="file" id="styleImage" name="styleImage" value="<?php echo $styleImage; ?>">
+									<textarea id="styleImagePath" name="styleImagePath" style="display: none;"><?php echo $styleImage; ?></textarea>
+									<div id="styleImagePreview">
+		                            	<?php
+		                            	if($styleImage != "")
+										{
+											echo "<img src=".base_url().$styleImage." height='100px' />";
+										}
+		                            	?>
+		                            </div>
+								</div>
+							</div>
+	                        <div class="form-group">
 	                            <div class="col-sm-offset-2 col-sm-10">
 	                                <button type="submit" class="btn btn-success">
 										<?php
@@ -131,6 +148,25 @@
 		$("#entryDetails").css('display', 'block');
 	});
 	
+	$("#styleImage").change(function()
+	{
+		readURL(this);
+	});
+	
+	function readURL(input)
+	{
+		if (input.files && input.files[0]) 
+		{
+			var reader = new FileReader();
+			reader.onload = function (e) 
+			{
+				var str = "<img src='"+e.target.result+"' height='100px' />";
+				$("#styleImagePreview").html(str);
+			}
+			reader.readAsDataURL(input.files[0]);
+		}
+	}
+	
 	$("#entryForm").submit(function(e)
 	{
 		e.preventDefault();
@@ -139,21 +175,30 @@
 		
 		var styleNo = $("#styleNo").val();
 		var styleDesc = $("#styleDesc").val();
+		var oldStyleImagePath = $("#styleImagePath").val();
 		
 		if(styleNo != "")
 		{
 			$("#responseMsg").html('');
 			
-			var req = new Request();
-			req.data = 
+			var data = new FormData();
+			
+			var filesList =  document.getElementById('styleImage');
+			for (var ie = 0; ie< filesList.files.length; ie ++) 
 			{
-				"menuId" : '<?php echo $menuId; ?>', 
-				"styleId" : styleId,
-				"styleNo" : styleNo, 
-				"styleDesc" : styleDesc
-			};
+				data.append('styleImage', filesList.files[ie]);
+			}
+			
+			data.append( "menuId", '<?php echo $menuId; ?>');
+			data.append( "styleId", styleId);
+			data.append( "styleNo", styleNo);
+			data.append( "styleDesc", styleDesc);
+			data.append( "oldStyleImagePath", oldStyleImagePath);
+			
+			var req = new Request();
+			req.data = data;
 			req.url = "admin/saveStyle";
-			RequestHandler(req, showResponse);
+			ImageRequestHandler(req, showResponse);
 		}
 		else
 		{

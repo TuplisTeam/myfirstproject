@@ -1,6 +1,6 @@
 /*Domain Name (Should ends with /)*/
 
-var domain = "http://"+ location.host +"/myprojects/barcode/barcodetracking/";
+var domain = "http://"+ location.host +"/myprojects/barcode/myfirstproject/";
 
 /*Request Function */
 
@@ -20,15 +20,17 @@ function Request(){
 function RequestHandler(request,response,resdata){
 	
 	$=jQuery.noConflict();
-	
-	$.blockUI();
+	$.blockUI({ message: '<i class="fa fa-spinner fa-pulse" style="font-size: 60px;color: #fff;"></i>' ,
+css: { width: '30%', border:'0px solid #FFFFFF',cursor:'wait',background:'transparent'},
+  overlayCSS:  { backgroundColor: 'rgba(0,0,0,0.7)',opacity:1,cursor:'wait'} 
+  }); 
+	//$.blockUI();
 	var tempurl = domain+request.url;
 	
 	if(request.isfulluri){
 		tempurl = request.url;
 		}
-	
-	$.ajax({
+	jQuery.ajax({
 		type: request.type,
 		url: tempurl,
 		data: request.data,
@@ -52,7 +54,6 @@ function RequestHandler(request,response,resdata){
 		}
 		
 	});
-	
 }
 
 
@@ -61,7 +62,7 @@ function RequestHandler(request,response,resdata){
 function ImageRequestHandler(request,response,resdata){
 	
 	var tempurl = domain+request.url;
-	
+	$.blockUI();
 	if(request.isfulluri){
 		tempurl = request.url;
 		}
@@ -71,11 +72,12 @@ function ImageRequestHandler(request,response,resdata){
 		url: tempurl,
 		data: request.data,
 		datatype:request.datatype,
-		/*cache: false,
-		processData: false,*/
-		/*contentType:"enctype=multipart/form-data",*/
+		cache: false,
+		processData: false,
+		//contentType:"enctype=multipart/form-data",
+		contentType:false,
 		success: function(data){
-			
+			$.unblockUI();
 			if(resdata != null && resdata != '')
 			response(data,resdata);
 			else
@@ -83,6 +85,7 @@ function ImageRequestHandler(request,response,resdata){
 			
 		},
 		error: function(err){
+			$.unblockUI();
 			if(err.responseText == null || err.responseText == ""){
 				/*alert("Error: Check your internet connection");*/
 			}

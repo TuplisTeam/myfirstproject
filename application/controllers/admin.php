@@ -1450,6 +1450,7 @@ public function style($styleId = '')
 	
 	$data["styleNo"] = '';
 	$data["styleDesc"] = '';
+	$data["styleImage"] = '';
 	
 	$res = $this->adminmodel->getStyleDetails($styleId);
 	
@@ -1461,6 +1462,7 @@ public function style($styleId = '')
 			{
 				$data["styleNo"] = $row->styleno;
 				$data["styleDesc"] = $row->styledesc;
+				$data["styleImage"] = $row->imagepath;
 			}
 		}
 	}
@@ -1480,6 +1482,7 @@ public function saveStyle()
 	$styleId = $this->input->post('styleId');
 	$styleNo = $this->input->post('styleNo');
 	$styleDesc = $this->input->post('styleDesc');
+	$oldStyleImagePath = $this->input->post('oldStyleImagePath');
 	
 	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $styleId);
 	
@@ -1493,7 +1496,18 @@ public function saveStyle()
 	
 	if($styleNo != "" && $styleDesc != "")
 	{
-		$this->adminmodel->saveStyle($styleId, $styleNo, $styleDesc);
+		$imgArr = $this->uploadSingleImage('', 'uploads', 'style', '', 'styleImage', $oldStyleImagePath);
+		
+		if($imgArr["isError"])
+		{
+			$data["isError"] = $imgArr["isError"];
+			$data["msg"] = $imgArr["msg"];
+			echo json_encode($data);
+			return;
+		}
+		$styleImage = $imgArr["imageSrc"];
+		
+		$this->adminmodel->saveStyle($styleId, $styleNo, $styleDesc, $styleImage);
 		
 		$data["isError"] = FALSE;
 		if($styleId > 0)
@@ -2104,6 +2118,74 @@ public function getAssemblyLoadingReport()
 /*Report Ends*/
 
 /*Common Function Starts*/
+
+public function uploadSingleImage($required = '', $dir1, $dir2, $dir3 = '', $fileName, $oldImgPath = '')
+{
+	$imageSrc = "";
+	$imagePath = "";
+	
+	$dir = './'.$dir1.'/';
+	if (!is_dir($dir)) 
+	{
+	   mkdir($dir);
+	}
+	
+	$dir = './'.$dir1.'/'.$dir2.'/';
+	if (!is_dir($dir)) 
+	{
+	   mkdir($dir);
+	}
+	
+	if($dir3 != "")
+	{
+		$dir = './'.$dir1.'/'.$dir2.'/'.$dir3.'/';
+		if (!is_dir($dir)) 
+		{
+		   mkdir($dir);
+		}
+	}
+	
+	$config['upload_path'] = $dir;
+	$config['allowed_types'] = 'gif|jpg|png|jpeg';
+	$config['max_size']	= '5000';
+	
+	$this->load->library('upload', $config);
+	$this->upload->initialize($config);
+	
+	$isError = FALSE;
+	$errMsg = "";
+	
+	if(!$this->upload->do_upload($fileName))
+	{
+		if($oldImgPath == "")
+		{
+			if($required == "required")
+			{
+				$isError = TRUE;
+				$errMsg = strip_tags($this->upload->display_errors());
+			}
+		}
+		$imageSrc = $oldImgPath;
+	}
+	else
+	{
+		if($oldImgPath != "")
+		unlink($oldImgPath);
+		$data = array('upload_data' => $this->upload->data());
+		foreach($data as $row)
+		{
+			$imagePath = $row["raw_name"]."".$row["file_ext"];
+		} 
+		$imageSrc = $dir.$imagePath;
+		$imageSrc = substr($imageSrc, 2);
+	}
+	
+	$resArr = array();
+	$resArr["isError"] = $isError;
+	$resArr["msg"] = $errMsg;
+	$resArr["imageSrc"] = $imageSrc;
+	return $resArr;
+}
 
 public function delEntry()
 {

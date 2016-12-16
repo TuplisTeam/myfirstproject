@@ -1048,13 +1048,14 @@ public function getStyleDetails($styleId = '')
 	return $res->result();
 }
 
-public function saveStyle($styleId, $styleNo, $styleDesc)
+public function saveStyle($styleId, $styleNo, $styleDesc, $styleImage)
 {
 	if($styleId > 0)
 	{
 		$sql = "UPDATE style SET 
 					styleno = '".$styleNo."', 
 					styledesc = '".$styleDesc."', 
+					imagepath = '".$styleImage."', 
 					modified_on = NOW(), 
 					modified_by = '".$this->session->userdata('userid')."'
 				WHERE id = $styleId";
@@ -1064,6 +1065,7 @@ public function saveStyle($styleId, $styleNo, $styleDesc)
 		$sql = "INSERT INTO style SET 
 					styleno = '".$styleNo."', 
 					styledesc = '".$styleDesc."', 
+					imagepath = '".$styleImage."', 
 					created_on = NOW(), 
 					created_by = '".$this->session->userdata('userid')."'";
 	}
