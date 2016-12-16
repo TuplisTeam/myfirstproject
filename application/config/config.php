@@ -16,7 +16,7 @@
 */
 $config['base_url']	= '';
 
-$config['projectTitle'] = 'Barcode Tracking System';
+$config['projectTitle'] = 'Tracking System';
 $config['logoText'] = 'Logo';
 /*
 |--------------------------------------------------------------------------

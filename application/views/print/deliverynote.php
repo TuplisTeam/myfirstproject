@@ -29,21 +29,6 @@
 
 </head>
 <body>
-	<?php
-	if(!$isprint)
-	{	
-	?>
-	<div class="row">
-		<div class="col-sm-12">
-			<center>
-				<a target="_blank" href="<?php echo base_url(); ?>admin/printDeliveryNote/<?php echo $deliveryNoteId;?>/TRUE"><button class="btn btn-primary">Download As PDF</button></a>
-			</center>
-		</div>
-	</div>
-	<?php
-	}
-	?>
-	
 	<div class="container mainDiv">
 		<div class="row headerdiv">
 			<div class="col-md-9">
@@ -176,20 +161,6 @@
 </head>
 <body>
 	<div class="container">
-		<?php
-		if(!$isprint)
-		{	
-		?>
-		<div class="row">
-			<div class="col-sm-12">
-				<center>
-					<a target="_blank" href="<?php echo base_url(); ?>admin/printDeliveryNote/<?php echo $deliveryNoteId;?>/TRUE"><button class="btn btn-primary">Download As PDF</button></a>
-				</center>
-			</div>
-		</div>
-		<?php
-		}
-		?>
 		<table style="width: 100%;margin-bottom: 5px;">
 			<tr>
 				<td>

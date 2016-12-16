@@ -301,10 +301,9 @@ public function saveBarcodeGeneration()
 	echo json_encode($data);
 }
 
-public function printBarcode($barcodeId, $isprint = FALSE)
+public function printBarcode($barcodeId)
 {
 	$data["barcodeId"] = $barcodeId;
-	$data["isprint"] = $isprint;
 	
 	$data["barcodeName"] = '';
 	$data["receiptDate"] = '';
@@ -339,17 +338,7 @@ public function printBarcode($barcodeId, $isprint = FALSE)
 		}
 	}
 	
-	if($isprint)
-	{	
-		$str = '';
-		$str .= $this->load->view('print/barcode', $data,TRUE);
-		
-		$this->downloadAsPDF($str);
-	}		
-	else
-	{
-		$this->load->view('print/barcode', $data);
-	}
+	$this->load->view('print/barcode', $data);
 }
 
 public function deliverynote($deliveryNoteId = '')
@@ -470,10 +459,9 @@ public function saveDeliveryNote()
 	echo json_encode($data);
 }
 
-public function printDeliveryNote($deliveryNoteId, $isprint=FALSE)
+public function printDeliveryNote($deliveryNoteId)
 {
 	$data["deliveryNoteId"] = $deliveryNoteId;
-	$data["isprint"] = $isprint;
 	
 	$data["deliveryNo"] = '';
 	$data["dcDate"] = '';
@@ -503,17 +491,7 @@ public function printDeliveryNote($deliveryNoteId, $isprint=FALSE)
 		}
 	}
 	
-	if($isprint)
-	{	
-		$str = '';
-		$str .= $this->load->view('print/deliverynote', $data,TRUE);
-		
-		$this->downloadAsPDF($str);
-	}		
-	else
-	{
-		$this->load->view('print/deliverynote', $data);	
-	}
+	$this->load->view('print/deliverynote', $data);	
 }
 
 public function receptioncheck($receptionCheckId = '')
@@ -629,10 +607,9 @@ public function saveReceptionCheck()
 	echo json_encode($data);
 }
 
-public function printReceptionCheck($receptionCheckId, $isprint = FALSE)
+public function printReceptionCheck($receptionCheckId)
 {
 	$data["receptionCheckId"] = $receptionCheckId;
-	$data["isprint"] = $isprint;
 	
 	$data["fromName"] = '';
 	$data["toName"] = '';
@@ -674,17 +651,7 @@ public function printReceptionCheck($receptionCheckId, $isprint = FALSE)
 		}
 	}
 	
-	if($isprint)
-	{	
-		$str = '';
-		$str .= $this->load->view('print/receptioncheck', $data,TRUE);
-		
-		$this->downloadAsPDF($str);
-	}		
-	else
-	{
-		$this->load->view('print/receptioncheck', $data);
-	}
+	$this->load->view('print/receptioncheck', $data);
 }
 
 public function scan()
@@ -2137,19 +2104,6 @@ public function getAssemblyLoadingReport()
 /*Report Ends*/
 
 /*Common Function Starts*/
-
-public function downloadAsPDF($str='')
-{
-	if($str == "")
-	{
-		$str = $this->input->post('PDFContent');
-	}
-	else
-	{
-		$str = $str;
-	}
-	downloadPDFByContent($str);
-}
 
 public function delEntry()
 {

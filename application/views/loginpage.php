@@ -46,7 +46,7 @@
 						<div class="col-md-3 center">
 							<div class="login-box">
 								<a href="<?php echo base_url(); ?>login/" class="logo-name text-lg text-center">
-									Barcode Tracking System
+									<?php echo $this->config->item('projectTitle'); ?>
 								</a>
 								<p class="text-center m-t-md">
 									Please Login Into Your Account.

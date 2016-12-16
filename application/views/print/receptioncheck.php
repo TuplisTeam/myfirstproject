@@ -4,22 +4,6 @@
 	</head>
 	<body>
 		<div class="container">
-			
-			<?php
-			if(!$isprint)
-			{	
-			?>
-			<div class="row">
-				<div class="col-sm-12">
-					<center>
-						<a target="_blank" href="<?php echo base_url(); ?>admin/printReceptionCheck/<?php echo $receptionCheckId;?>/TRUE"><button class="btn btn-primary">Download As PDF</button></a>
-					</center>
-				</div>
-			</div>
-			<?php
-			}
-			?>
-			
 			<h3 align="center">Reception Check</h3>
 			
 			<div class="row">
