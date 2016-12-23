@@ -61,11 +61,17 @@
 									<div class="form-group">
 										<select class="form-control" data-placeholder="Select Store" id="store" name="store" required="">
 											<option value=""></option>
-											<option value="AKM_Procurement">AKM-Procurement</option>
+											<option value="Cutting">Cutting Section</option>
+											<option value="Sewing">Sewing Section</option>
+											<option value="Storage_Procurement">Storage / Procurement Section</option>
+											<option value="Ironing_Packing">Ironing / Packing Section</option>
+											<option value="Printing">Printing Section</option>
+											<option value="Embroidary">Embroidary Section</option>
+											<!--<option value="AKM_Procurement">AKM-Procurement</option>
 											<option value="AKM_Nap_Store">AKM Nap Store</option>
 											<option value="Ramnagar_Store">Ramnagar Store</option>
 											<option value="Cbe_Unit_Store">Cbe Unit Store</option>
-											<option value="AKM_Cutting_Store">AKM Cutting Store</option>
+											<option value="AKM_Cutting_Store">AKM Cutting Store</option>-->
 										</select>
 									</div>
 									<button type="submit" class="btn btn-success btn-block">

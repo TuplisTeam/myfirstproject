@@ -109,7 +109,7 @@ public function checkLogin($email, $password, $store)
 			$arr = array("save"=>$menu->save_access,
 						  "edit" => $menu->edit_access,
 						  "delete"=> $menu->delete_access);
-			array_push($a[$menu->menu_id] = $arr,$arr);         
+			array_push($a[$menu->menu_id] = $arr,$arr);
 		}
 		
 		$userdata = array(
@@ -117,8 +117,9 @@ public function checkLogin($email, $password, $store)
 			'username' => $user->email,
 			'firstname' => $user->firstname,
     		'usertype' => $user->usertype,
-    		'status'=> $user->status,
-			'loggedin'=> TRUE,
+    		'status' => $user->status,
+			'store' => $store, 
+			'loggedin' => TRUE,
 			'menudata' => $a
     	);
 		
