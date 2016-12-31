@@ -736,12 +736,12 @@ public function getSkillMatrix_EmpDetails($skillMatrixId)
 	return $res->result();
 }
 
-public function checkDateLineNameAvailability_SkillMatrix($skillMatrixId, $entryDate, $lineName)
+public function checkDateLineNameAvailability_SkillMatrix($skillMatrixId, $entryDate, $shiftTime, $lineName)
 {
 	$sql = "SELECT * FROM skillmatrix_hdr 
 			WHERE 
 				STATUS <> 'inactive' AND entry_date = '".$entryDate."' AND 
-				linename = '".$lineName."'";
+				shifttime = '".$shiftTime."' AND linename = '".$lineName."'";
 	if($skillMatrixId > 0)
 	{
 		$sql .= " AND id <> $skillMatrixId";
@@ -750,12 +750,13 @@ public function checkDateLineNameAvailability_SkillMatrix($skillMatrixId, $entry
 	return $res->num_rows();
 }
 
-public function saveSkillMatrix($skillMatrixId, $entryDate, $lineName, $dtlArr)
+public function saveSkillMatrix($skillMatrixId, $entryDate, $shiftTime, $lineName, $dtlArr)
 {
 	if($skillMatrixId > 0)
 	{
 		$sql = "UPDATE skillmatrix_hdr SET 
 					entry_date = '".$entryDate."', 
+					shifttime = '".$shiftTime."', 
 					linename = '".$lineName."', 
 					modified_on = NOW(), 
 					modified_by = '".$this->session->userdata('userid')."'
@@ -766,6 +767,7 @@ public function saveSkillMatrix($skillMatrixId, $entryDate, $lineName, $dtlArr)
 	{
 		$sql = "INSERT INTO skillmatrix_hdr SET 
 					entry_date = '".$entryDate."', 
+					shifttime = '".$shiftTime."', 
 					linename = '".$lineName."', 
 					created_on = NOW(), 
 					created_by = '".$this->session->userdata('userid')."'";
@@ -780,7 +782,8 @@ public function saveSkillMatrix($skillMatrixId, $entryDate, $lineName, $dtlArr)
 	{
 		$sql1 = "INSERT INTO skillmatrix_dtl SET 
 					skillmatrix_id = $skillMatrixId, 
-					empid = '".$row->empId."', operationid = '".$row->operationId."', 
+					empid = '".$row->empId."', styleid = '".$row->styleId."', 
+					operationid = '".$row->operationId."', 
 					producedmin = '".$row->producedMin."', pieces = '".$row->pieces."', 
 					sam = '".$row->sam."', shifthrs = '".$row->shiftHrs."', 
 					othours = '".$row->otHours."'";
@@ -1049,13 +1052,17 @@ public function getStyleDetails($styleId = '')
 	return $res->result();
 }
 
-public function saveStyle($styleId, $styleNo, $styleDesc, $styleImage)
+public function saveStyle($styleId, $buyer, $merchant, $styleNo, $styleDesc, $colour, $size, $styleImage)
 {
 	if($styleId > 0)
 	{
 		$sql = "UPDATE style SET 
+					buyer = '".$buyer."', 
+					merchant = '".$merchant."', 
 					styleno = '".$styleNo."', 
 					styledesc = '".$styleDesc."', 
+					colour = '".$colour."', 
+					size = '".$size."', 
 					imagepath = '".$styleImage."', 
 					modified_on = NOW(), 
 					modified_by = '".$this->session->userdata('userid')."'
@@ -1064,8 +1071,12 @@ public function saveStyle($styleId, $styleNo, $styleDesc, $styleImage)
 	else
 	{
 		$sql = "INSERT INTO style SET 
+					buyer = '".$buyer."', 
+					merchant = '".$merchant."', 
 					styleno = '".$styleNo."', 
 					styledesc = '".$styleDesc."', 
+					colour = '".$colour."', 
+					size = '".$size."',  
 					imagepath = '".$styleImage."', 
 					created_on = NOW(), 
 					created_by = '".$this->session->userdata('userid')."'";
@@ -1127,7 +1138,7 @@ public function getOperationBulletin_ManualWorkDetails($bulletinId)
 	return $res->result();
 }
 
-public function saveOperationBulletin($bulletinId, $styleId, $stdNoOfWorkStations, $stdNoOfOperators, $stdNoOfHelpers, $totalSAM, $machineSAM, $manualSAM, $possibleDailyOutput, $expectedPeakEfficiency, $expectedOutput, $expectedAvgEfficiency, $expectedDailyOutput, $avgOutputPerMachine, $mc_TotalNumbers, $mc_TotalSMV, $operationDtlArr, $machineryDtlArr, $manualWorkDtlArr)
+public function saveOperationBulletin($bulletinId, $styleId, $stdNoOfWorkStations, $stdNoOfOperators, $stdNoOfHelpers, $totalSAM, $machineSAM, $manualSAM, $possibleDailyOutput, $expectedPeakEfficiency, $expectedOutput, $expectedAvgEfficiency, $expectedDailyOutput, $avgOutputPerMachine, $mc_TotalNumbers, $mc_TotalSMV, $mn_TotalNumbers, $mn_TotalSMV, $operationDtlArr, $machineryDtlArr, $manualWorkDtlArr)
 {
 	$sql = "INSERT INTO operationbulletin_hdr SET 
 				styleid = '".$styleId."', workstations = '".$stdNoOfWorkStations."', 
@@ -1143,6 +1154,8 @@ public function saveOperationBulletin($bulletinId, $styleId, $stdNoOfWorkStation
 				avg_output_per_mc = '".$avgOutputPerMachine."', 
 				mc_totalnumbers = '".$mc_TotalNumbers."', 
 				mc_totalsmv = '".$mc_TotalSMV."', 
+				mn_totalnumbers = '".$mn_TotalNumbers."', 
+				mn_totalsmv = '".$mn_TotalSMV."', 
 				created_on = NOW(), 
 				created_by = '".$this->session->userdata('userid')."'";
 	$this->db->query($sql);

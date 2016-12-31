@@ -1039,6 +1039,7 @@ public function skillmatrix($skillMatrixId = '')
 	$data["skillMatrixId"] = $skillMatrixId;
 	
 	$data["empDtls"] = $this->adminmodel->getEmployeeDetails();
+	$data["styleDtls"] = $this->adminmodel->getStyleDetails();
 	$data["operationDtls"] = $this->adminmodel->getOperationDetails();
 	
 	$res = $this->adminmodel->getSkillMatrix_HdrDetails($skillMatrixId);
@@ -1071,6 +1072,7 @@ public function saveSkillMatrix()
 	$menuId = $this->input->post('menuId');
 	$skillMatrixId = $this->input->post('skillMatrixId');
 	$entryDate = $this->input->post('entryDate');
+	$shiftTime = $this->input->post('shiftTime');
 	$lineName = $this->input->post('lineName');
 	$dtlArr = $this->input->post('dtlArr');
 	$dtlArr = json_decode($dtlArr);
@@ -1087,9 +1089,9 @@ public function saveSkillMatrix()
 		return;
 	}
 	
-	if($entryDate != "" && $lineName != "" && count($dtlArr) > 0)
+	if($entryDate != "" && $shiftTime != "" && $lineName != "" && count($dtlArr) > 0)
 	{
-		$availRes = $this->adminmodel->checkDateLineNameAvailability_SkillMatrix($skillMatrixId, $entryDate, $lineName);
+		$availRes = $this->adminmodel->checkDateLineNameAvailability_SkillMatrix($skillMatrixId, $entryDate, $shiftTime, $lineName);
 		if($availRes > 0)
 		{
 			$data["isError"] = TRUE;
@@ -1097,7 +1099,7 @@ public function saveSkillMatrix()
 		}
 		else
 		{
-			$this->adminmodel->saveSkillMatrix($skillMatrixId, $entryDate, $lineName, $dtlArr);
+			$this->adminmodel->saveSkillMatrix($skillMatrixId, $entryDate, $shiftTime, $lineName, $dtlArr);
 		
 			$data["isError"] = FALSE;
 			if($skillMatrixId > 0)
@@ -1448,8 +1450,12 @@ public function style($styleId = '')
 	
 	$data["styleId"] = $styleId;
 	
+	$data["buyer"] = '';
+	$data["merchant"] = '';
 	$data["styleNo"] = '';
 	$data["styleDesc"] = '';
+	$data["colour"] = '';
+	$data["size"] = '';
 	$data["styleImage"] = '';
 	
 	$res = $this->adminmodel->getStyleDetails($styleId);
@@ -1460,8 +1466,12 @@ public function style($styleId = '')
 		{
 			foreach($res as $row)
 			{
+				$data["buyer"] = $row->buyer;
+				$data["merchant"] = $row->merchant;
 				$data["styleNo"] = $row->styleno;
 				$data["styleDesc"] = $row->styledesc;
+				$data["colour"] = $row->colour;
+				$data["size"] = $row->size;
 				$data["styleImage"] = $row->imagepath;
 			}
 		}
@@ -1480,8 +1490,12 @@ public function saveStyle()
 {
 	$menuId = $this->input->post('menuId');
 	$styleId = $this->input->post('styleId');
+	$buyer = $this->input->post('buyer');
+	$merchant = $this->input->post('merchant');
 	$styleNo = $this->input->post('styleNo');
 	$styleDesc = $this->input->post('styleDesc');
+	$colour = $this->input->post('colour');
+	$size = $this->input->post('size');
 	$oldStyleImagePath = $this->input->post('oldStyleImagePath');
 	
 	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $styleId);
@@ -1507,7 +1521,7 @@ public function saveStyle()
 		}
 		$styleImage = $imgArr["imageSrc"];
 		
-		$this->adminmodel->saveStyle($styleId, $styleNo, $styleDesc, $styleImage);
+		$this->adminmodel->saveStyle($styleId, $buyer, $merchant, $styleNo, $styleDesc, $colour, $size, $styleImage);
 		
 		$data["isError"] = FALSE;
 		if($styleId > 0)
@@ -1618,6 +1632,9 @@ public function saveOperationBulletin()
 	$mc_TotalNumbers = $this->input->post('mc_TotalNumbers');
 	$mc_TotalSMV = $this->input->post('mc_TotalSMV');
 	
+	$mn_TotalNumbers = $this->input->post('mn_TotalNumbers');
+	$mn_TotalSMV = $this->input->post('mn_TotalSMV');
+	
 	$operationDtlArr = $this->input->post('operationDtlArr');
 	$machineryDtlArr = $this->input->post('machineryDtlArr');
 	$manualWorkDtlArr = $this->input->post('manualWorkDtlArr');
@@ -1637,7 +1654,7 @@ public function saveOperationBulletin()
 	
 	if($styleId > 0 && count($operationDtlArr) > 0 && count($machineryDtlArr) > 0 && count($manualWorkDtlArr) > 0)
 	{
-		$this->adminmodel->saveOperationBulletin($bulletinId, $styleId, $stdNoOfWorkStations, $stdNoOfOperators, $stdNoOfHelpers, $totalSAM, $machineSAM, $manualSAM, $possibleDailyOutput, $expectedPeakEfficiency, $expectedOutput, $expectedAvgEfficiency, $expectedDailyOutput, $avgOutputPerMachine, $mc_TotalNumbers, $mc_TotalSMV, $operationDtlArr, $machineryDtlArr, $manualWorkDtlArr);
+		$this->adminmodel->saveOperationBulletin($bulletinId, $styleId, $stdNoOfWorkStations, $stdNoOfOperators, $stdNoOfHelpers, $totalSAM, $machineSAM, $manualSAM, $possibleDailyOutput, $expectedPeakEfficiency, $expectedOutput, $expectedAvgEfficiency, $expectedDailyOutput, $avgOutputPerMachine, $mc_TotalNumbers, $mc_TotalSMV, $mn_TotalNumbers, $mn_TotalSMV, $operationDtlArr, $machineryDtlArr, $manualWorkDtlArr);
 		
 		if($bulletinId > 0)
 		{

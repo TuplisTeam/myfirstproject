@@ -32,8 +32,12 @@
                         <table id="example" class="display table" style="width: 100%; cellspacing: 0;">
                             <thead>
                                 <tr>
+                                    <th>Buyer</th>
+                                    <th>Merchant</th>
                                     <th>Style No.</th>
                                     <th>Style Desc</th>
+                                    <th>Colour</th>
+                                    <th>Size</th>
                                     <th>Manage</th>
                                 </tr>
                             </thead>
@@ -45,8 +49,12 @@
 								{
 								?>
 								<tr>
+									<td><?php echo $row->buyer; ?></td>
+									<td><?php echo $row->merchant; ?></td>
 									<td><?php echo $row->styleno; ?></td>
 									<td><?php echo $row->styledesc; ?></td>
+									<td><?php echo $row->colour; ?></td>
+									<td><?php echo $row->size; ?></td>
 									<td>
 										<button class="btn btn-primary btn-xs editEntry" entryId="<?php echo $row->id; ?>">
 											Edit
@@ -77,6 +85,22 @@
 	                    <form class="form-horizontal" id="entryForm" method="POST">
 							<div class="form-group">
 	                            <label class="col-sm-2 control-label">
+									Buyer&nbsp;<span style="color: red;">*</span>
+								</label>
+	                            <div class="col-sm-6">
+	                                <input type="text" class="form-control" id="buyer" name="buyer" placeholder="Buyer" value="<?php echo $buyer; ?>" required="">
+	                            </div>
+	                        </div>
+							<div class="form-group">
+	                            <label class="col-sm-2 control-label">
+									Merchant&nbsp;<span style="color: red;">*</span>
+								</label>
+	                            <div class="col-sm-6">
+	                                <input type="text" class="form-control" id="merchant" name="merchant" placeholder="Merchant" value="<?php echo $merchant; ?>" required="">
+	                            </div>
+	                        </div>
+							<div class="form-group">
+	                            <label class="col-sm-2 control-label">
 									Style No.&nbsp;<span style="color: red;">*</span>
 								</label>
 	                            <div class="col-sm-6">
@@ -89,6 +113,22 @@
 								</label>
 	                            <div class="col-sm-6">
 	                                <textarea class="form-control" id="styleDesc" name="styleDesc" placeholder="Style Desc"><?php echo $styleDesc; ?></textarea>
+	                            </div>
+	                        </div>
+							<div class="form-group">
+	                            <label class="col-sm-2 control-label">
+									Colour
+								</label>
+	                            <div class="col-sm-6">
+	                                <input type="text" class="form-control" id="colour" name="colour" placeholder="Colour" value="<?php echo $colour; ?>" >
+	                            </div>
+	                        </div>
+							<div class="form-group">
+	                            <label class="col-sm-2 control-label">
+									Size
+								</label>
+	                            <div class="col-sm-6">
+	                                <input type="text" class="form-control" id="size" name="size" placeholder="Size" value="<?php echo $size; ?>" >
 	                            </div>
 	                        </div>
 	                        <div class="form-group">
@@ -173,8 +213,12 @@
 		
 		var styleId = '<?php echo $styleId; ?>';
 		
+		var buyer = $("#buyer").val();
+		var merchant = $("#merchant").val();
 		var styleNo = $("#styleNo").val();
 		var styleDesc = $("#styleDesc").val();
+		var colour = $("#colour").val();
+		var size = $("#size").val();
 		var oldStyleImagePath = $("#styleImagePath").val();
 		
 		if(styleNo != "")
@@ -191,8 +235,12 @@
 			
 			data.append( "menuId", '<?php echo $menuId; ?>');
 			data.append( "styleId", styleId);
+			data.append( "buyer", buyer);
+			data.append( "merchant", merchant);
 			data.append( "styleNo", styleNo);
 			data.append( "styleDesc", styleDesc);
+			data.append( "colour", colour);
+			data.append( "size", size);
 			data.append( "oldStyleImagePath", oldStyleImagePath);
 			
 			var req = new Request();

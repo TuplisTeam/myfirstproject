@@ -285,7 +285,7 @@
 																<input type="text" class="form-control op_noOfWorkers_<?php echo $cnt; ?>" placeholder="No. Of Workers" value="<?php echo $row->no_of_workers; ?>" disabled="">
 															</td>
 															<td>
-																<input type="text" class="form-control numeric onBlurOperationFields op_balancedWorkers_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Balanced Workers" value="<?php echo $row->balanced_workers; ?>">
+																<input type="text" class="form-control numeric onBlurOperationFields op_balancedWorkers_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Balanced Workers" value="<?php echo $row->balanced_workers; ?>" disabled="">
 															</td>
 															<td>
 																<input type="text" class="form-control op_secPerUnit_<?php echo $cnt; ?>" placeholder="Sec / Unit" value="<?php echo $row->sec_per_unit; ?>" disabled="">
@@ -418,10 +418,10 @@
 																<input type="text" class="form-control mn_manualWork_<?php echo $cnt; ?>" placeholder="Manual Work" value="<?php echo $row->manualwork; ?>">
 															</td>
 															<td>
-																<input type="text" class="form-control numeric mn_numbers_<?php echo $cnt; ?>" placeholder="Numbers" value="<?php echo $row->numbers; ?>">
+																<input type="text" class="form-control numeric onBlurManualFields mn_numbers_<?php echo $cnt; ?>" placeholder="Numbers" value="<?php echo $row->numbers; ?>">
 															</td>
 															<td>
-																<input type="text" class="form-control numeric mn_smv_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="SMV" value="<?php echo $row->smv; ?>">
+																<input type="text" class="form-control numeric onBlurManualFields mn_smv_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="SMV" value="<?php echo $row->smv; ?>">
 															</td>
 															<td>
 																<button type="button" title="Delete" class="btn btn-danger btn-xs btn-perspective delManualWorkDtl"><i class="fa fa-close"></i></button>
@@ -434,6 +434,28 @@
 			                        			?>
 				                        		</tbody>
 				                        	</table>
+			                        	</div>
+										<div class="row">
+			                        		<div class="col-md-6">
+			                        			<div class="form-group">
+			                        				<label class="col-sm-5 control-label">
+														Total Numbers&nbsp;<span style="color: red;">*</span>
+													</label>
+						                            <div class="col-sm-7">
+						                                <input type="text" class="form-control numeric" id="mn_TotalNumbers" name="mn_TotalNumbers" placeholder="Total Numbers" disabled="" value="<?php echo $mn_TotalNumbers; ?>" />
+						                            </div>
+			                        			</div>
+			                        		</div>
+			                        		<div class="col-md-6">
+			                        			<div class="form-group">
+			                        				<label class="col-sm-5 control-label">
+														Total SMV&nbsp;<span style="color: red;">*</span>
+													</label>
+						                            <div class="col-sm-7">
+						                                <input type="text" class="form-control numeric" id="mn_TotalSMV" name="mn_TotalSMV" placeholder="Total SMV" disabled="" value="<?php echo $mn_TotalSMV; ?>" />
+						                            </div>
+			                        			</div>
+			                        		</div>
 			                        	</div>
 		                        	</div>
 		                        </div>
@@ -541,7 +563,7 @@
 			str += '<input type="text" class="form-control op_noOfWorkers_'+parseInt(rowNo)+'" placeholder="No. Of Workers" value="" disabled="">';
 			str += '</td>';
 			str += '<td>';
-			str += '<input type="text" class="form-control numeric onBlurOperationFields op_balancedWorkers_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Balanced Workers" value="">';
+			str += '<input type="text" class="form-control numeric onBlurOperationFields op_balancedWorkers_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Balanced Workers" value="" disabled="">';
 			str += '</td>';
 			str += '<td>';
 			str += '<input type="text" class="form-control op_secPerUnit_'+parseInt(rowNo)+'" placeholder="Sec / Unit" value="" disabled="">';
@@ -673,6 +695,9 @@
 		var mc_TotalNumbers = $("#mc_TotalNumbers").val();
 		var mc_TotalSMV = $("#mc_TotalSMV").val();
 		
+		var mn_TotalNumbers = $("#mn_TotalNumbers").val();
+		var mn_TotalSMV = $("#mn_TotalSMV").val();
+		
 		var operationDtlArr = [];
 		var machineryDtlArr = [];
 		var manualWorkDtlArr = [];
@@ -803,6 +828,9 @@
 					
 					"mc_TotalNumbers" : mc_TotalNumbers, 
 					"mc_TotalSMV" : mc_TotalSMV, 
+					
+					"mn_TotalNumbers" : mn_TotalNumbers, 
+					"mn_TotalSMV" : mn_TotalSMV, 
 					
 					"operationDtlArr" : JSON.stringify(operationDtlArr), 
 					"machineryDtlArr" : JSON.stringify(machineryDtlArr), 
@@ -938,10 +966,11 @@
 				{
 					noOfWorkers = (parseFloat(smv)*1.2)/(480/parseFloat(expectedOutput ? expectedOutput : 0));
 					
-					$(".op_noOfWorkers_"+rowNo).val(noOfWorkers);
+					$(".op_noOfWorkers_"+rowNo).val(parseFloat(noOfWorkers).toFixed(2));
+					$(".op_balancedWorkers_"+rowNo).val(Math.round(parseFloat(noOfWorkers).toFixed(2)));
 					
 					secPerUnit = parseFloat(smv ? smv : 0) * 60;
-					$(".op_secPerUnit_"+rowNo).val(secPerUnit);
+					$(".op_secPerUnit_"+rowNo).val(parseFloat(secPerUnit).toFixed(2));
 				}
 			}
 		});
@@ -963,12 +992,31 @@
 			totalSMV += parseFloat(smv ? smv : 0);
 		});
 		
-		$("#mc_TotalNumbers").val(parseFloat(totalNumbers ? totalNumbers : 0));
-		$("#mc_TotalSMV").val(parseFloat(totalSMV ? totalSMV : 0));
+		$("#mc_TotalNumbers").val(parseFloat(totalNumbers ? totalNumbers : 0).toFixed(2));
+		$("#mc_TotalSMV").val(parseFloat(totalSMV ? totalSMV : 0).toFixed(2));
 		
-		$("#machineSAM").val(parseFloat(totalSMV ? totalSMV : 0));
+		$("#machineSAM").val(parseFloat(totalSMV ? totalSMV : 0).toFixed(2));
 		calculatePossibleDailyOutput();
 		calculateTotalSAM();
+	});
+	
+	$(document).on('blur','.onBlurManualFields',function()
+	{
+		var totalNumbers = 0;
+		var totalSMV = 0;
+		
+		$(".manualWorkDetailsTBody tr.manualWorkDetailsTR").each(function()
+		{
+			var rowNo = $(this).attr('rowNo');
+			var numbers = $(".mn_numbers_"+rowNo).val();
+			var smv = $(".mn_smv_"+rowNo).val();
+			
+			totalNumbers += parseFloat(numbers ? numbers : 0);
+			totalSMV += parseFloat(smv ? smv : 0);
+		});
+		
+		$("#mn_TotalNumbers").val(parseFloat(totalNumbers ? totalNumbers : 0).toFixed(2));
+		$("#mn_TotalSMV").val(parseFloat(totalSMV ? totalSMV : 0).toFixed(2));
 	});
 	
 	$(".calculateWorkStations").blur(function()
@@ -978,7 +1026,7 @@
 		
 		var stdNoOfWorkStations = parseFloat(stdNoOfOperators ? stdNoOfOperators : 0) + parseFloat(stdNoOfHelpers ? stdNoOfHelpers : 0);
 		
-		$("#stdNoOfWorkStations").val(stdNoOfWorkStations);
+		$("#stdNoOfWorkStations").val(parseFloat(stdNoOfWorkStations ? stdNoOfWorkStations : 0).toFixed(2));
 	});
 	
 	$(".calculateExpectedDailyOutput").blur(function()
@@ -992,8 +1040,8 @@
 		var possibleDailyOutput = $("#possibleDailyOutput").val();
 		var expectedAvgEfficiency = $("#expectedAvgEfficiency").val();
 		
-		var expectedDailyOutput = parseFloat(possibleDailyOutput ? possibleDailyOutput : 0) * parseFloat(expectedAvgEfficiency ? expectedAvgEfficiency : 0);
-		$("#expectedDailyOutput").val(expectedDailyOutput);
+		var expectedDailyOutput = parseFloat(possibleDailyOutput ? possibleDailyOutput : 0) * (parseFloat(expectedAvgEfficiency ? expectedAvgEfficiency : 0)/100);
+		$("#expectedDailyOutput").val(parseFloat(expectedDailyOutput ? expectedDailyOutput : 0).toFixed(2));
 	}
 	
 	function calculateAvgOutputPerMachine()
@@ -1002,7 +1050,7 @@
 		var expectedDailyOutput = $("#expectedDailyOutput").val();
 		
 		var avgOutputPerMachine = parseFloat(expectedDailyOutput ? expectedDailyOutput : 0)/parseFloat(stdNoOfOperators ? stdNoOfOperators : 0);
-		$("#avgOutputPerMachine").val(avgOutputPerMachine);
+		$("#avgOutputPerMachine").val(parseFloat(avgOutputPerMachine ? avgOutputPerMachine : 0).toFixed(2));
 	}
 
 	function calculatePossibleDailyOutput()
@@ -1011,7 +1059,7 @@
 		var machineSAM = $("#machineSAM").val();
 		
 		var possibleDailyOutput = (480/parseFloat(machineSAM ? machineSAM : 0))*parseFloat(stdNoOfOperators ? stdNoOfOperators : 0);
-		$("#possibleDailyOutput").val(parseFloat(possibleDailyOutput ? possibleDailyOutput : 0));
+		$("#possibleDailyOutput").val(Math.ceil(parseFloat(possibleDailyOutput ? possibleDailyOutput : 0).toFixed(2)));
 		
 		calculateExpectedOutput();
 		calculateExpectedDailyOutput();
@@ -1027,8 +1075,8 @@
 		var possibleDailyOutput = $("#possibleDailyOutput").val();
 		var expectedPeakEfficiency = $("#expectedPeakEfficiency").val();
 		
-		var expectedOutput = parseFloat(possibleDailyOutput ? possibleDailyOutput : 0) * parseFloat(expectedPeakEfficiency ? expectedPeakEfficiency : 0)
-		$("#expectedOutput").val(expectedOutput);
+		var expectedOutput = parseFloat(possibleDailyOutput ? possibleDailyOutput : 0) * (parseFloat(expectedPeakEfficiency ? expectedPeakEfficiency : 0)/100);
+		$("#expectedOutput").val(parseFloat(expectedOutput ? expectedOutput : 0).toFixed(2));
 		calculateNumberOfWorkers();
 	}
 	
@@ -1066,7 +1114,7 @@
 		var manualSAM = $("#manualSAM").val();
 		
 		var totalSAM = parseFloat(machineSAM ? machineSAM : 0) + parseFloat(manualSAM ? manualSAM : 0);
-		$("#totalSAM").val(parseFloat(totalSAM ? totalSAM : 0));
+		$("#totalSAM").val(parseFloat(totalSAM ? totalSAM : 0).toFixed(2));
 	}
 	
 </script>

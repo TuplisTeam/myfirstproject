@@ -2,7 +2,7 @@
     <div class="page-title">
         <h3>
 			<a href="<?php echo base_url(); ?>admin/skillmatrix" style="text-decoration: none;">
-				Skill Matrix
+				Skill Matrix - Individual Target Assign Form
 			</a>
 		</h3>
     </div>
@@ -34,6 +34,7 @@
 	                            <thead>
 	                                <tr>
 	                                    <th>Entry Date</th>
+	                                    <th>Shift Time</th>
 	                                    <th>Line Name</th>
 	                                    <th>Manage</th>
 	                                </tr>
@@ -45,6 +46,7 @@
 									?>
 									<tr>
 										<td><?php echo $row->entrydate; ?></td>
+										<td><?php echo $row->shifttime; ?></td>
 										<td><?php echo $row->linename; ?></td>
 										<td>
 											<button class="btn btn-sm btn-success editEntry" skillMatrixId="<?php echo $row->id; ?>" title="Edit">
@@ -74,22 +76,36 @@
 	                <div class="panel-body">
 	                    <form class="form-horizontal" id="skillMatrixForm" method="POST">
 	                    	<div class="row">
-	                    		<div class="col-md-6">
+	                    		<div class="col-md-4">
 	                    			<div class="form-group">
-			                            <label class="col-sm-3 control-label">
+			                            <label class="col-sm-4 control-label">
 											Entry Date&nbsp;<span style="color: red;">*</span>
 										</label>
-			                            <div class="col-sm-4">
+			                            <div class="col-sm-8">
 			                                <input type="text" class="form-control datePicker" id="entryDate" name="entryDate" placeholder="Entry Date" value="<?php echo $entryDate; ?>" required="">
 			                            </div>
 			                        </div>
 	                    		</div>
-								<div class="col-md-6">
+								<div class="col-md-4">
 	                    			<div class="form-group">
-			                            <label class="col-sm-3 control-label">
+			                            <label class="col-sm-4 control-label">
+											Shift Time&nbsp;<span style="color: red;">*</span>
+										</label>
+			                            <div class="col-sm-8">
+			                                <select class="form-control" id="shiftTime" style="width: 100%;" data-placeholder="Select">
+												<option value=""></option>
+												<option value="General">General</option>
+												<option value="Other">Other</option>
+											</select>
+			                            </div>
+			                        </div>
+	                    		</div>
+								<div class="col-md-4">
+	                    			<div class="form-group">
+			                            <label class="col-sm-4 control-label">
 											Line Name&nbsp;<span style="color: red;">*</span>
 										</label>
-			                            <div class="col-sm-4">
+			                            <div class="col-sm-8">
 			                                <input type="text" class="form-control" id="lineName" name="lineName" placeholder="Line Name" value="<?php echo $lineName; ?>" required="">
 			                            </div>
 			                        </div>
@@ -108,13 +124,14 @@
 				                        		<thead>
 				                        			<tr>
 				                        				<th width="15%">Employee Name</th>
-				                        				<th width="15%">Operation</th>
-				                        				<th width="10%">Produced Minutes</th>
-				                        				<th width="10%">Pieces</th>
+				                        				<th width="10%">Style</th>
+				                        				<th width="10%">Operation</th>
+				                        				<th width="10%">Target Minutes</th>
+				                        				<th width="10%">Target Pieces</th>
 				                        				<th width="10%">SAM</th>
-				                        				<th width="15%">Shift Hrs Worked</th>
-				                        				<th width="15%">OT Hrs Worked</th>
-				                        				<th width="10%">Manage</th>
+				                        				<th width="10%">Actual Minutes</th>
+				                        				<th width="10%">OT Hrs Worked</th>
+				                        				<th width="15%">Manage</th>
 				                        			</tr>
 				                        		</thead>
 				                        		<tbody class="empDetailsTBody">
@@ -142,6 +159,18 @@
 																</select>
 															</td>
 															<td>
+																<select class="form-control styleId_<?php echo $cnt; ?>" style="width: 100%;" data-placeholder="Select">
+																<option value=""></option>
+																<?php
+																foreach($styleDtls as $res)
+																{
+																	echo '<option value="'.$res->id.'"';
+																	echo '>'.$res->styleno.'</option>';
+																}
+																?>
+																</select>
+															</td>
+															<td>
 																<select class="form-control operationId_<?php echo $cnt; ?>" style="width: 100%;" data-placeholder="Select">
 																<option value=""></option>
 																<?php
@@ -154,16 +183,16 @@
 																</select>
 															</td>
 															<td>
-																<input type="text" class="form-control numeric producedMin_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Produced Minutes" value="<?php echo $row->producedmin; ?>">
+																<input type="text" class="form-control numeric producedMin_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Target Minutes" value="<?php echo $row->producedmin; ?>">
 															</td>
 															<td>
-																<input type="text" class="form-control numeric pieces_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Pieces" value="<?php echo $row->pieces; ?>">
+																<input type="text" class="form-control numeric pieces_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Target Pieces" value="<?php echo $row->pieces; ?>">
 															</td>
 															<td>
 																<input type="text" class="form-control numeric sam_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="SAM" value="<?php echo $row->sam; ?>">
 															</td>
 															<td>
-																<input type="text" class="form-control numeric shiftHrs_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Shift Hours" value="<?php echo $row->shifthrs; ?>">
+																<input type="text" class="form-control numeric shiftHrs_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Actual Minutes" value="<?php echo $row->shifthrs; ?>">
 															</td>
 															<td>
 																<input type="text" class="form-control numeric otHours_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="OT Hours" value="<?php echo $row->othours; ?>">
@@ -221,6 +250,9 @@
 	var empDtls = '<?php echo json_encode($empDtls); ?>';
 	empDtls = JSON.parse(empDtls);
 	
+	var styleDtls = '<?php echo json_encode($styleDtls); ?>';
+	styleDtls = JSON.parse(styleDtls);
+	
 	var operationDtls = '<?php echo json_encode($operationDtls); ?>';
 	operationDtls = JSON.parse(operationDtls);
 	
@@ -242,6 +274,8 @@
 		}
 		else
 		{
+			$("#shiftTime").select2('val', '<?php echo $shiftTime; ?>');
+			
 			var myDtlArr = '<?php echo json_encode($dtlArr); ?>';
 			myDtlArr = JSON.parse(myDtlArr);
 			
@@ -250,6 +284,7 @@
 				for(var k=0; k<myDtlArr.length; k++)
 				{
 					$(".empId_"+(k+1)).select2('val',myDtlArr[k].empid);
+					$(".styleId_"+(k+1)).select2('val',myDtlArr[k].styleid);
 					$(".operationId_"+(k+1)).select2('val',myDtlArr[k].operationid);
 				}
 			}
@@ -298,6 +333,15 @@
 			str += '</select>';
 			str += '</td>';
 			str += '<td>';
+			str += '<select class="form-control styleId_'+parseInt(rowNo)+'" style="width: 100%;" data-placeholder="Select">';
+			str += '<option value=""></option>';
+			for(var n=0; n<styleDtls.length; n++)
+			{
+				str += '<option value="'+styleDtls[n].id+'">'+styleDtls[n].styleno+'</option>';
+			}
+			str += '</select>';
+			str += '</td>';
+			str += '<td>';
 			str += '<select class="form-control operationId_'+parseInt(rowNo)+'" style="width: 100%;" data-placeholder="Select">';
 			str += '<option value=""></option>';
 			for(var n=0; n<operationDtls.length; n++)
@@ -307,16 +351,16 @@
 			str += '</select>';
 			str += '</td>';
 			str += '<td>';
-			str += '<input type="text" class="form-control numeric producedMin_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Produced Minutes">';
+			str += '<input type="text" class="form-control numeric producedMin_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Target Minutes">';
 			str += '</td>';
 			str += '<td>';
-			str += '<input type="text" class="form-control numeric pieces_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Pieces">';
+			str += '<input type="text" class="form-control numeric pieces_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Target Pieces">';
 			str += '</td>';
 			str += '<td>';
 			str += '<input type="text" class="form-control numeric sam_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="SAM">';
 			str += '</td>';
 			str += '<td>';
-			str += '<input type="text" class="form-control numeric shiftHrs_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Shift Hours">';
+			str += '<input type="text" class="form-control numeric shiftHrs_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Actual Minutes">';
 			str += '</td>';
 			str += '<td>';
 			str += '<input type="text" class="form-control numeric otHours_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="OT Hours">';
@@ -349,6 +393,7 @@
 		
 		var skillMatrixId = '<?php echo $skillMatrixId; ?>';
 		var entryDate = $("#entryDate").val();
+		var shiftTime = $("#shiftTime").val();
 		var lineName = $("#lineName").val();
 		
 		var dtlArr = [];
@@ -359,6 +404,7 @@
 		{
 			var rowNo = $(this).attr('rowNo');
 			var empId = $(".empId_"+rowNo).val();
+			var styleId = $(".styleId_"+rowNo).val();
 			var operationId = $(".operationId_"+rowNo).val();
 			var producedMin = $(".producedMin_"+rowNo).val();
 			var pieces = $(".pieces_"+rowNo).val();
@@ -370,6 +416,7 @@
 			{
 				var cri = {};
 				cri["empId"] = empId;
+				cri["styleId"] = styleId;
 				cri["operationId"] = operationId;
 				cri["producedMin"] = producedMin;
 				cri["pieces"] = pieces;
@@ -391,7 +438,7 @@
 			return;
 		}
 		
-		if(entryDate != "" && lineName != "" && dtlArr.length > 0)
+		if(entryDate != "" && shiftTime != "" && lineName != "" && dtlArr.length > 0)
 		{
 			$("#responseMsg").html('');
 			
@@ -402,6 +449,7 @@
 				{
 					"menuId" : '<?php echo $menuId; ?>', 
 					"skillMatrixId" : skillMatrixId,
+					"shiftTime" : shiftTime,
 					"entryDate" : entryDate,
 					"lineName" : lineName,
 					"dtlArr" : JSON.stringify(dtlArr)

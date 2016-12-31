@@ -10,6 +10,12 @@
         <h3>
 			<a href="<?php echo base_url(); ?>admin/" style="text-decoration: none;">
 				Dashboard
+				<?php
+				if($this->session->userdata('usertype') != "admin")
+				{
+					echo ' - '.$this->session->userdata('store').' Section';
+				}
+				?>
 			</a>
 		</h3>
     </div>
@@ -157,6 +163,15 @@
 		                <div class="panel-body">
 		                    <h2 class="no-m m-b-md text-center">
 								Nowork / Breakdown Report
+							</h2>
+		                </div>
+		        	</div>
+				</div>
+				<div class="col-md-3 myMenu" pageName="operationbulletin">
+					<div class="panel panel-green" style="cursor: pointer;">
+		                <div class="panel-body">
+		                    <h2 class="no-m m-b-md text-center">
+								Operation Bulletin
 							</h2>
 		                </div>
 		        	</div>

@@ -103,20 +103,23 @@
 								<td>Target/Head/Shift</td>
 								<td>
 									<?php
-									$val = (600/$totalSAM)*$expectedPeakEfficiency;
-									echo $val ? $val : 0;
+									$a = (600/$totalSAM)*($expectedPeakEfficiency/100);
+									$a = number_format($a, 2, '.', '');
+									echo $a ? $a : 0;
 									?>
 								</td>
 								<td>
 									<?php
-									$val = (600/$totalSAM)*$expectedAvgEfficiency;
-									echo $val ? $val : 0;
+									$b = (600/$totalSAM)*($expectedAvgEfficiency/100);
+									$b = number_format($b, 2, '.', '');
+									echo $b ? $b : 0;
 									?>
 								</td>
 								<td>
 									<?php
-									$val = (600/$totalSAM);
-									echo $val ? $val : 0;
+									$c = (600/$totalSAM);
+									$c = number_format($c, 2, '.', '');
+									echo $c ? $c : 0;
 									?>
 								</td>
 							</tr>
@@ -124,20 +127,23 @@
 								<td>Target/Machine/Shift</td>
 								<td>
 									<?php
-									$val = (600/$machineSAM)/$expectedPeakEfficiency;
-									echo $val ? $val : 0;
+									$d = (600/$machineSAM)*($expectedPeakEfficiency/100);
+									$d = number_format($d, 2, '.', '');
+									echo $d ? $d : 0;
 									?>
 								</td>
 								<td>
 									<?php
-									$val = (600/$machineSAM)/$expectedAvgEfficiency;
-									echo $val ? $val : 0;
+									$e = (600/$machineSAM)*($expectedAvgEfficiency/100);
+									$e = number_format($e, 2, '.', '');
+									echo $e ? $e : 0;
 									?>
 								</td>
 								<td>
 									<?php
-									$val = (600/$machineSAM);
-									echo $val ? $val : 0;
+									$f = (600/$machineSAM);
+									$f = number_format($f, 2, '.', '');
+									echo $f ? $f : 0;
 									?>
 								</td>
 							</tr>
@@ -232,14 +238,14 @@
 								<td>
 									<?php
 									$ttlCost = ($mc_TotalNumbers * 506) + ($mn_TotalNumbers * 380);
-									echo $ttlCost;
+									echo number_format($ttlCost, 2, '.', '');
 									?>
 								</td>
-								<td><?php echo $expectedDailyOutput; ?></td>
+								<td><?php echo number_format($expectedDailyOutput, 2, '.', ''); ?></td>
 								<td>
 									<?php
 									$costPerPcs = $ttlCost / $expectedDailyOutput;
-									echo $costPerPcs ? $costPerPcs : 0;
+									echo number_format($costPerPcs ? $costPerPcs : 0, 2, '.', '');
 									?>
 								</td>
 							</tr>
