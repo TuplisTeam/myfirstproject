@@ -1568,6 +1568,9 @@ public function operationbulletin($bulletinId = '')
 	$data["mc_TotalNumbers"] = "";
 	$data["mc_TotalSMV"] = "";
 	
+	$data["mn_TotalNumbers"] = "";
+	$data["mn_TotalSMV"] = "";
+	
 	$data["operationDtls"] = array();
 	$data["machineryDtls"] = array();
 	$data["manualWorkDtls"] = array();
@@ -1598,6 +1601,9 @@ public function operationbulletin($bulletinId = '')
 				
 				$data["mc_TotalNumbers"] = $row->mc_totalnumbers;
 				$data["mc_TotalSMV"] = $row->mc_totalsmv;
+				
+				$data["mn_TotalNumbers"] = $row->mn_totalnumbers;
+				$data["mn_TotalSMV"] = $row->mn_totalsmv;
 			}
 		}
 	}

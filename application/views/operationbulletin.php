@@ -339,13 +339,13 @@
 														?>
 														<tr class="machineryDetailsTR" rowNo="<?php echo $cnt; ?>">
 															<td>
-																<input type="text" class="form-control mc_machineryRequirement_<?php echo $cnt; ?>" placeholder="Machinery Requirement" value="<?php echo $row->machinery_requirement; ?>">
+																<input type="text" class="form-control onBlurMachinaryRequirement mc_machineryRequirement_<?php echo $cnt; ?>" placeholder="Machinery Requirement" value="<?php echo $row->machinery_requirement; ?>">
 															</td>
 															<td>
-																<input type="text" class="form-control numeric onBlurMachineryFields mc_numbers_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Numbers" value="<?php echo $row->numbers; ?>">
+																<input type="text" class="form-control numeric mc_numbers_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Numbers" value="<?php echo $row->numbers; ?>" disabled="">
 															</td>
 															<td>
-																<input type="text" class="form-control numeric onBlurMachineryFields mc_smv_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="SMV" value="<?php echo $row->smv; ?>">
+																<input type="text" class="form-control numeric mc_smv_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="SMV" value="<?php echo $row->smv; ?>" disabled="">
 															</td>
 															<td>
 																<button type="button" title="Delete" class="btn btn-danger btn-xs btn-perspective delMachineryDtl"><i class="fa fa-close"></i></button>
@@ -593,13 +593,13 @@
 		
 			str += '<tr class="machineryDetailsTR" rowNo="'+parseInt(rowNo)+'">';
 			str += '<td>';
-			str += '<input type="text" class="form-control mc_machineryRequirement_'+parseInt(rowNo)+'" placeholder="Machinery Requirement" value="">';
+			str += '<input type="text" class="form-control onBlurMachinaryRequirement mc_machineryRequirement_'+parseInt(rowNo)+'" placeholder="Machinery Requirement" value="">';
 			str += '</td>';
 			str += '<td>';
-			str += '<input type="text" class="form-control numeric onBlurMachineryFields mc_numbers_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Numbers" value="">';
+			str += '<input type="text" class="form-control numeric mc_numbers_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Numbers" value="" disabled="">';
 			str += '</td>';
 			str += '<td>';
-			str += '<input type="text" class="form-control numeric onBlurMachineryFields mc_smv_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="SMV" value="">';
+			str += '<input type="text" class="form-control numeric mc_smv_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="SMV" value="" disabled="">';
 			str += '</td>';
 			str += '<td>';
 			str += '<button type="button" title="Delete" class="btn btn-danger btn-xs btn-perspective delMachineryDtl"><i class="fa fa-close"></i></button>';
@@ -626,10 +626,10 @@
 			str += '<input type="text" class="form-control mn_manualWork_'+parseInt(rowNo)+'" placeholder="Manual Work" value="">';
 			str += '</td>';
 			str += '<td>';
-			str += '<input type="text" class="form-control numeric mn_numbers_'+parseInt(rowNo)+'" placeholder="Numbers" value="">';
+			str += '<input type="text" class="form-control numeric onBlurManualFields mn_numbers_'+parseInt(rowNo)+'" placeholder="Numbers" value="">';
 			str += '</td>';
 			str += '<td>';
-			str += '<input type="text" class="form-control numeric mn_smv_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="SMV" value="">';
+			str += '<input type="text" class="form-control numeric onBlurManualFields mn_smv_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="SMV" value="">';
 			str += '</td>';
 			str += '<td>';
 			str += '<button type="button" title="Delete" class="btn btn-danger btn-xs btn-perspective delManualWorkDtl"><i class="fa fa-close"></i></button>';
@@ -659,6 +659,8 @@
 		{
 			deleted_Machinery_RowsCount++;
 			$(this).closest('tr').remove();
+			
+			calculateMachinaryFieldDetails();
 		}
 	});
 
@@ -669,6 +671,8 @@
 		{
 			deleted_ManualWork_RowsCount++;
 			$(this).closest('tr').remove();
+			
+			calculateManualFieldDetails();
 		}
 	});
 	
@@ -967,17 +971,21 @@
 					noOfWorkers = (parseFloat(smv)*1.2)/(480/parseFloat(expectedOutput ? expectedOutput : 0));
 					
 					$(".op_noOfWorkers_"+rowNo).val(parseFloat(noOfWorkers).toFixed(2));
-					$(".op_balancedWorkers_"+rowNo).val(Math.round(parseFloat(noOfWorkers).toFixed(2)));
+					
+					var balancedWorkers = Math.round($(".op_noOfWorkers_"+rowNo).val());
+					$(".op_balancedWorkers_"+rowNo).val(parseFloat(balancedWorkers).toFixed(2));
 					
 					secPerUnit = parseFloat(smv ? smv : 0) * 60;
 					$(".op_secPerUnit_"+rowNo).val(parseFloat(secPerUnit).toFixed(2));
 				}
 			}
 		});
+		
+		calculateMachinaryRequirements();
 		calculateManualSAM();
 	}
 	
-	$(document).on('blur','.onBlurMachineryFields',function()
+	function calculateMachinaryFieldDetails()
 	{
 		var totalNumbers = 0;
 		var totalSMV = 0;
@@ -998,9 +1006,14 @@
 		$("#machineSAM").val(parseFloat(totalSMV ? totalSMV : 0).toFixed(2));
 		calculatePossibleDailyOutput();
 		calculateTotalSAM();
-	});
+	}
 	
 	$(document).on('blur','.onBlurManualFields',function()
+	{
+		calculateManualFieldDetails();
+	});
+	
+	function calculateManualFieldDetails()
 	{
 		var totalNumbers = 0;
 		var totalSMV = 0;
@@ -1017,7 +1030,7 @@
 		
 		$("#mn_TotalNumbers").val(parseFloat(totalNumbers ? totalNumbers : 0).toFixed(2));
 		$("#mn_TotalSMV").val(parseFloat(totalSMV ? totalSMV : 0).toFixed(2));
-	});
+	}
 	
 	$(".calculateWorkStations").blur(function()
 	{
@@ -1098,7 +1111,7 @@
 		
 		var curSMV = tempArr.min();
 
-		$("#manualSAM").val(curSMV);
+		$("#manualSAM").val(curSMV ? curSMV : 0);
 		
 		calculateTotalSAM();
 	}
@@ -1117,4 +1130,39 @@
 		$("#totalSAM").val(parseFloat(totalSAM ? totalSAM : 0).toFixed(2));
 	}
 	
+	$(document).on('keyup blur','.onBlurMachinaryRequirement',function()
+	{
+		calculateMachinaryRequirements();
+	});
+	
+	function calculateMachinaryRequirements()
+	{
+		$(".machineryDetailsTR").each(function()
+		{
+			var rowNo = $(this).attr("rowNo");
+			var machineryRequirement = $(".mc_machineryRequirement_"+rowNo).val();
+			
+			var totalNoOfWorkers = 0;
+			var totalSMV = 0;
+			
+			$(".operationDetailsTR").each(function()
+			{
+				var op_rowNo = $(this).attr("rowNo");
+				var op_machine = $(".op_machine_"+op_rowNo).val();
+				
+				if(machineryRequirement.toLowerCase() === op_machine.toLowerCase())
+				{
+					var op_smv = $(".op_smv_"+op_rowNo).val();
+					var op_balancedWorkers = $(".op_balancedWorkers_"+op_rowNo).val();
+					
+					totalNoOfWorkers += parseFloat(op_balancedWorkers ? op_balancedWorkers : 0);
+					totalSMV += parseFloat(op_smv ? op_smv : 0);
+				}
+			});
+			
+			$(".mc_numbers_"+rowNo).val(parseFloat(totalNoOfWorkers).toFixed(2));
+			$(".mc_smv_"+rowNo).val(parseFloat(totalSMV).toFixed(2));
+		});
+	}
+
 </script>
