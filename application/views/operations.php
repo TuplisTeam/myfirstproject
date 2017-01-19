@@ -51,7 +51,7 @@
 										<button class="btn btn-primary btn-xs editEntry" operationId="<?php echo $row->id; ?>">
 											Edit
 										</button>
-										<button class="btn btn-danger btn-xs delEntry" operationId="<?php echo $row->id; ?>">
+										<button class="btn btn-danger btn-xs delEntry" entryId="<?php echo $row->id; ?>">
 											Del
 										</button>
 									</td>
@@ -177,23 +177,22 @@
 	
 	$(".delEntry").on("click",function()
 	{
-		var operationId = $(this).attr('operationId');
-		if(operationId > 0)
+		var entryId = $(this).attr('entryId');
+		if(entryId > 0)
 		{
-			var bool = confirm("Do you want to remove this Operation?");
+			var bool = confirm("Are You Sure Want To Remove This Entry?");
 			if(bool)
 			{
 				var req = new Request();
-				req.data =
+				req.data = 
 				{
-					"operationId" : operationId
+					"menuId" : '<?php echo $menuId; ?>', 
+					"entryId" : entryId, 
+					"tableName" : "operations", 
+					"columnName" : "id"
 				};
-				req.url = "admin/delOperation";
-				RequestHandler(req,showResponse);
-			}
-			else
-			{
-				return;
+				req.url = "admin/delEntry";
+				RequestHandler(req, showResponse);
 			}
 		}
 		else

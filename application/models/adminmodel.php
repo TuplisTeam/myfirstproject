@@ -633,12 +633,6 @@ public function saveEmployee($empId, $empNo, $empName)
 	$this->db->query($sql);
 }
 
-public function delEmployee($empId)
-{
-	$sql = "UPDATE employee SET status = 'inactive' WHERE id = $empId";
-	$this->db->query($sql);
-}
-
 public function getOperationDetails($operationId = '')
 {
 	$sql = "SELECT * FROM operations WHERE status <> 'inactive'";
@@ -669,12 +663,6 @@ public function saveOperation($operationId, $operationName, $operationDesc)
 					created_on = NOW(), 
 					created_by = '".$this->session->userdata('userid')."'";
 	}
-	$this->db->query($sql);
-}
-
-public function delOperation($operationId)
-{
-	$sql = "UPDATE operations SET status = 'inactive' WHERE id = $operationId";
 	$this->db->query($sql);
 }
 

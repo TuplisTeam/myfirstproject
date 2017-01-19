@@ -865,25 +865,6 @@ public function saveEmployee()
 	echo json_encode($data);
 }
 
-public function delEmployee()
-{
-	$empId = $this->input->post('empId');
-	
-	if($empId > 0)
-	{
-		$this->adminmodel->delEmployee($empId);
-		
-		$data["isError"] = FALSE;
-		$data["msg"] = "Employee Details Removed Successfully.";
-	}
-	else
-	{
-		$data["isError"] = TRUE;
-		$data["msg"] = "Please Fill All Details.";
-	}
-	echo json_encode($data);
-}
-
 public function operation($operationId = '')
 {
 	$data["operationId"] = $operationId;
@@ -933,25 +914,6 @@ public function saveOperation()
 		{
 			$data["msg"] = "Operation Details Saved Successfully.";
 		}
-	}
-	else
-	{
-		$data["isError"] = TRUE;
-		$data["msg"] = "Please Fill All Details.";
-	}
-	echo json_encode($data);
-}
-
-public function delOperation()
-{
-	$operationId = $this->input->post('operationId');
-	
-	if($operationId > 0)
-	{
-		$this->adminmodel->delOperation($operationId);
-		
-		$data["isError"] = FALSE;
-		$data["msg"] = "Operation Details Removed Successfully.";
 	}
 	else
 	{
