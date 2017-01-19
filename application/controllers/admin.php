@@ -867,6 +867,7 @@ public function saveEmployee()
 
 public function operation($operationId = '')
 {
+	$data["menuId"] = 5;
 	$data["operationId"] = $operationId;
 	
 	$data["operationName"] = '';
