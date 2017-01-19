@@ -1032,6 +1032,77 @@ public function saveMachinery()
 	echo json_encode($data);
 }
 
+public function manualwork($manualWorkId = '')
+{
+	$data["menuId"] = 6;
+	
+	$data["manualWorkId"] = $manualWorkId;
+	
+	$data["manualWorkName"] = '';
+	$data["manualWorkDesc"] = '';
+	
+	$res = $this->adminmodel->getManualWorkDetails($manualWorkId);
+	
+	if($manualWorkId > 0)
+	{
+		if(count($res) > 0)
+		{
+			foreach($res as $row)
+			{
+				$data["manualWorkName"] = $row->manualworkname;
+				$data["manualWorkDesc"] = $row->manualworkdesc;
+			}
+		}
+	}
+	else
+	{
+		$data["allManualWorks"] = $res;
+	}
+	
+	$this->load->view('header');
+	$this->load->view('manualwork', $data);
+	$this->load->view('footer');
+}
+
+public function saveManualWork()
+{
+	$menuId = $this->input->post('menuId');
+	$manualWorkId = $this->input->post('manualWorkId');
+	$manualWorkName = $this->input->post('manualWorkName');
+	$manualWorkDesc = $this->input->post('manualWorkDesc');
+	
+	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $manualWorkId);
+	
+	if($permissions["isError"])
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = $permissions["msg"];
+		echo json_encode($data);
+		return;
+	}
+	
+	if($manualWorkName != "")
+	{
+		$this->adminmodel->saveManualWork($manualWorkId, $manualWorkName, $manualWorkDesc);
+		
+		$data["isError"] = FALSE;
+		if($manualWorkId > 0)
+		{
+			$data["msg"] = "Manual Work Details Updated Successfully.";
+		}
+		else
+		{
+			$data["msg"] = "Manual Work Details Saved Successfully.";
+		}
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
+}
+
 public function skillmatrix($skillMatrixId = '')
 {
 	$data["menuId"] = 17;
@@ -1570,6 +1641,9 @@ public function operationbulletin($bulletinId = '')
 	
 	$data["mn_TotalNumbers"] = "";
 	$data["mn_TotalSMV"] = "";
+	
+	$data["machinaryRequirements"] = $this->adminmodel->getMachineryDetails();
+	$data["manualWorkRequirements"] = $this->adminmodel->getManualWorkDetails();
 	
 	$data["operationDtls"] = array();
 	$data["machineryDtls"] = array();

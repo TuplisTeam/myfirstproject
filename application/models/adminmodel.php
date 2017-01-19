@@ -711,6 +711,39 @@ public function saveMachinery($machineryId, $machineryName, $machineryDesc)
 	$this->db->query($sql);
 }
 
+public function getManualWorkDetails($manualWorkId = '')
+{
+	$sql = "SELECT * FROM manualwork WHERE status <> 'inactive'";
+	if($manualWorkId > 0)
+	{
+		$sql .= " AND id = $manualWorkId";	
+	}
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function saveManualWork($manualWorkId, $manualWorkName, $manualWorkDesc)
+{
+	if($manualWorkId > 0)
+	{
+		$sql = "UPDATE manualwork SET 
+					manualworkname = '".$manualWorkName."', 
+					manualworkdesc = '".$manualWorkDesc."', 
+					modified_on = NOW(), 
+					modified_by = '".$this->session->userdata('userid')."'
+				WHERE id = $manualWorkId";
+	}
+	else
+	{
+		$sql = "INSERT INTO manualwork SET 
+					manualworkname = '".$manualWorkName."', 
+					manualworkdesc = '".$manualWorkDesc."', 
+					created_on = NOW(), 
+					created_by = '".$this->session->userdata('userid')."'";
+	}
+	$this->db->query($sql);
+}
+
 public function getSkillMatrix_HdrDetails($skillMatrixId = '')
 {
 	$sql = "SELECT h.*, DATE_FORMAT(h.entry_date,'%d-%m-%Y') AS entrydate
