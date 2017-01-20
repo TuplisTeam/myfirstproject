@@ -435,18 +435,6 @@ public function saveReceptionCheck($receptionCheckId, $fromName, $toName, $dcNo,
 
 public function getReceivedGoods($deliveryNoteId = '')
 {
-	/*$sql = "SELECT 
-				h.id, h.deliveryno, DATE_FORMAT(h.dcdate,'%d-%m-%Y') AS dcdt, 
-				h.suppliername, h.customername, h.receivername, d.is_received, 
-				d.quantity,d.Nos
-			FROM
-				deliverynote_hdr h
-				INNER JOIN 
-					(SELECT 
-						deliverynoteid,is_received,SUM(quantity) AS quantity,
-						SUM(1) AS Nos
-					FROM deliverynote_dtl GROUP BY deliverynoteid,is_received) d 
-					ON h.id=d.deliverynoteid";*/
 	$sql = "SELECT 
 				h.id, h.deliveryno, DATE_FORMAT(h.dcdate,'%d-%m-%Y') AS dcdt, 
 				h.totalamount, h.suppliername, h.customername, h.receivername, 
@@ -726,6 +714,66 @@ public function saveManualWork($manualWorkId, $manualWorkName, $manualWorkDesc)
 		$sql = "INSERT INTO manualwork SET 
 					manualworkname = '".$manualWorkName."', 
 					manualworkdesc = '".$manualWorkDesc."', 
+					created_on = NOW(), 
+					created_by = '".$this->session->userdata('userid')."'";
+	}
+	$this->db->query($sql);
+}
+
+public function getEmployeeVsOperationDetails($entryId = '')
+{
+	$sql = "SELECT 
+				h.id, DATE_FORMAT(h.entrydate,'%d/%m/%Y') AS entrydate, 
+				h.empid, e.empname, h.operationname, h.machinaryid, m.machineryname
+			FROM 
+				employee_vs_operation h
+				INNER JOIN employee e ON h.empid = e.id
+				INNER JOIN machineries m ON h.machinaryid = m.id
+			WHERE 
+				h.status <> 'inactive' AND e.status <> 'inactive' AND 
+				m.status <> 'inactive'";
+	if($entryId > 0)
+	{
+		$sql .= " AND h.id = $entryId";	
+	}
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function checkEmployeeVsOperationavailability($entryId, $entryDate, $employeeId)
+{
+	$sql = "SELECT * FROM employee_vs_operation 
+			WHERE 
+				status <> 'inactive' AND entrydate = '".$entryDate."' AND 
+				empid = '".$employeeId."'";
+	if($entryId > 0)
+	{
+		$sql .= " AND id <> $entryId";
+	}
+	$res = $this->db->query($sql);
+	return $res->num_rows();
+}
+
+public function saveEmployeeVsOperation($entryId, $entryDate, $employeeId, $operationName, $machinaryId)
+{
+	if($manualWorkId > 0)
+	{
+		$sql = "UPDATE employee_vs_operation SET 
+					entrydate = '".$entryDate."', 
+					empid = '".$employeeId."', 
+					operationname = '".$operationName."', 
+					machinaryid = '".$machinaryId."', 
+					modified_on = NOW(), 
+					modified_by = '".$this->session->userdata('userid')."'
+				WHERE id = $entryId";
+	}
+	else
+	{
+		$sql = "INSERT INTO employee_vs_operation SET 
+					entrydate = '".$entryDate."', 
+					empid = '".$employeeId."', 
+					operationname = '".$operationName."', 
+					machinaryid = '".$machinaryId."', 
 					created_on = NOW(), 
 					created_by = '".$this->session->userdata('userid')."'";
 	}

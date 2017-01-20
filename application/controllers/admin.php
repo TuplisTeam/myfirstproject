@@ -1066,6 +1066,93 @@ public function saveManualWork()
 	echo json_encode($data);
 }
 
+public function employee_vs_operation($entryId = '')
+{
+	$data["menuId"] = 31;
+	$data["entryId"] = $entryId;
+	
+	$data["entryDate"] = '';
+	$data["employeeId"] = '';
+	$data["operationName"] = '';
+	$data["machinaryId"] = '';
+	
+	$res = $this->adminmodel->getEmployeeVsOperationDetails($entryId);
+	
+	if($entryId > 0)
+	{
+		if(count($res) > 0)
+		{
+			foreach($res as $row)
+			{
+				$data["entryDate"] = $row->entrydate;
+				$data["employeeId"] = $row->empid;
+				$data["operationName"] = $row->operationname;
+				$data["machinaryId"] = $row->machinaryid;
+			}
+		}
+	}
+	else
+	{
+		$data["allDetails"] = $res;
+	}
+	
+	$this->load->view('header');
+	$this->load->view('employee_vs_operation', $data);
+	$this->load->view('footer');
+}
+
+public function saveEmployeeVsOperation()
+{
+	$menuId = $this->input->post('menuId');
+	$entryId = $this->input->post('entryId');
+	$entryDate = $this->input->post('entryDate');
+	$employeeId = $this->input->post('employeeId');
+	$operationName = $this->input->post('operationName');
+	$machinaryId = $this->input->post('machinaryId');
+	
+	$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
+	
+	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $entryId);
+	
+	if($permissions["isError"])
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = $permissions["msg"];
+		echo json_encode($data);
+		return;
+	}
+	
+	if($entryDate != "" && $employeeId > 0 && $operationName != "" && $machinaryId > 0)
+	{
+		$res = $this->adminmodel->checkEmployeeVsOperationavailability($entryId, $entryDate, $employeeId);
+		if($res > 0)
+		{
+			$data["isError"] = TRUE;
+			$data["msg"] = "This Entry Is Already Available. Please Check and Update.";
+		}
+		else
+		{
+			$this->adminmodel->saveEmployeeVsOperation($entryId, $entryDate, $employeeId, $operationName, $machinaryId);
+			
+			$data["isError"] = FALSE;
+			if($empId > 0)
+			{
+				$data["msg"] = "Employee Vs Operation Details Updated Successfully.";
+			}
+			else
+			{
+				$data["msg"] = "Employee Vs Operation Details Saved Successfully.";
+			}
+		}
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
+}
+
 public function skillmatrix($skillMatrixId = '')
 {
 	$data["menuId"] = 17;
