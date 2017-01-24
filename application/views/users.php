@@ -36,6 +36,7 @@
                                     <th>User Name</th>
                                     <th>User Email</th>
                                     <th>User Type</th>
+                                    <th>Section</th>
                                     <th>Created By</th>
                                     <th>Manage</th>
                                 </tr>
@@ -51,6 +52,7 @@
 										<td><?php echo $row->firstname; ?></td>
 										<td><?php echo $row->email; ?></td>
 										<td><?php echo ucwords($row->usertype); ?></td>
+										<td><?php echo $row->sectionname; ?></td>
 										<td><?php echo $row->createdby; ?></td>
 										<td>
 											<button class="btn btn-primary btn-xs editUser" userId="<?php echo $row->userid; ?>">
@@ -104,6 +106,22 @@
 	                                <select class="form-control" style="width: 100%;" data-placeholder="Select" id="userType" name="userType" required="">
 										<option value=""></option>
 										<option value="user">User</option>
+									</select>
+	                            </div>
+	                        </div>
+							<div class="form-group">
+	                            <label class="col-sm-2 control-label">
+									Section&nbsp;<span style="color: red;">*</span>
+								</label>
+	                            <div class="col-sm-6">
+	                                <select class="form-control" style="width: 100%;" data-placeholder="Select Section" id="sectionName" name="sectionName" required="">
+										<option value=""></option>
+										<option value="Cutting">Cutting Section</option>
+										<option value="Sewing">Sewing Section</option>
+										<option value="Storage_Procurement">Storage / Procurement Section</option>
+										<option value="Ironing_Packing">Ironing / Packing Section</option>
+										<option value="Printing">Printing Section</option>
+										<option value="Embroidary">Embroidary Section</option>
 									</select>
 	                            </div>
 	                        </div>
@@ -207,6 +225,7 @@
 		if('<?php echo $userId; ?>' > 0)
 		{
 			$("#userType").select2('val','<?php echo $userType; ?>');
+			$("#sectionName").select2('val','<?php echo $sectionName; ?>');
 			
 			var userPermissions = '<?php echo json_encode($userPermissions); ?>';
 			userPermissions = JSON.parse(userPermissions);
@@ -306,6 +325,7 @@
 		var userName = $("#userName").val();
 		var userEmail = $("#userEmail").val();
 		var userType = $("#userType").val();
+		var sectionName = $("#sectionName").val();
 		
 		var menuPermissionsArr = [];
 		
@@ -348,6 +368,7 @@
 				"userName" : userName, 
 				"userEmail" : userEmail, 
 				"userType" : userType, 
+				"sectionName" : sectionName, 
 				"menuPermissionsArr" : JSON.stringify(menuPermissionsArr)
 			};
 			req.url = "admin/saveUser";

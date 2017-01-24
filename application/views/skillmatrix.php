@@ -2,7 +2,7 @@
     <div class="page-title">
         <h3>
 			<a href="<?php echo base_url(); ?>admin/skillmatrix" style="text-decoration: none;">
-				Skill Matrix - Individual Target Assign Form
+				Individual Target Assign Form
 			</a>
 		</h3>
     </div>
@@ -124,7 +124,6 @@
 				                        		<thead>
 				                        			<tr>
 				                        				<th width="15%">Employee Name</th>
-				                        				<th width="10%">Style</th>
 				                        				<th width="10%">Operation</th>
 				                        				<th width="10%">Target Minutes</th>
 				                        				<th width="10%">Target Pieces</th>
@@ -154,18 +153,6 @@
 																{
 																	echo '<option value="'.$res->id.'"';
 																	echo '>'.$res->empname.'</option>';
-																}
-																?>
-																</select>
-															</td>
-															<td>
-																<select class="form-control styleId_<?php echo $cnt; ?>" style="width: 100%;" data-placeholder="Select">
-																<option value=""></option>
-																<?php
-																foreach($styleDtls as $res)
-																{
-																	echo '<option value="'.$res->id.'"';
-																	echo '>'.$res->styleno.'</option>';
 																}
 																?>
 																</select>
@@ -243,17 +230,16 @@
     </div>
 </div>
 
+<div id="empDtlsDiv" style="display: none;"><?php echo json_encode($empDtls); ?></div>
+<div id="operationDtlsDiv" style="display: none;"><?php echo json_encode($operationDtls); ?></div>
 <script>
 	
 	var deletedRowsCount = 0;
 	
-	var empDtls = '<?php echo json_encode($empDtls); ?>';
+	var empDtls = $("#empDtlsDiv").html();
 	empDtls = JSON.parse(empDtls);
 	
-	var styleDtls = '<?php echo json_encode($styleDtls); ?>';
-	styleDtls = JSON.parse(styleDtls);
-	
-	var operationDtls = '<?php echo json_encode($operationDtls); ?>';
+	var operationDtls = $("#operationDtlsDiv").html();
 	operationDtls = JSON.parse(operationDtls);
 	
 	$(document).ready(function()
@@ -274,7 +260,7 @@
 		}
 		else
 		{
-			$("#shiftTime").select2('val', '<?php echo $shiftTime; ?>');
+			$("#shiftTime").select2('val', '<?php echo $shiftName; ?>');
 			
 			var myDtlArr = '<?php echo json_encode($dtlArr); ?>';
 			myDtlArr = JSON.parse(myDtlArr);
@@ -284,7 +270,6 @@
 				for(var k=0; k<myDtlArr.length; k++)
 				{
 					$(".empId_"+(k+1)).select2('val',myDtlArr[k].empid);
-					$(".styleId_"+(k+1)).select2('val',myDtlArr[k].styleid);
 					$(".operationId_"+(k+1)).select2('val',myDtlArr[k].operationid);
 				}
 			}
@@ -329,15 +314,6 @@
 			for(var n=0; n<empDtls.length; n++)
 			{
 				str += '<option value="'+empDtls[n].id+'">'+empDtls[n].empname+'</option>';
-			}
-			str += '</select>';
-			str += '</td>';
-			str += '<td>';
-			str += '<select class="form-control styleId_'+parseInt(rowNo)+'" style="width: 100%;" data-placeholder="Select">';
-			str += '<option value=""></option>';
-			for(var n=0; n<styleDtls.length; n++)
-			{
-				str += '<option value="'+styleDtls[n].id+'">'+styleDtls[n].styleno+'</option>';
 			}
 			str += '</select>';
 			str += '</td>';
@@ -404,7 +380,6 @@
 		{
 			var rowNo = $(this).attr('rowNo');
 			var empId = $(".empId_"+rowNo).val();
-			var styleId = $(".styleId_"+rowNo).val();
 			var operationId = $(".operationId_"+rowNo).val();
 			var producedMin = $(".producedMin_"+rowNo).val();
 			var pieces = $(".pieces_"+rowNo).val();
@@ -416,7 +391,6 @@
 			{
 				var cri = {};
 				cri["empId"] = empId;
-				cri["styleId"] = styleId;
 				cri["operationId"] = operationId;
 				cri["producedMin"] = producedMin;
 				cri["pieces"] = pieces;

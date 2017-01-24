@@ -58,8 +58,8 @@
 									<div class="form-group">
 										<input type="password" class="form-control" placeholder="Password" id="password" name="password" required />
 									</div>
-									<div class="form-group">
-										<select class="form-control" data-placeholder="Select Store" id="store" name="store" required="">
+									<div class="form-group" id="sectionDiv">
+										<select class="form-control" data-placeholder="Select Store" id="sectionName" name="sectionName">
 											<option value=""></option>
 											<option value="Cutting">Cutting Section</option>
 											<option value="Sewing">Sewing Section</option>
@@ -67,11 +67,6 @@
 											<option value="Ironing_Packing">Ironing / Packing Section</option>
 											<option value="Printing">Printing Section</option>
 											<option value="Embroidary">Embroidary Section</option>
-											<!--<option value="AKM_Procurement">AKM-Procurement</option>
-											<option value="AKM_Nap_Store">AKM Nap Store</option>
-											<option value="Ramnagar_Store">Ramnagar Store</option>
-											<option value="Cbe_Unit_Store">Cbe Unit Store</option>
-											<option value="AKM_Cutting_Store">AKM Cutting Store</option>-->
 										</select>
 									</div>
 									<button type="submit" class="btn btn-success btn-block">
@@ -116,13 +111,60 @@
 				$('select').select2();
 			});
 			
+			$("#email").blur(function()
+			{
+				var email = $(this).val();
+				if(email != "")
+				{
+					var req = new Request();
+					req.data = 
+					{
+						"email" : email
+					};
+					req.url = "login/getUserDetailsByEmail";
+					RequestHandler(req, setUserDetails);
+				}
+			});
+			
+			function setUserDetails(data)
+			{
+				data = JSON.parse(data);
+				var isError = data.isError;
+				var msg = data.msg;
+				if(isError)
+				{
+					alert(msg);
+					$("#email").val('');
+				}
+				else
+				{
+					var res = data.res;
+					if(res.length > 0)
+					{
+						if(res[0].usertype == "user")
+						{
+							$("#sectionDiv").css('display','block');
+							
+							var sectionName = res[0].sectionname;
+						
+							$("#sectionName").select2('val', sectionName);
+							$("#sectionName").select2('enable', false);
+						}
+						else
+						{
+							$("#sectionDiv").css('display','none');
+						}
+					}
+				}
+			}
+			
 			$("#loginForm").submit(function(e)
 			{
 				e.preventDefault();
 				
 				var email = $("#email").val();
 				var password = $("#password").val();
-				var store = $("#store").val();
+				var sectionName = $("#sectionName").val();
 				
 				if(email != "" && password != "")
 				{
@@ -131,7 +173,7 @@
 					{
 						"email" : email,
 						"password" : password, 
-						"store" : store
+						"sectionName" : sectionName
 					};
 					req.url = "login/checkLogin";
 					RequestHandler(req, showResponse);

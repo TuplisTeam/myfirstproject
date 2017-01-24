@@ -36,7 +36,7 @@
 	                                    <th>Entry Date</th>
 	                                    <th>Line Name</th>
 	                                    <th>Shift Name</th>
-	                                    <th>Total Workers</th>
+	                                    <th>Line Incharge</th>
 	                                    <th>Total Pieces</th>
 	                                    <th>Manage</th>
 	                                </tr>
@@ -50,7 +50,7 @@
 										<td><?php echo $row->entrydate; ?></td>
 										<td><?php echo $row->linename; ?></td>
 										<td><?php echo $row->shift; ?></td>
-										<td><?php echo $row->totalworkers; ?></td>
+										<td><?php echo $row->lineinchargename; ?></td>
 										<td><?php echo $row->totalpieces; ?></td>
 										<td>
 											<button class="btn btn-sm btn-success editEntry" entryId="<?php echo $row->id; ?>" title="Edit">
@@ -85,8 +85,8 @@
 			                            <label class="col-sm-3 control-label">
 											Entry Date&nbsp;<span style="color: red;">*</span>
 										</label>
-			                            <div class="col-sm-4">
-			                                <input type="text" class="form-control datePicker" id="entryDate" name="entryDate" placeholder="Entry Date" value="<?php echo $entryDate; ?>" required="">
+			                            <div class="col-sm-7">
+			                                <input type="text" class="form-control datePicker onBlurEntryDateLineName" id="entryDate" name="entryDate" placeholder="Entry Date" value="<?php echo $entryDate; ?>" required="">
 			                            </div>
 			                        </div>
 	                    		</div>
@@ -95,8 +95,8 @@
 			                            <label class="col-sm-3 control-label">
 											Line Name&nbsp;<span style="color: red;">*</span>
 										</label>
-			                            <div class="col-sm-4">
-			                                <input type="text" class="form-control" id="lineName" name="lineName" placeholder="Line Name" value="<?php echo $lineName; ?>" required="">
+			                            <div class="col-sm-7">
+			                                <input type="text" class="form-control onBlurEntryDateLineName" id="lineName" name="lineName" placeholder="Line Name" value="<?php echo $lineName; ?>" required="">
 			                            </div>
 			                        </div>
 	                    		</div>
@@ -107,131 +107,153 @@
 			                            <label class="col-sm-3 control-label">
 											Shift Name&nbsp;<span style="color: red;">*</span>
 										</label>
-			                            <div class="col-sm-4">
+			                            <div class="col-sm-7">
 			                                <input type="text" class="form-control" id="shiftName" name="shiftName" placeholder="Shift Name" value="<?php echo $shiftName; ?>" required="">
-			                            </div>
-			                        </div>
-	                    		</div>
-	                    	</div>
-	                    	<div class="row">
-	                    		<div class="form-group">
-		                        	<div class="col-md-12">
-		                        		<div class="table-responsive">
-		                        			<div style="float: right;">
-				                        		<button type="button" class="btn btn-success addRow">
-				                        		Add New Row <i class="fa fa-plus"></i>
-				                        		</button>
-			                        		</div>
-			                        		<table class="table table-bordered">
-				                        		<thead>
-				                        			<tr>
-				                        				<th width="20%">
-				                        					Employee Name
-				                        				</th>
-				                        				<th>Target</th>
-				                        				<th>1</th>
-				                        				<th>2</th>
-				                        				<th>3</th>
-				                        				<th>4</th>
-				                        				<th>5</th>
-				                        				<th>6</th>
-				                        				<th>7</th>
-				                        				<th>8</th>
-				                        				<th>OT</th>
-				                        				<th>Total</th>
-				                        				<th>Manage</th>
-				                        			</tr>
-				                        		</thead>
-				                        		<tbody class="detailsTBody">
-			                        			<?php
-			                        			if($assemblyLoadingId > 0)
-			                        			{
-													if(count($dtlArr) > 0)
-													{
-														$cnt = 0;
-														foreach($dtlArr as $row)
-														{
-															$cnt++;
-														?>
-														<tr class="detailsTR" rowNo="<?php echo $cnt; ?>">
-															<td>
-																<select class="form-control empId_<?php echo $cnt; ?>" style="width: 100%;" data-placeholder="Select">
-																<option value=""></option>
-																<?php
-																foreach($empDtls as $res)
-																{
-																	echo '<option value="'.$res->id.'"';
-																	echo '>'.$res->empname.'</option>';
-																}
-																?>
-																</select>
-															</td>
-															<td>
-																<input type="text" class="form-control numeric selectText target_<?php echo $cnt; ?>" placeholder="Target" value="<?php echo $row->target; ?>">
-															</td>
-															<td>
-																<input type="text" class="form-control numeric onBlurPieces selectText hour1_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Hour 1" value="<?php echo $row->hour_1; ?>">
-															</td>
-															<td>
-																<input type="text" class="form-control numeric onBlurPieces selectText hour2_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Hour 2" value="<?php echo $row->hour_2; ?>">
-															</td>
-															<td>
-																<input type="text" class="form-control numeric onBlurPieces selectText hour3_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Hour 3" value="<?php echo $row->hour_3; ?>">
-															</td>
-															<td>
-																<input type="text" class="form-control numeric onBlurPieces selectText hour4_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Hour 4" value="<?php echo $row->hour_4; ?>">
-															</td>
-															<td>
-																<input type="text" class="form-control numeric onBlurPieces selectText hour5_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Hour 5" value="<?php echo $row->hour_5; ?>">
-															</td>
-															<td>
-																<input type="text" class="form-control numeric onBlurPieces selectText hour6_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Hour 6" value="<?php echo $row->hour_6; ?>">
-															</td>
-															<td>
-																<input type="text" class="form-control numeric onBlurPieces selectText hour7_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Hour 7" value="<?php echo $row->hour_7; ?>">
-															</td>
-															<td>
-																<input type="text" class="form-control numeric onBlurPieces selectText hour8_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Hour 8" value="<?php echo $row->hour_8; ?>">
-															</td>
-															<td>
-																<input type="text" class="form-control numeric onBlurPieces selectText otPieces_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="OT" value="<?php echo $row->ot_pieces; ?>">
-															</td>
-															<td>
-																<input type="text" class="form-control numeric totalPieces_<?php echo $cnt; ?>" placeholder="Total Pieces" disabled="" value="<?php echo $row->totalpieces; ?>">
-															</td>
-															<td>
-																<button type="button" title="Delete" class="btn btn-danger btn-xs btn-perspective delDtl"><i class="fa fa-close"></i></button>
-															</td>
-														</tr>
-														<?php
-														}
-													}
-												}
-			                        			?>
-				                        		</tbody>
-				                        	</table>
-			                        	</div>
-		                        	</div>
-		                        </div>
-	                    	</div>
-	                    	<div class="row">
-	                    		<div class="col-md-6">
-	                    			<div class="form-group">
-			                            <label class="col-sm-3 control-label">
-											Total Workers&nbsp;<span style="color: red;">*</span>
-										</label>
-			                            <div class="col-sm-4">
-			                                <input type="text" class="form-control" id="totalWorkers" name="totalWorkers" placeholder="Total Workers" value="<?php echo $totalWorkers; ?>" disabled="">
 			                            </div>
 			                        </div>
 	                    		</div>
 								<div class="col-md-6">
 	                    			<div class="form-group">
 			                            <label class="col-sm-3 control-label">
-											Total Pieces&nbsp;<span style="color: red;">*</span>
+											Line Incharge&nbsp;<span style="color: red;">*</span>
 										</label>
-			                            <div class="col-sm-4">
-			                                <input type="text" class="form-control" id="totalPieces" name="totalPieces" placeholder="Total Pieces" value="<?php echo $totalPieces; ?>" disabled="">
+			                            <div class="col-sm-7">
+			                                <select class="form-control" id="lineIncharge" name="lineIncharge" style="width: 100%;" data-placeholder="Select" required="">
+												<option value=""></option>
+												<?php
+												foreach($empDtls as $res)
+												{
+													echo '<option value="'.$res->id.'"';
+													if($res->id == $lineIncharge)
+													{
+														echo ' selected="selected"';
+													}
+													echo '>'.$res->empname.'</option>';
+												}
+												?>
+											</select>
+			                            </div>
+			                        </div>
+	                    		</div>
+	                    	</div>
+							<div class="row">
+								<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											Target&nbsp;<span style="color: red;">*</span>
+										</label>
+			                            <div class="col-sm-7">
+			                                <input type="text" class="form-control numeric" id="target" name="target" placeholder="Target" value="<?php echo $target; ?>" required="">
+			                            </div>
+			                        </div>
+	                    		</div>
+								<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											Hour 1
+										</label>
+			                            <div class="col-sm-7">
+			                                <input type="text" class="form-control numeric onBlurHours" id="hour1" name="hour1" placeholder="Hour 1" value="<?php echo $hour1; ?>">
+			                            </div>
+			                        </div>
+	                    		</div>
+	                    	</div>
+							<div class="row">
+								<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											Hour 2
+										</label>
+			                            <div class="col-sm-7">
+			                                <input type="text" class="form-control numeric onBlurHours" id="hour2" name="hour2" placeholder="Hour 2" value="<?php echo $hour2; ?>">
+			                            </div>
+			                        </div>
+	                    		</div>
+								<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											Hour 3
+										</label>
+			                            <div class="col-sm-7">
+			                                <input type="text" class="form-control numeric onBlurHours" id="hour3" name="hour3" placeholder="Hour 3" value="<?php echo $hour3; ?>">
+			                            </div>
+			                        </div>
+	                    		</div>
+	                    	</div>
+							<div class="row">
+								<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											Hour 4
+										</label>
+			                            <div class="col-sm-7">
+			                                <input type="text" class="form-control numeric onBlurHours" id="hour4" name="hour4" placeholder="Hour 4" value="<?php echo $hour4; ?>">
+			                            </div>
+			                        </div>
+	                    		</div>
+								<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											Hour 5
+										</label>
+			                            <div class="col-sm-7">
+			                                <input type="text" class="form-control numeric onBlurHours" id="hour5" name="hour5" placeholder="Hour 5" value="<?php echo $hour5; ?>">
+			                            </div>
+			                        </div>
+	                    		</div>
+	                    	</div>
+							<div class="row">
+								<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											Hour 6
+										</label>
+			                            <div class="col-sm-7">
+			                                <input type="text" class="form-control numeric onBlurHours" id="hour6" name="hour6" placeholder="Hour 6" value="<?php echo $hour6; ?>">
+			                            </div>
+			                        </div>
+	                    		</div>
+								<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											Hour 7
+										</label>
+			                            <div class="col-sm-7">
+			                                <input type="text" class="form-control numeric onBlurHours" id="hour7" name="hour7" placeholder="Hour 7" value="<?php echo $hour7; ?>">
+			                            </div>
+			                        </div>
+	                    		</div>
+	                    	</div>
+							<div class="row">
+								<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											Hour 8
+										</label>
+			                            <div class="col-sm-7">
+			                                <input type="text" class="form-control numeric onBlurHours" id="hour8" name="hour8" placeholder="Hour 8" value="<?php echo $hour8; ?>">
+			                            </div>
+			                        </div>
+	                    		</div>
+								<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											OT
+										</label>
+			                            <div class="col-sm-7">
+			                                <input type="text" class="form-control numeric onBlurHours" id="otHour" name="otHour" placeholder="OT" value="<?php echo $otHour; ?>">
+			                            </div>
+			                        </div>
+	                    		</div>
+	                    	</div>
+							<div class="row">
+								<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											Total Pieces
+										</label>
+			                            <div class="col-sm-7">
+			                                <input type="text" class="form-control numeric" id="totalPieces" name="totalPieces" placeholder="Total Pieces" value="<?php echo $totalPieces; ?>" disabled="">
 			                            </div>
 			                        </div>
 	                    		</div>
@@ -269,11 +291,6 @@
 
 <script>
 	
-	var deletedRowsCount = 0;
-	
-	var empDtls = '<?php echo json_encode($empDtls); ?>';
-	empDtls = JSON.parse(empDtls);
-	
 	$(document).ready(function()
 	{
 		$('#example').dataTable();
@@ -284,25 +301,6 @@
 			format: 'dd/mm/yyyy', 
 			autoclose: true
 		});
-		
-		var assemblyLoadingId = '<?php echo $assemblyLoadingId; ?>';
-		if(assemblyLoadingId == "")
-		{
-			addNewRow();
-		}
-		else
-		{
-			var myDtlArr = '<?php echo json_encode($dtlArr); ?>';
-			myDtlArr = JSON.parse(myDtlArr);
-			
-			if(myDtlArr.length > 0)
-			{
-				for(var k=0; k<myDtlArr.length; k++)
-				{
-					$(".empId_"+(k+1)).select2('val',myDtlArr[k].empid);
-				}
-			}
-		}
 	});
 	
 	$(".newEntry").click(function()
@@ -311,148 +309,74 @@
 		$("#entryDetails").css('display', 'block');
 	});
 	
-	$(document).on('click','.addRow',function()
+	$(document).on('blur','.onBlurEntryDateLineName',function()
 	{
-		addNewRow();
-		scrollToDown();
-	});
-	
-	function addNewRow()
-	{
-		var rowNo = $(".detailsTBody tr").length;
-		rowNo = parseInt(rowNo) + parseInt(deletedRowsCount) + 1;
+		var entryDate = $("#entryDate").val();
+		var lineName = $("#lineName").val();
 		
-		renderNewRows(rowNo);
-	}
-	
-	function scrollToDown()
-	{
-		$("html, body").animate({ scrollTop: $(document).height() }, 1000);
-	}
-	
-	function renderNewRows(rowNo)
-	{
-		if(rowNo > 0)
+		if(entryDate != "" && lineName != "")
 		{
-			var str = '';
-			
-			str += '<tr class="detailsTR" rowNo="'+parseInt(rowNo)+'">';
-			str += '<td>';
-			str += '<select class="form-control empId_'+parseInt(rowNo)+'" style="width: 100%;" data-placeholder="Select">';
-			str += '<option value=""></option>';
-			for(var n=0; n<empDtls.length; n++)
+			var req = new Request();
+			req.data = 
 			{
-				str += '<option value="'+empDtls[n].id+'">'+empDtls[n].empname+'</option>';
-			}
-			str += '</select>';
-			str += '</td>';
-			str += '<td>';
-			str += '<input type="text" class="form-control numeric selectText target_'+parseInt(rowNo)+'" placeholder="Target" value="">';
-			str += '</td>';
-			str += '<td>';
-			str += '<input type="text" class="form-control numeric onBlurPieces selectText hour1_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Hour 1" value="">';
-			str += '</td>';
-			str += '<td>';
-			str += '<input type="text" class="form-control numeric onBlurPieces selectText hour2_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Hour 2" value="">';
-			str += '</td>';
-			str += '<td>';
-			str += '<input type="text" class="form-control numeric onBlurPieces selectText hour3_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Hour 3" value="">';
-			str += '</td>';
-			str += '<td>';
-			str += '<input type="text" class="form-control numeric onBlurPieces selectText hour4_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Hour 4" value="">';
-			str += '</td>';
-			str += '<td>';
-			str += '<input type="text" class="form-control numeric onBlurPieces selectText hour5_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Hour 5" value="">';
-			str += '</td>';
-			str += '<td>';
-			str += '<input type="text" class="form-control numeric onBlurPieces selectText hour6_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Hour 6" value="">';
-			str += '</td>';
-			str += '<td>';
-			str += '<input type="text" class="form-control numeric onBlurPieces selectText hour7_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Hour 7" value="">';
-			str += '</td>';
-			str += '<td>';
-			str += '<input type="text" class="form-control numeric onBlurPieces selectText hour8_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Hour 8" value="">';
-			str += '</td>';
-			str += '<td>';
-			str += '<input type="text" class="form-control numeric onBlurPieces selectText otPieces_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="OT" value="">';
-			str += '</td>';
-			str += '<td>';
-			str += '<input type="text" class="form-control numeric totalPieces_'+parseInt(rowNo)+'" placeholder="Total Pieces" disabled="" value="">';
-			str += '</td>';
-			str += '<td>';
-			str += '<button type="button" title="Delete" class="btn btn-danger btn-xs btn-perspective delDtl"><i class="fa fa-close"></i></button>';
-			str += '</td>';
-			str += '</tr>';
-			
-			$(".detailsTBody").append(str);
-			
-			$(".numeric").numeric();
-			$("select").select2();
-		}
-	}
-	
-	$(document).on('click','.selectText',function()
-	{
-		$(this).select();
-	});
-	
-	$(document).on('blur','.onBlurPieces',function()
-	{
-		var rowNo = $(this).attr('rowNo');
-		if(rowNo > 0)
-		{
-			var hour1 = $(".hour1_"+rowNo).val();
-			var hour2 = $(".hour2_"+rowNo).val();
-			var hour3 = $(".hour3_"+rowNo).val();
-			var hour4 = $(".hour4_"+rowNo).val();
-			var hour5 = $(".hour5_"+rowNo).val();
-			var hour6 = $(".hour6_"+rowNo).val();
-			var hour7 = $(".hour7_"+rowNo).val();
-			var hour8 = $(".hour8_"+rowNo).val();
-			var otPieces = $(".otPieces_"+rowNo).val();
-			
-			var totalPieces = parseFloat(hour1 ? hour1 : 0) + 
-								parseFloat(hour2 ? hour2 : 0) + 
-								parseFloat(hour3 ? hour3 : 0) + 
-								parseFloat(hour4 ? hour4 : 0) + 
-								parseFloat(hour5 ? hour5 : 0) + 
-								parseFloat(hour6 ? hour6 : 0) + 
-								parseFloat(hour7 ? hour7 : 0) + 
-								parseFloat(hour8 ? hour8 : 0) + 
-								parseFloat(otPieces ? otPieces : 0) ;
-			$(".totalPieces_"+rowNo).val(totalPieces);
-			
-			calculateConsolidatedCounts();
+				"entryDate" : entryDate, 
+				"lineName" : lineName
+			};
+			req.url = "admin/getEmployeesByEntryDateLineName";
+			RequestHandler(req, setEmployees);
 		}
 	});
 	
-	function calculateConsolidatedCounts()
+	function setEmployees(data)
 	{
-		var totalPieces = 0;
-		var totalWorkers = 0;
-		$("tr.detailsTR").each(function()
-		{
-			var rowNo = $(this).attr('rowNo');
-			if(rowNo > 0)
-			{
-				var totalPiecesTR = $(".totalPieces_"+rowNo).val();
-				totalPieces += parseFloat(totalPiecesTR);
-				totalWorkers++;
-			}
-		});
+		data = JSON.parse(data);
 		
-		$("#totalWorkers").val(totalWorkers);
+		var isError = data.isError;
+		var msg = data.msg;
+		if(isError == false)
+		{
+			var res = data.res;
+			if(res.length > 0)
+			{
+				var tempArr = [];
+				var cri = [];
+				cri["id"] = "";
+				cri["text"] = "";
+				tempArr.push(cri);
+				for(var a=0; a<res.length; a++)
+				{
+					var cri = {};
+					cri["id"] = res[a].empid;
+					cri["text"] = res[a].empname;
+					tempArr.push(cri);
+				}
+				$("#lineIncharge").select2('destroy').empty().select2({data:tempArr});
+			}
+		}
+	}
+	
+	$(document).on('blur','.onBlurHours',function()
+	{
+		var hour1 = $("#hour1").val();
+		var hour2 = $("#hour2").val();
+		var hour3 = $("#hour3").val();
+		var hour4 = $("#hour4").val();
+		var hour5 = $("#hour5").val();
+		var hour6 = $("#hour6").val();
+		var hour7 = $("#hour7").val();
+		var hour8 = $("#hour8").val();
+		var otHour = $("#otHour").val();
+		
+		var totalPieces = parseFloat(hour1 ? hour1 : 0) + 
+							parseFloat(hour2 ? hour2 : 0) + 
+							parseFloat(hour3 ? hour3 : 0) + 
+							parseFloat(hour4 ? hour4 : 0) + 
+							parseFloat(hour5 ? hour5 : 0) + 
+							parseFloat(hour6 ? hour6 : 0) + 
+							parseFloat(hour7 ? hour7 : 0) + 
+							parseFloat(hour8 ? hour8 : 0) + 
+							parseFloat(otHour ? otHour : 0);
 		$("#totalPieces").val(totalPieces);
-	}
-	
-	$(document).on('click','.delDtl',function()
-	{
-		var bool = confirm("Are you sure want to Remove this Employee Detail?");
-		if(bool == true)
-		{
-			deletedRowsCount++;
-			$(this).closest('tr').remove();
-		}
 	});
 	
 	$("#entryForm").submit(function(e)
@@ -463,63 +387,20 @@
 		var entryDate = $("#entryDate").val();
 		var lineName = $("#lineName").val();
 		var shiftName = $("#shiftName").val();
-		var totalWorkers = $("#totalWorkers").val();
+		var lineIncharge = $("#lineIncharge").val();
+		var target = $("#target").val();
+		var hour1 = $("#hour1").val();
+		var hour2 = $("#hour2").val();
+		var hour3 = $("#hour3").val();
+		var hour4 = $("#hour4").val();
+		var hour5 = $("#hour5").val();
+		var hour6 = $("#hour6").val();
+		var hour7 = $("#hour7").val();
+		var hour8 = $("#hour8").val();
+		var otHour = $("#otHour").val();
 		var totalPieces = $("#totalPieces").val();
-		var totalTarget = 0;
 		
-		var dtlArr = [];
-		
-		var isError = false;
-		
-		$(".detailsTBody tr.detailsTR").each(function()
-		{
-			var rowNo = $(this).attr('rowNo');
-			var empId = $(".empId_"+rowNo).val();
-			var target = $(".target_"+rowNo).val();
-			var hour1 = $(".hour1_"+rowNo).val();
-			var hour2 = $(".hour2_"+rowNo).val();
-			var hour3 = $(".hour3_"+rowNo).val();
-			var hour4 = $(".hour4_"+rowNo).val();
-			var hour5 = $(".hour5_"+rowNo).val();
-			var hour6 = $(".hour6_"+rowNo).val();
-			var hour7 = $(".hour7_"+rowNo).val();
-			var hour8 = $(".hour8_"+rowNo).val();
-			var otPieces = $(".otPieces_"+rowNo).val();
-			var totalPiecesTR = $(".totalPieces_"+rowNo).val();
-			
-			if(empId > 0 && target > 0 && (hour1 > 0 || hour2 > 0 || hour3 > 0 || hour4 > 0 || hour5 > 0 || hour6 > 0 || hour7 > 0 || hour8 > 0 || otPieces > 0) && totalPiecesTR > 0)
-			{
-				var cri = {};
-				cri["empId"] = empId;
-				cri["target"] = target;
-				cri["hour1"] = hour1;
-				cri["hour2"] = hour2;
-				cri["hour3"] = hour3;
-				cri["hour4"] = hour4;
-				cri["hour5"] = hour5;
-				cri["hour6"] = hour6;
-				cri["hour7"] = hour7;
-				cri["hour8"] = hour8;
-				cri["otPieces"] = otPieces;
-				cri["totalPieces"] = totalPiecesTR;
-				
-				totalTarget += parseFloat(target);
-				
-				dtlArr.push(cri);
-			}
-			else
-			{
-				isError = true;
-			}
-		});
-		
-		if(isError)
-		{
-			alert('Please Fill All Employee Details.');
-			return;
-		}
-		
-		if(entryDate != "" && lineName != "" && totalWorkers > 0 && totalPieces > 0 && dtlArr.length > 0)
+		if(entryDate != "" && lineName != "" && shiftName != "" && lineIncharge > 0 && totalPieces > 0)
 		{
 			$("#responseMsg").html('');
 			
@@ -533,10 +414,18 @@
 					"entryDate" : entryDate,
 					"lineName" : lineName,
 					"shiftName" : shiftName, 
-					"totalWorkers" : totalWorkers, 
-					"totalPieces" : totalPieces, 
-					"totalTarget" : totalTarget, 
-					"dtlArr" : JSON.stringify(dtlArr)
+					"lineIncharge" : lineIncharge, 
+					"target" : target, 
+					"hour1" : hour1, 
+					"hour2" : hour2, 
+					"hour3" : hour3, 
+					"hour4" : hour4, 
+					"hour5" : hour5, 
+					"hour6" : hour6, 
+					"hour7" : hour7, 
+					"hour8" : hour8, 
+					"otHour" : otHour, 
+					"totalPieces" : totalPieces
 				};
 				req.url = "admin/saveAssemblyLoading";
 				RequestHandler(req, showResponse);
@@ -582,7 +471,7 @@
 				{
 					"menuId" : '<?php echo $menuId; ?>', 
 					"entryId" : entryId, 
-					"tableName" : "assemblyloading_hdr", 
+					"tableName" : "assemblyloading", 
 					"columnName" : "id"
 				};
 				req.url = "admin/delEntry";

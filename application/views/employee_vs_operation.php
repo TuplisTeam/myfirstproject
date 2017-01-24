@@ -33,10 +33,11 @@
                             <thead>
                                 <tr>
                                     <th>Entry Date</th>
-                                    <th>Employee No.</th>
                                     <th>Employee Name</th>
+                                    <th>Line Name</th>
                                     <th>Operation Name</th>
                                     <th>Machine Name</th>
+                                    <th>SMV</th>
                                     <th>Manage</th>
                                 </tr>
                             </thead>
@@ -49,10 +50,11 @@
 								?>
 								<tr>
 									<td><?php echo $row->entrydate; ?></td>
-									<td><?php echo $row->empno; ?></td>
 									<td><?php echo $row->empname; ?></td>
+									<td><?php echo $row->linename; ?></td>
 									<td><?php echo $row->operationname; ?></td>
-									<td><?php echo $row->machinaryname; ?></td>
+									<td><?php echo $row->machineryname; ?></td>
+									<td><?php echo $row->smv; ?></td>
 									<td>
 										<button class="btn btn-primary btn-xs editEntry" entryId="<?php echo $row->id; ?>">
 											Edit
@@ -110,12 +112,33 @@
 									</select>
 	                            </div>
 	                        </div>
+							<div class="form-group">
+	                            <label class="col-sm-2 control-label">
+									Line Name&nbsp;<span style="color: red;">*</span>
+								</label>
+	                            <div class="col-sm-6">
+	                                <input type="text" class="form-control" id="lineName" name="lineName" placeholder="Line Name" value="<?php echo $lineName; ?>" required="">
+	                            </div>
+	                        </div>
 	                        <div class="form-group">
 	                            <label class="col-sm-2 control-label">
 									Operation Name&nbsp;<span style="color: red;">*</span>
 								</label>
 	                            <div class="col-sm-6">
-	                                <input type="text" class="form-control" id="operationName" name="operationName" placeholder="Operation Name" value="<?php echo $operationName; ?>" required="">
+	                                <select class="form-control" style="width: 100%;" id="operationId" name="operationId">
+										<option value="">All</option>
+										<?php
+										foreach($operationDtls as $row)
+										{
+											echo '<option value="'.$row->id.'"';
+											if($row->id == $operationId)
+											{
+												echo ' selected="selected"';
+											}
+											echo '>'.$row->operationname.'</option>';
+										}
+										?>
+									</select>
 	                            </div>
 	                        </div>
 	                        <div class="form-group">
@@ -137,6 +160,14 @@
 										}
 										?>
 									</select>
+	                            </div>
+	                        </div>
+							<div class="form-group">
+	                            <label class="col-sm-2 control-label">
+									SMV&nbsp;<span style="color: red;">*</span>
+								</label>
+	                            <div class="col-sm-6">
+	                                <input type="text" class="form-control" id="smv" name="smv" value="<?php echo $smv; ?>" required="" />
 	                            </div>
 	                        </div>
 	                        <div class="form-group">
@@ -193,10 +224,12 @@
 		
 		var entryDate = $("#entryDate").val();
 		var employeeId = $("#employeeId").val();
-		var operationName = $("#operationName").val();
+		var lineName = $("#lineName").val();
+		var operationId = $("#operationId").val();
 		var machinaryId = $("#machinaryId").val();
+		var smv = $("#smv").val();
 		
-		if(empNo != "" && empName != "")
+		if(entryDate != "" && employeeId > 0 && lineName != "" && operationId > 0 && machinaryId > 0 && smv != "")
 		{
 			$("#responseMsg").html('');
 			
@@ -207,10 +240,12 @@
 				"entryId" : entryId,
 				"entryDate" : entryDate, 
 				"employeeId" : employeeId, 
-				"operationName" : operationName, 
-				"machinaryId" : machinaryId
+				"lineName" : lineName, 
+				"operationId" : operationId, 
+				"machinaryId" : machinaryId, 
+				"smv" : smv
 			};
-			req.url = "admin/saveEmployeesVsOperations";
+			req.url = "admin/saveEmployeeVsOperation";
 			RequestHandler(req, showResponse);
 		}
 		else

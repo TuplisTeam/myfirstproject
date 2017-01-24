@@ -33,11 +33,11 @@ public function checkLogin()
 {
 	$email = $this->input->post('email');
 	$password = $this->input->post('password');
-	$store = $this->input->post('store');
+	$sectionName = $this->input->post('sectionName');
 	
-	if($email != "" && $password != "" && $store != "")
+	if($email != "" && $password != "")
 	{
-		$this->adminmodel->checkLogin($email, $password, $store);
+		$this->adminmodel->checkLogin($email, $password, $sectionName);
 	}
 	else
 	{
@@ -47,6 +47,25 @@ public function checkLogin()
 		echo json_encode($data);
 		return;
 	}
+}
+
+public function getUserDetailsByEmail()
+{
+	$email = $this->input->post('email');
+	if($email != "")
+	{
+		$res = $this->adminmodel->getUserDetailsByEmail($email);
+		
+		$data["isError"] = FALSE;
+		$data["msg"] = "";
+		$data["res"] = $res;
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
 }
 
 /*Manju Ends*/

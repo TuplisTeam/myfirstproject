@@ -270,13 +270,39 @@
 														?>
 														<tr class="operationDetailsTR" rowNo="<?php echo $cnt; ?>">
 															<td>
-																<input type="text" class="form-control op_operationDesc_<?php echo $cnt; ?>" placeholder="Operation Desc." value="<?php echo $row->operation_desc; ?>">
+																<select class="form-control op_operationId_<?php echo $cnt; ?>" style="width: 100%;" data-placeholder="Select">
+																	<option value=""></option>
+																	<?php
+																	foreach($operations as $res)
+																	{
+																		echo '<option value="'.$res->id.'"';
+																		if($row->operationid == $res->id)
+																		{
+																			echo ' selected="selected"';
+																		}
+																		echo '>'.$res->operationname.'</option>';
+																	}
+																	?>
+																</select>
 															</td>
 															<td>
 																<input type="text" class="form-control op_frequency_<?php echo $cnt; ?>" placeholder="Frequency" value="<?php echo $row->frequency; ?>">
 															</td>
 															<td>
-																<input type="text" class="form-control op_machine_<?php echo $cnt; ?>" placeholder="Machine" value="<?php echo $row->machine; ?>">
+																<select class="form-control op_machine_<?php echo $cnt; ?>" style="width: 100%;" data-placeholder="Select">
+																	<option value=""></option>
+																	<?php
+																	foreach($machinaryRequirements as $res)
+																	{
+																		echo '<option value="'.$res->id.'"';
+																		if($row->machine == $res->id)
+																		{
+																			echo ' selected="selected"';
+																		}
+																		echo '>'.$res->machineryname.'</option>';
+																	}
+																	?>
+																</select>
 															</td>
 															<td>
 																<input type="text" class="form-control numeric onBlurOperationFields op_smv_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="SMV" value="<?php echo $row->smv; ?>">
@@ -473,9 +499,18 @@
     </div>
 </div>
 
+<div id="operationsDiv" style="display: none;"><?php echo json_encode($operations); ?></div>
+<div id="machinaryRequirementsDiv" style="display: none;"><?php echo json_encode($machinaryRequirements); ?></div>
+
 <script>
 	
 	var deleted_Operation_RowsCount = 0;
+	
+	var operations = $("#operationsDiv").html();
+	operations = JSON.parse(operations);
+	
+	var machinaryRequirements = $("#machinaryRequirementsDiv").html();
+	machinaryRequirements = JSON.parse(machinaryRequirements);
 	
 	$(document).ready(function()
 	{
@@ -545,13 +580,27 @@
 		
 			str += '<tr class="operationDetailsTR" rowNo="'+parseInt(rowNo)+'">';
 			str += '<td>';
-			str += '<input type="text" class="form-control op_operationDesc_'+parseInt(rowNo)+'" placeholder="Operation Desc." value="">';
+			str += '<select class="form-control op_operationId_'+parseInt(rowNo)+'" style="width: 100%;" data-placeholder="Select">';
+			str += '<option value=""></option>';
+			for(var k=0; k<operations.length; k++)
+			{
+				str += '<option value="'+operations[k].id+'"';
+				str += '>'+operations[k].operationname+'</option>';
+			}
+			str += '</select>';
 			str += '</td>';
 			str += '<td>';
 			str += '<input type="text" class="form-control op_frequency_'+parseInt(rowNo)+'" placeholder="Frequency" value="">';
 			str += '</td>';
 			str += '<td>';
-			str += '<input type="text" class="form-control op_machine_'+parseInt(rowNo)+'" placeholder="Machine" value="">';
+			str += '<select class="form-control op_machine_'+parseInt(rowNo)+'" style="width: 100%;" data-placeholder="Select">';
+			str += '<option value=""></option>';
+			for(var k=0; k<machinaryRequirements.length; k++)
+			{
+				str += '<option value="'+machinaryRequirements[k].id+'"';
+				str += '>'+machinaryRequirements[k].machineryname+'</option>';
+			}
+			str += '</select>';
 			str += '</td>';
 			str += '<td>';
 			str += '<input type="text" class="form-control numeric onBlurOperationFields op_smv_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="SMV" value="">';
@@ -575,6 +624,7 @@
 			
 			$(".operationDetailsTBody").append(str);
 			
+			$("select").select2();
 			$(".numeric").numeric();
 		}
 	}
@@ -627,7 +677,7 @@
 		{
 			var rowNo = $(this).attr('rowNo');
 			
-			var operationDesc = $(".op_operationDesc_"+rowNo).val();
+			var operationId = $(".op_operationId_"+rowNo).val();
 			var frequency = $(".op_frequency_"+rowNo).val();
 			var machine = $(".op_machine_"+rowNo).val();
 			var smv = $(".op_smv_"+rowNo).val();
@@ -636,10 +686,10 @@
 			var secPerUnit = $(".op_secPerUnit_"+rowNo).val();
 			var folders = $(".op_folders_"+rowNo).val();
 			
-			if(operationDesc != "" && frequency > 0 && machine != "" && smv > 0 && noOfWorkers > 0 && balancedWorkers > 0 && secPerUnit > 0)
+			if(operationId > 0 && frequency > 0 && machine != "" && smv > 0 && noOfWorkers > 0 && balancedWorkers > 0 && secPerUnit > 0)
 			{
 				var cri = {};
-				cri["operationDesc"] = operationDesc;
+				cri["operationId"] = operationId;
 				cri["frequency"] = frequency;
 				cri["machine"] = machine;
 				cri["smv"] = smv;
@@ -1034,13 +1084,15 @@
 			var machinaryId = $(this).attr("machinaryId");
 			var machineryRequirement = $(".mc_machineryRequirement_"+machinaryId).text();
 			machineryRequirement = machineryRequirement.trim();
+			
 			var totalNoOfWorkers = 0;
 			var totalSMV = 0;
 			
 			$(".operationDetailsTR").each(function()
 			{
 				var op_rowNo = $(this).attr("rowNo");
-				var op_machine = $(".op_machine_"+op_rowNo).val();
+				var op_machine = $(".op_machine_"+op_rowNo).select2('data')[0]['text'];
+				op_machine = op_machine.trim();
 				
 				if(machineryRequirement.toLowerCase() === op_machine.toLowerCase())
 				{
@@ -1065,11 +1117,14 @@
 		$(".machineryDetailsTBody tr.machineryDetailsTR").each(function()
 		{
 			var machinaryId = $(this).attr('machinaryId');
-			var numbers = $(".mc_numbers_"+machinaryId).val();
-			var smv = $(".mc_smv_"+machinaryId).val();
-			
-			totalNumbers += parseFloat(numbers ? numbers : 0);
-			totalSMV += parseFloat(smv ? smv : 0);
+			if($(".onCheckMachinaryField_"+machinaryId).is(":checked"))
+			{
+				var numbers = $(".mc_numbers_"+machinaryId).val();
+				var smv = $(".mc_smv_"+machinaryId).val();
+				
+				totalNumbers += parseFloat(numbers ? numbers : 0);
+				totalSMV += parseFloat(smv ? smv : 0);
+			}
 		});
 		
 		$("#mc_TotalNumbers").val(parseFloat(totalNumbers ? totalNumbers : 0).toFixed(2));

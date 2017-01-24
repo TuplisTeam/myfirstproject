@@ -2,7 +2,7 @@
     <div class="page-title">
         <h3>
 			<a href="<?php echo base_url(); ?>admin/noworktime" style="text-decoration: none;">
-				No Work Time Issues
+				Nowork / Breakdown / Rework Time Issues
 			</a>
 		</h3>
     </div>
@@ -23,7 +23,7 @@
 			<div class="col-md-12">
 				<div class="panel panel-white">
                     <div class="panel-heading clearfix">
-                        <h4 class="panel-title">No Work Time Issue Details</h4>
+                        <h4 class="panel-title">Nowork / Breakdown / Rework Time Issue Details</h4>
 						<button class="btn btn-success pull-right newEntry">
 							New Entry
 						</button>
@@ -35,6 +35,7 @@
 	                                <tr>
 	                                    <th>Entry Date</th>
 	                                    <th>Line Name</th>
+	                                    <th>Shift Name</th>
 	                                    <th>Manage</th>
 	                                </tr>
 	                            </thead>
@@ -46,6 +47,7 @@
 									<tr>
 										<td><?php echo $row->entrydate; ?></td>
 										<td><?php echo $row->linename; ?></td>
+										<td><?php echo $row->shiftname; ?></td>
 										<td>
 											<button class="btn btn-sm btn-success editEntry" entryId="<?php echo $row->id; ?>" title="Edit">
 												<span class="fa fa-pencil"></span>
@@ -95,6 +97,18 @@
 			                        </div>
 	                    		</div>
 	                    	</div>
+							<div class="row">
+								<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											Shift Name&nbsp;<span style="color: red;">*</span>
+										</label>
+			                            <div class="col-sm-4">
+			                                <input type="text" class="form-control" id="shiftName" name="shiftName" placeholder="Shift Name" value="<?php echo $shiftName; ?>" required="">
+			                            </div>
+			                        </div>
+	                    		</div>
+	                    	</div>
 	                    	<div class="row">
 	                    		<div class="form-group">
 		                        	<div class="col-md-12">
@@ -108,7 +122,9 @@
 				                        		<thead>
 				                        			<tr>
 				                        				<th width="15%">Reason</th>
-				                        				<th width="15%">No Work Time</th>
+				                        				<th width="15%">Machinary</th>
+				                        				<th width="15%">Start Time</th>
+				                        				<th width="15%">End Time</th>
 				                        				<th width="10%">Manage</th>
 				                        			</tr>
 				                        		</thead>
@@ -128,7 +144,26 @@
 																<input type="text" class="form-control reason_<?php echo $cnt; ?>" placeholder="Reason" value="<?php echo $row->reason; ?>">
 															</td>
 															<td>
-																<input type="text" class="form-control noWorkTime_<?php echo $cnt; ?>" placeholder="No Work Time" value="<?php echo $row->noworktime; ?>">
+																<select class="form-control machinaryId_<?php echo $cnt; ?>" style="width: 100%;" data-placeholder="Select">
+																	<option value=""></option>
+																	<?php
+																	foreach($machinaryRequirements as $res)
+																	{
+																		echo '<option value="'.$res->id.'"';
+																		if($row->machinaryid == $res->id)
+																		{
+																			echo ' selected="selected"';
+																		}
+																		echo '>'.$res->machineryname.'</option>';
+																	}
+																	?>
+																</select>
+															</td>
+															<td>
+																<input type="text" class="form-control startTime_<?php echo $cnt; ?>" placeholder="Start Time" value="<?php echo $row->starttime; ?>">
+															</td>
+															<td>
+																<input type="text" class="form-control endTime_<?php echo $cnt; ?>" placeholder="End Time" value="<?php echo $row->endtime; ?>">
 															</td>
 															<td>
 																<button type="button" title="Delete" class="btn btn-danger btn-xs btn-perspective delDtl"><i class="fa fa-close"></i></button>
@@ -176,9 +211,14 @@
     </div>
 </div>
 
+<div id="machinaryRequirementsDiv" style="display: none;"><?php echo json_encode($machinaryRequirements); ?></div>
+
 <script>
 	
 	var deletedRowsCount = 0;
+	
+	var machinaryRequirements = $("#machinaryRequirementsDiv").html();
+	machinaryRequirements = JSON.parse(machinaryRequirements);
 	
 	$(document).ready(function()
 	{
@@ -188,6 +228,7 @@
 			format: 'dd/mm/yyyy', 
 			autoclose: true
 		});
+		$("select").select2();
 		
 		var noWorkId = '<?php echo $noWorkId; ?>';
 		if(noWorkId == "")
@@ -232,7 +273,20 @@
 			str += '<input type="text" class="form-control reason_'+parseInt(rowNo)+'" placeholder="Reason" value="">';
 			str += '</td>';
 			str += '<td>';
-			str += '<input type="text" class="form-control noWorkTime_'+parseInt(rowNo)+'" placeholder="No Work Time" value="">';
+			str += '<select class="form-control machinaryId_'+parseInt(rowNo)+'" style="width: 100%;" data-placeholder="Select">';
+			str += '<option value=""></option>';
+			for(var k=0; k<machinaryRequirements.length; k++)
+			{
+				str += '<option value="'+machinaryRequirements[k].id+'"';
+				str += '>'+machinaryRequirements[k].machineryname+'</option>';
+			}
+			str += '</select>';
+			str += '</td>';
+			str += '<td>';
+			str += '<input type="text" class="form-control startTime_'+parseInt(rowNo)+'" placeholder="Start Time" value="">';
+			str += '</td>';
+			str += '<td>';
+			str += '<input type="text" class="form-control endTime_'+parseInt(rowNo)+'" placeholder="End Time" value="">';
 			str += '</td>';
 			str += '<td>';
 			str += '<button type="button" title="Delete" class="btn btn-danger btn-xs btn-perspective delDtl"><i class="fa fa-close"></i></button>';
@@ -240,6 +294,7 @@
 			str += '</tr>';
 			
 			$(".detailsTBody").append(str);
+			$("select").select2();
 		}
 	}
 	
@@ -260,6 +315,7 @@
 		var noWorkId = '<?php echo $noWorkId; ?>';
 		var entryDate = $("#entryDate").val();
 		var lineName = $("#lineName").val();
+		var shiftName = $("#shiftName").val();
 		
 		var dtlArr = [];
 		
@@ -269,13 +325,17 @@
 		{
 			var rowNo = $(this).attr('rowNo');
 			var reason = $(".reason_"+rowNo).val();
-			var noWorkTime = $(".noWorkTime_"+rowNo).val();
+			var machinaryId = $(".machinaryId_"+rowNo).val();
+			var startTime = $(".startTime_"+rowNo).val();
+			var endTime = $(".endTime_"+rowNo).val();
 			
-			if(reason != "" && noWorkTime != "")
+			if(reason != "" && machinaryId > 0 && startTime != "" && endTime != "")
 			{
 				var cri = {};
 				cri["reason"] = reason;
-				cri["noWorkTime"] = noWorkTime;
+				cri["machinaryId"] = machinaryId;
+				cri["startTime"] = startTime;
+				cri["endTime"] = endTime;
 				
 				dtlArr.push(cri);
 			}
@@ -304,6 +364,7 @@
 					"noWorkId" : noWorkId,
 					"entryDate" : entryDate,
 					"lineName" : lineName,
+					"shiftName" : shiftName,
 					"dtlArr" : JSON.stringify(dtlArr)
 				};
 				req.url = "admin/saveNoWorkTime";

@@ -67,15 +67,15 @@
 										<td><?php echo $row->avail_min; ?></td>
 										<td><?php echo $row->current_target; ?></td>
 										<td><?php echo $row->issues; ?></td>
-										<td><?php echo $row->hour_1; ?></td>
-										<td><?php echo $row->hour_2; ?></td>
-										<td><?php echo $row->hour_3; ?></td>
-										<td><?php echo $row->hour_4; ?></td>
-										<td><?php echo $row->hour_5; ?></td>
-										<td><?php echo $row->hour_6; ?></td>
-										<td><?php echo $row->hour_7; ?></td>
-										<td><?php echo $row->hour_8; ?></td>
-										<td><?php echo $row->ot_pieces; ?></td>
+										<td><?php echo $row->hour1; ?></td>
+										<td><?php echo $row->hour2; ?></td>
+										<td><?php echo $row->hour3; ?></td>
+										<td><?php echo $row->hour4; ?></td>
+										<td><?php echo $row->hour5; ?></td>
+										<td><?php echo $row->hour6; ?></td>
+										<td><?php echo $row->hour7; ?></td>
+										<td><?php echo $row->hour8; ?></td>
+										<td><?php echo $row->othour; ?></td>
 										<td><?php echo $row->totalpieces; ?></td>
 										<td><?php echo $row->wip; ?></td>
 										<td><?php echo $row->idletime; ?></td>

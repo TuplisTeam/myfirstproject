@@ -109,7 +109,7 @@
 	                        </div>
 	                        <div class="form-group">
 	                            <label class="col-sm-2 control-label">
-									Style Desc
+									Style Desc&nbsp;<span style="color: red;">*</span>
 								</label>
 	                            <div class="col-sm-6">
 	                                <textarea class="form-control" id="styleDesc" name="styleDesc" placeholder="Style Desc"><?php echo $styleDesc; ?></textarea>

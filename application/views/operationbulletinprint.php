@@ -169,7 +169,7 @@
 							?>
 							<tr>
 								<td><?php echo $i; ?></td>
-								<td><?php echo $res->operation_desc; ?></td>
+								<td><?php echo $res->operationname; ?></td>
 								<td><?php echo $res->frequency; ?></td>
 								<td><?php echo $res->machine; ?></td>
 								<td><?php echo $res->smv; ?></td>
@@ -196,7 +196,7 @@
 							{
 							?>
 							<tr>
-								<td><?php echo $res->machinery_requirement; ?></td>
+								<td><?php echo $res->machineryname; ?></td>
 								<td><?php echo $res->numbers; ?></td>
 								<td><?php echo $res->smv; ?></td>
 							</tr>
@@ -217,7 +217,7 @@
 							{
 							?>
 							<tr>
-								<td><?php echo $res->manualwork; ?></td>
+								<td><?php echo $res->manualworkname; ?></td>
 								<td><?php echo $res->numbers; ?></td>
 								<td><?php echo $res->smv; ?></td>
 							</tr>

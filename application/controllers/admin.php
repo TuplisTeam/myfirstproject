@@ -95,6 +95,7 @@ public function users($userId = '')
 	$data["userName"] = "";
 	$data["userEmail"] = "";
 	$data["userType"] = "";
+	$data["sectionName"] = "";
 	
 	if($userId > 0)
 	{
@@ -103,6 +104,7 @@ public function users($userId = '')
 			$data["userName"] = $row->firstname;
 			$data["userEmail"] = $row->email;
 			$data["userType"] = $row->usertype;
+			$data["sectionName"] = $row->sectionname;
 		}
 	}
 	else
@@ -122,6 +124,7 @@ public function saveUser()
 	$userName = $this->input->post('userName');
 	$userEmail = $this->input->post('userEmail');
 	$userType = $this->input->post('userType');
+	$sectionName = $this->input->post('sectionName');
 	$menuPermissionsArr = $this->input->post('menuPermissionsArr');
 	$menuPermissionsArr = json_decode($menuPermissionsArr);
 	
@@ -135,7 +138,7 @@ public function saveUser()
 		return;
 	}
 	
-	if($userName != "" && $userEmail != "" && $userType != "")
+	if($userName != "" && $userEmail != "" && $userType != "" && $sectionName != "")
 	{
 		$resCheck = $this->adminmodel->checkUserAvailability($userId, $userEmail);
 		if($resCheck > 0)
@@ -145,7 +148,7 @@ public function saveUser()
 		}
 		else
 		{
-			$this->adminmodel->saveUser($userId, $userName, $userEmail, $userType, $menuPermissionsArr);
+			$this->adminmodel->saveUser($userId, $userName, $userEmail, $userType, $sectionName, $menuPermissionsArr);
 			
 			$data["isError"] = FALSE;
 			if($userId > 0)
@@ -1073,8 +1076,14 @@ public function employee_vs_operation($entryId = '')
 	
 	$data["entryDate"] = '';
 	$data["employeeId"] = '';
-	$data["operationName"] = '';
+	$data["lineName"] = '';
+	$data["operationId"] = '';
 	$data["machinaryId"] = '';
+	$data["smv"] = '';
+	
+	$data["empDtls"] = $this->adminmodel->getEmployeeDetails();
+	$data["machinaryDtls"] = $this->adminmodel->getMachineryDetails();
+	$data["operationDtls"] = $this->adminmodel->getOperationDetails();
 	
 	$res = $this->adminmodel->getEmployeeVsOperationDetails($entryId);
 	
@@ -1086,8 +1095,10 @@ public function employee_vs_operation($entryId = '')
 			{
 				$data["entryDate"] = $row->entrydate;
 				$data["employeeId"] = $row->empid;
-				$data["operationName"] = $row->operationname;
+				$data["lineName"] = $row->linename;
+				$data["operationId"] = $row->operationid;
 				$data["machinaryId"] = $row->machinaryid;
+				$data["smv"] = $row->smv;
 			}
 		}
 	}
@@ -1107,8 +1118,10 @@ public function saveEmployeeVsOperation()
 	$entryId = $this->input->post('entryId');
 	$entryDate = $this->input->post('entryDate');
 	$employeeId = $this->input->post('employeeId');
-	$operationName = $this->input->post('operationName');
+	$lineName = $this->input->post('lineName');
+	$operationId = $this->input->post('operationId');
 	$machinaryId = $this->input->post('machinaryId');
+	$smv = $this->input->post('smv');
 	
 	$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
 	
@@ -1122,7 +1135,7 @@ public function saveEmployeeVsOperation()
 		return;
 	}
 	
-	if($entryDate != "" && $employeeId > 0 && $operationName != "" && $machinaryId > 0)
+	if($entryDate != "" && $employeeId > 0 && $operationId > 0 && $machinaryId > 0 && $smv != "")
 	{
 		$res = $this->adminmodel->checkEmployeeVsOperationavailability($entryId, $entryDate, $employeeId);
 		if($res > 0)
@@ -1132,7 +1145,7 @@ public function saveEmployeeVsOperation()
 		}
 		else
 		{
-			$this->adminmodel->saveEmployeeVsOperation($entryId, $entryDate, $employeeId, $operationName, $machinaryId);
+			$this->adminmodel->saveEmployeeVsOperation($entryId, $entryDate, $employeeId, $lineName, $operationId, $machinaryId, $smv);
 			
 			$data["isError"] = FALSE;
 			if($empId > 0)
@@ -1167,6 +1180,7 @@ public function skillmatrix($skillMatrixId = '')
 	
 	$data["entryDate"] = "";
 	$data["lineName"] = "";
+	$data["shiftName"] = "";
 	$data["dtlArr"] = array();
 	
 	if($skillMatrixId > 0)
@@ -1175,6 +1189,7 @@ public function skillmatrix($skillMatrixId = '')
 		{
 			$data["entryDate"] = $row->entrydate;
 			$data["lineName"] = $row->linename;
+			$data["shiftName"] = $row->shifttime;
 			$data["dtlArr"] = $this->adminmodel->getSkillMatrix_EmpDetails($skillMatrixId);
 		}
 	}
@@ -1247,10 +1262,13 @@ public function noworktime($noWorkId = '')
 	
 	$data["noWorkId"] = $noWorkId;
 	
+	$data["machinaryRequirements"] = $this->adminmodel->getMachineryDetails();
+	
 	$res = $this->adminmodel->getNoWork_HdrDetails($noWorkId);
 	
 	$data["entryDate"] = "";
 	$data["lineName"] = "";
+	$data["shiftName"] = "";
 	$data["dtlArr"] = array();
 	
 	if($noWorkId > 0)
@@ -1259,6 +1277,7 @@ public function noworktime($noWorkId = '')
 		{
 			$data["entryDate"] = $row->entrydate;
 			$data["lineName"] = $row->linename;
+			$data["shiftName"] = $row->shiftname;
 			$data["dtlArr"] = $this->adminmodel->getNoWork_ReasonDetails($noWorkId);
 		}
 	}
@@ -1278,6 +1297,7 @@ public function saveNoWorkTime()
 	$noWorkId = $this->input->post('noWorkId');
 	$entryDate = $this->input->post('entryDate');
 	$lineName = $this->input->post('lineName');
+	$shiftName = $this->input->post('shiftName');
 	$dtlArr = $this->input->post('dtlArr');
 	$dtlArr = json_decode($dtlArr);
 	
@@ -1293,9 +1313,9 @@ public function saveNoWorkTime()
 		return;
 	}
 	
-	if($entryDate != "" && $lineName != "" && count($dtlArr) > 0)
+	if($entryDate != "" && $lineName != "" && $shiftName != "" && count($dtlArr) > 0)
 	{
-		$availRes = $this->adminmodel->checkDateLineNameAvailability_NoWork($noWorkId, $entryDate, $lineName);
+		$availRes = $this->adminmodel->checkDateLineNameAvailability_NoWork($noWorkId, $entryDate, $lineName, $shiftName);
 		if($availRes > 0)
 		{
 			$data["isError"] = TRUE;
@@ -1303,7 +1323,7 @@ public function saveNoWorkTime()
 		}
 		else
 		{
-			$this->adminmodel->saveNoWorkTime($noWorkId, $entryDate, $lineName, $dtlArr);
+			$this->adminmodel->saveNoWorkTime($noWorkId, $entryDate, $lineName, $shiftName, $dtlArr);
 			
 			$data["isError"] = FALSE;
 			if($noWorkId > 0)
@@ -1331,14 +1351,23 @@ public function assemblyloading($assemblyLoadingId = '')
 	$data["assemblyLoadingId"] = $assemblyLoadingId;
 	
 	$data["empDtls"] = $this->adminmodel->getEmployeeDetails();
-	$res = $this->adminmodel->getAssemblyLoading_HdrDetails($assemblyLoadingId);
+	$res = $this->adminmodel->getAssemblyLoadingDetails($assemblyLoadingId);
 	
 	$data["entryDate"] = "";
 	$data["lineName"] = "";
 	$data["shiftName"] = "";
-	$data["totalWorkers"] = "";
+	$data["lineIncharge"] = "";
+	$data["target"] = "";
+	$data["hour1"] = "";
+	$data["hour2"] = "";
+	$data["hour3"] = "";
+	$data["hour4"] = "";
+	$data["hour5"] = "";
+	$data["hour6"] = "";
+	$data["hour7"] = "";
+	$data["hour8"] = "";
+	$data["otHour"] = "";
 	$data["totalPieces"] = "";
-	$data["dtlArr"] = array();
 	
 	if($assemblyLoadingId > 0)
 	{
@@ -1347,9 +1376,18 @@ public function assemblyloading($assemblyLoadingId = '')
 			$data["entryDate"] = $row->entrydate;
 			$data["lineName"] = $row->linename;
 			$data["shiftName"] = $row->shift;
-			$data["totalWorkers"] = $row->totalworkers;
+			$data["lineIncharge"] = $row->lineincharge;
+			$data["target"] = $row->target;
+			$data["hour1"] = $row->hour1;
+			$data["hour2"] = $row->hour2;
+			$data["hour3"] = $row->hour3;
+			$data["hour4"] = $row->hour4;
+			$data["hour5"] = $row->hour5;
+			$data["hour6"] = $row->hour6;
+			$data["hour7"] = $row->hour7;
+			$data["hour8"] = $row->hour8;
+			$data["othour"] = $row->othour;
 			$data["totalPieces"] = $row->totalpieces;
-			$data["dtlArr"] = $this->adminmodel->getAssemblyLoading_EmpDetails($assemblyLoadingId);
 		}
 	}
 	else
@@ -1362,6 +1400,27 @@ public function assemblyloading($assemblyLoadingId = '')
 	$this->load->view('footer');
 }
 
+public function getEmployeesByEntryDateLineName()
+{
+	$entryDate = $this->input->post('entryDate');
+	$lineName = $this->input->post('lineName');
+	
+	$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
+	
+	if($entryDate != "" && $lineName != "")
+	{
+		$data["isError"] = FALSE;
+		$data["msg"] = "";
+		$data["res"] = $this->adminmodel->getEmployeeVsOperationDetails('', $entryDate, $lineName);
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
+}
+
 public function saveAssemblyLoading()
 {
 	$menuId = $this->input->post('menuId');
@@ -1369,12 +1428,19 @@ public function saveAssemblyLoading()
 	$entryDate = $this->input->post('entryDate');
 	$lineName = $this->input->post('lineName');
 	$shiftName = $this->input->post('shiftName');
-	$totalWorkers = $this->input->post('totalWorkers');
+	$lineIncharge = $this->input->post('lineIncharge');
+	$target = $this->input->post('target');
+	$hour1 = $this->input->post('hour1');
+	$hour2 = $this->input->post('hour2');
+	$hour3 = $this->input->post('hour3');
+	$hour4 = $this->input->post('hour4');
+	$hour5 = $this->input->post('hour5');
+	$hour6 = $this->input->post('hour6');
+	$hour7 = $this->input->post('hour7');
+	$hour8 = $this->input->post('hour8');
+	$otHour = $this->input->post('otHour');
 	$totalPieces = $this->input->post('totalPieces');
-	$totalTarget = $this->input->post('totalTarget');
-	$dtlArr = $this->input->post('dtlArr');
-	$dtlArr = json_decode($dtlArr);
-	
+		
 	$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
 	
 	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $assemblyLoadingId);
@@ -1387,7 +1453,7 @@ public function saveAssemblyLoading()
 		return;
 	}
 	
-	if($entryDate != "" && $lineName != "" && $shiftName != "" && $totalWorkers > 0 && $totalPieces > 0 && $totalTarget > 0 && count($dtlArr) > 0)
+	if($entryDate != "" && $lineName != "" && $shiftName != "" && $lineIncharge > 0 && $totalPieces > 0)
 	{
 		$availRes = $this->adminmodel->checkDateLineNameAvailability_AssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $shiftName);
 		if($availRes > 0)
@@ -1397,7 +1463,7 @@ public function saveAssemblyLoading()
 		}
 		else
 		{
-			$this->adminmodel->saveAssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $shiftName, $totalWorkers, $totalPieces, $totalTarget, $dtlArr);
+			$this->adminmodel->saveAssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $shiftName, $lineIncharge, $target, $hour1, $hour2, $hour3, $hour4, $hour5, $hour6, $hour7, $hour8, $otHour, $totalPieces);
 		
 			$data["isError"] = FALSE;
 			if($assemblyLoadingId > 0)
@@ -1694,6 +1760,7 @@ public function operationbulletin($bulletinId = '')
 	
 	$data["machinaryRequirements"] = $this->adminmodel->getMachineryDetails();
 	$data["manualWorkRequirements"] = $this->adminmodel->getManualWorkDetails();
+	$data["operations"] = $this->adminmodel->getOperationDetails();
 	
 	$data["operationDtls"] = array();
 	$data["machineryDtls"] = array();
@@ -2125,7 +2192,7 @@ public function getHourlyProductionReport()
 			{
 			   	$i++;
 				
-				$str .= $i.',"'.$row->entrydt.'","'.$row->linename.'","'.$row->shift.'","'.$row->empno.'","'.$row->empname.'","'.$row->hour_1.'","'.$row->hour_2.'","'.$row->hour_3.'","'.$row->hour_4.'","'.$row->hour_5.'","'.$row->hour_6.'","'.$row->hour_7.'","'.$row->hour_8.'","'.$row->ot_pieces.'","'.$row->totalpieces.'"'."\n";
+				$str .= $i.',"'.$row->entrydt.'","'.$row->linename.'","'.$row->shift.'","'.$row->empno.'","'.$row->empname.'","'.$row->hour1.'","'.$row->hour2.'","'.$row->hour3.'","'.$row->hour4.'","'.$row->hour5.'","'.$row->hour6.'","'.$row->hour7.'","'.$row->hour8.'","'.$row->othour.'","'.$row->totalpieces.'"'."\n";
 		  	}
 		}
 		else
@@ -2183,7 +2250,7 @@ public function getHourlyProductionLineWiseReport()
 			{
 			   	$i++;
 				
-				$str .= $i.',"'.$row->entrydt.'","'.$row->linename.'","'.$row->shift.'","'.$row->operationname.'","'.$row->no_of_workers.'","'.$row->days_target.'","'.$row->target_per_hr.'","'.$row->no_of_operators.'","'.$row->avail_min.'","'.$row->current_target.'","'.$row->issues.'","'.$row->hour_1.'","'.$row->hour_2.'","'.$row->hour_3.'","'.$row->hour_4.'","'.$row->hour_5.'","'.$row->hour_6.'","'.$row->hour_7.'","'.$row->hour_8.'","'.$row->ot_pieces.'","'.$row->totalpieces.'","'.$row->wip.'","'.$row->idletime.'","'.$row->breakdown_time.'","'.$row->rework_time.'","'.$row->nowork_time.'","'.$row->line_efficiency.'"'."\n";
+				$str .= $i.',"'.$row->entrydt.'","'.$row->linename.'","'.$row->shift.'","'.$row->operationname.'","'.$row->no_of_workers.'","'.$row->days_target.'","'.$row->target_per_hr.'","'.$row->no_of_operators.'","'.$row->avail_min.'","'.$row->current_target.'","'.$row->issues.'","'.$row->hour1.'","'.$row->hour2.'","'.$row->hour3.'","'.$row->hour4.'","'.$row->hour5.'","'.$row->hour6.'","'.$row->hour7.'","'.$row->hour8.'","'.$row->othour.'","'.$row->totalpieces.'","'.$row->wip.'","'.$row->idletime.'","'.$row->breakdown_time.'","'.$row->rework_time.'","'.$row->nowork_time.'","'.$row->line_efficiency.'"'."\n";
 		  	}
 		}
 		else
@@ -2244,7 +2311,7 @@ public function getAssemblyLoadingReport()
 			{
 			   	$i++;
 				
-				$str .= $i.',"'.$row->entrydt.'","'.$row->linename.'","'.$row->shift.'","'.$row->empno.'","'.$row->empname.'","'.$row->hour_1.'","'.$row->hour_2.'","'.$row->hour_3.'","'.$row->hour_4.'","'.$row->hour_5.'","'.$row->hour_6.'","'.$row->hour_7.'","'.$row->hour_8.'","'.$row->ot_pieces.'","'.$row->totalpieces.'"'."\n";
+				$str .= $i.',"'.$row->entrydt.'","'.$row->linename.'","'.$row->shift.'","'.$row->empno.'","'.$row->empname.'","'.$row->hour1.'","'.$row->hour2.'","'.$row->hour3.'","'.$row->hour4.'","'.$row->hour5.'","'.$row->hour6.'","'.$row->hour7.'","'.$row->hour8.'","'.$row->othour.'","'.$row->totalpieces.'"'."\n";
 		  	}
 		}
 		else
