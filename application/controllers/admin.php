@@ -2479,9 +2479,14 @@ public function checkScreenPermissionAvailability($menuId, $type, $id = '')
 	return $data;
 }
 
-/*Common Function Ends*/
+public function getBarcode()
+{
+	$this->adminmodel->generateBarcode(123);
+}
 
-/*Manju Starts*/
+/*Common Function Ends*/
+	
+/*Manju Ends*/
 
 /*Pratheep Starts*/
 /*Pratheep Ends*/

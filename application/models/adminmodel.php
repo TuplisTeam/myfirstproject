@@ -1522,6 +1522,16 @@ public function getAssemblyLoadingReport($fromDate, $toDate, $employeeId)
 
 /*Report Ends*/
 
+public function generateBarcode($code)
+{
+	//load library
+	$this->load->library('zend');
+	//load in folder Zend
+	$this->zend->load('Zend/Barcode');
+	//generate barcode
+	Zend_Barcode::render('code128', 'image', array('text'=>$code), array());
+}
+
 /*Manju Ends*/
 
 /*Pratheep Starts*/
