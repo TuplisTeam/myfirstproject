@@ -190,12 +190,17 @@ public function checkUserAvailability($userId, $userEmail)
 	return $res->num_rows();
 }
 
-public function saveUser($userId, $userName, $userEmail, $userType, $sectionName, $menuPermissionsArr)
+public function saveUser($userId, $userName, $userEmail, $userType, $userPassword, $sectionName, $menuPermissionsArr)
 {
 	if($userId > 0)
 	{
+		$myStr = '';
+		if($userPassword != "")
+		{
+			$myStr = "password = md5('".$userPassword."'), ";
+		}
 		$sql = "UPDATE users SET 
-					email = '".$userEmail."', 
+					email = '".$userEmail."', $myStr
 					firstname = '".$userName."', usertype = '".$userType."', 
 					sectionname = '".$sectionName."', 
 					modified_on = NOW(), 
@@ -206,7 +211,7 @@ public function saveUser($userId, $userName, $userEmail, $userType, $sectionName
 	else
 	{
 		$sql = "INSERT INTO users SET 
-					email = '".$userEmail."', password = md5(123), 
+					email = '".$userEmail."', password = md5('".$userPassword."'), 
 					firstname = '".$userName."', usertype = '".$userType."', 
 					sectionname = '".$sectionName."', 
 					created_on = NOW(), 

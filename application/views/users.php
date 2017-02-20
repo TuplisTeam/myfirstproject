@@ -109,6 +109,14 @@
 									</select>
 	                            </div>
 	                        </div>
+	                        <div class="form-group">
+	                            <label class="col-sm-2 control-label">
+									Password&nbsp;<span style="color: red;">*</span>
+								</label>
+	                            <div class="col-sm-6">
+	                                <input type="password" class="form-control" id="userPassword" name="userPassword" placeholder="User Password" value="">
+	                            </div>
+	                        </div>
 							<div class="form-group">
 	                            <label class="col-sm-2 control-label">
 									Section&nbsp;<span style="color: red;">*</span>
@@ -325,6 +333,7 @@
 		var userName = $("#userName").val();
 		var userEmail = $("#userEmail").val();
 		var userType = $("#userType").val();
+		var userPassword = $("#userPassword").val();
 		var sectionName = $("#sectionName").val();
 		
 		var menuPermissionsArr = [];
@@ -368,6 +377,7 @@
 				"userName" : userName, 
 				"userEmail" : userEmail, 
 				"userType" : userType, 
+				"userPassword" : userPassword, 
 				"sectionName" : sectionName, 
 				"menuPermissionsArr" : JSON.stringify(menuPermissionsArr)
 			};

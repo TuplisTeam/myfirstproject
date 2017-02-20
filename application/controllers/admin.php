@@ -124,6 +124,7 @@ public function saveUser()
 	$userName = $this->input->post('userName');
 	$userEmail = $this->input->post('userEmail');
 	$userType = $this->input->post('userType');
+	$userPassword = $this->input->post('userPassword');
 	$sectionName = $this->input->post('sectionName');
 	$menuPermissionsArr = $this->input->post('menuPermissionsArr');
 	$menuPermissionsArr = json_decode($menuPermissionsArr);
@@ -148,16 +149,24 @@ public function saveUser()
 		}
 		else
 		{
-			$this->adminmodel->saveUser($userId, $userName, $userEmail, $userType, $sectionName, $menuPermissionsArr);
-			
-			$data["isError"] = FALSE;
-			if($userId > 0)
+			if((($userId == "" || $userId == 0) && $userPassword != "") || $userId > 0)
 			{
-				$data["msg"] = "User Updated Successfully...";
+				$this->adminmodel->saveUser($userId, $userName, $userEmail, $userType, $userPassword, $sectionName, $menuPermissionsArr);
+			
+				$data["isError"] = FALSE;
+				if($userId > 0)
+				{
+					$data["msg"] = "User Updated Successfully...";
+				}
+				else
+				{
+					$data["msg"] = "User Created Successfully...";
+				}
 			}
 			else
 			{
-				$data["msg"] = "User Created Successfully...";
+				$data["isError"] = TRUE;
+				$data["msg"] = "Password Should Not Be Empty.";
 			}
 		}
 	}
