@@ -68,6 +68,74 @@ public function getUserDetailsByEmail()
 	echo json_encode($data);
 }
 
+public function forgotpassword()
+{
+	$this->load->view("forgotpassword");
+}
+
+public function checkForgotPassword()
+{
+ 	$email = $this->input->post("email");
+	$res = $this->adminmodel->getUserDetailsByEmail($email);
+	if(count($res) > 0)
+	{
+	 	$this->adminmodel->checkForgotPassword($email);
+ 	
+	 	$data["isError"] = FALSE;
+		$data["msg"] = "Please check your mail to reset password. Also please check your spam mail if you have not received the activation email.";
+ 	}
+ 	else
+ 	{
+		$data["isError"] = TRUE;
+	 	$data["msg"] = "There is no account registered with this email id";
+	}
+	echo json_encode($data);
+}
+
+public function resetpassword($email)
+{
+	if($email != "")
+	{
+		$email = base64_decode(urldecode($email));
+		$data["email"] = $email;
+		$res = $this->adminmodel->getUserDetailsByEmail($email);
+		if(count($res) > 0)
+		{
+			$data["userId"] = $res[0]->userid;
+			$this->load->view('resetpassword',$data);
+		}
+		else
+		{
+			echo "<h2>There is some problem.</h2>";
+		}
+	}
+	else
+	{
+		redirect(base_url());
+	}
+}
+
+public function resetNewPassword()
+{
+	$userId = $this->input->post('userId');
+	$newPassword = $this->input->post('newPassword');
+	$confirmPassword = $this->input->post('confirmPassword');
+	
+	if($userId > 0 && $newPassword != "" && $confirmPassword != "" && ($newPassword == $confirmPassword))
+	{
+		$this->adminmodel->updatePassword($userId, $newPassword);
+ 	
+	 	$data["isError"] = FALSE;
+		$data["msg"] = "Password Resetted Successfully.";
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+	 	$data["msg"] = "Password Must Match.";
+	}
+	echo json_encode($data);
+}
+
 /*Manju Ends*/
 
 }

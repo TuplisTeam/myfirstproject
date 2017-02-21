@@ -148,6 +148,12 @@ public function checkLogin($email, $password, $sectionName)
 	return;
 }
 
+public function checkForgotPassword($email)
+{
+ 	$myURL = base_url().'common/sendForgotPassword/'.$email;
+	$this->initializeCURL($myURL);
+}
+
 public function getUserDetails($userType = '', $userId = '')
 {
 	$sql = "SELECT u.*, IFNULL(cb.firstname,'') AS createdby
@@ -1522,6 +1528,8 @@ public function getAssemblyLoadingReport($fromDate, $toDate, $employeeId)
 
 /*Report Ends*/
 
+/*Common Function Starts*/
+
 public function generateBarcode($code)
 {
 	//load library
@@ -1531,6 +1539,18 @@ public function generateBarcode($code)
 	//generate barcode
 	Zend_Barcode::render('code128', 'image', array('text'=>$code), array());
 }
+
+public function initializeCURL($url)
+{
+	$ch = curl_init();  
+	curl_setopt($ch, CURLOPT_URL,$url);
+	curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);
+	curl_setopt($ch, CURLOPT_TIMEOUT, 1);   
+	curl_exec($ch);
+	curl_close($ch);
+}
+
+/*Common Function Ends*/
 
 /*Manju Ends*/
 

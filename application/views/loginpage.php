@@ -72,8 +72,8 @@
 									<button type="submit" class="btn btn-success btn-block">
 										Login
 									</button>
-									<!--<a href="<?php echo base_url(); ?>login/forgotpassword" class="display-block text-center m-t-md text-sm">Forgot Password?</a>
-									<p class="text-center m-t-xs text-sm">
+									<a href="<?php echo base_url(); ?>login/forgotpassword" class="display-block text-center m-t-md text-sm">Forgot Password?</a>
+									<!--<p class="text-center m-t-xs text-sm">
 										DO NOT HAVE AN ACCOUNT?
 									</p>
 									<a href="<?php echo base_url(); ?>login/register" class="btn btn-default btn-block m-t-md">CREATE AN ACCOUNT</a>-->
