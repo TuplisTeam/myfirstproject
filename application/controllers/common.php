@@ -17,7 +17,6 @@ public function sendForgotPassword($email)
 public function sendEmail($toEmail, $subject, $heading, $msg)
 {
 	$fromEmail = $this->config->item("fromEmail");
-	$toEmail = 'manjusrianu@gmail.com';
 	
 	$this->load->library('email');
 	$this->email->from($fromEmail);
