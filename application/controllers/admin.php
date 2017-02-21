@@ -328,10 +328,9 @@ public function printBarcode($barcodeId)
 	$data["color"] = '';
 	$data["size"] = '';
 	
-	$res = $this->adminmodel->getBarcodeDetails($barcodeId);
-	
 	if($barcodeId > 0)
 	{
+		$res = $this->adminmodel->getBarcodeDetails($barcodeId);
 		if(count($res) > 0)
 		{
 			foreach($res as $row)
@@ -351,6 +350,24 @@ public function printBarcode($barcodeId)
 	}
 	
 	$this->load->view('print/barcode', $data);
+}
+
+public function printBarcodeSticker($barcodeId)
+{
+	$barcode = '';
+	if($barcodeId > 0)
+	{
+		$res = $this->adminmodel->getBarcodeDetails($barcodeId);
+		if(count($res) > 0)
+		{
+			foreach($res as $row)
+			{
+				$barcode = str_replace(" ", "_", $row->barcode);
+			}
+		}
+	}
+	
+	$this->adminmodel->generateBarcode($barcode);
 }
 
 public function deliverynote($deliveryNoteId = '')

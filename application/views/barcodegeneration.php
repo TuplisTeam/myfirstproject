@@ -70,6 +70,9 @@
 											<button class="btn btn-sm btn-warning printEntry" barcodeId="<?php echo $row->id; ?>" title="Print">
 												<span class="fa fa-print"></span>
 											</button>
+											<button class="btn btn-sm btn-primary printBarcodeSticker" barcodeId="<?php echo $row->id; ?>" title="Print Barcode Sticker">
+												<span class="fa fa-barcode"></span>
+											</button>
 										</td>
 									</tr>
 									<?php
@@ -402,6 +405,15 @@
 		if(barcodeId > 0)
 		{
 			window.open('<?php echo base_url(); ?>admin/printBarcode/'+barcodeId);
+		}
+	});
+	
+	$(".printBarcodeSticker").click(function()
+	{
+		var barcodeId = $(this).attr('barcodeId');
+		if(barcodeId > 0)
+		{
+			window.open('<?php echo base_url(); ?>admin/printBarcodeSticker/'+barcodeId);
 		}
 	});
 	
