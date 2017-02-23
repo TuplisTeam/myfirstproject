@@ -52,7 +52,13 @@
                                     <div class="form-group">
                                         <input type="email" id="email" class="form-control" placeholder="Email" required>
                                     </div>
-                                    <button type="submit" class="btn btn-primary btn-block">Submit</button>
+                                    <div class="form-group">
+                                        <input type="password" class="form-control" placeholder="New Password" id="newPassword" name="newPassword" required>
+                                    </div>
+									<div class="form-group">
+                                        <input type="password" class="form-control" placeholder="Confirm Password" id="confirmPassword" name="confirmPassword" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-block">Reset Password</button>
                                     <a href="<?php echo base_url(); ?>" class="btn btn-default btn-block m-t-md">Back</a>
                                 </form>
                                 <p class="text-center m-t-xs text-sm">2016 &copy;</p>
@@ -82,10 +88,8 @@
         
         <script>
         
-        	$("#forgotPassword").submit(function(e)
+        	$("#email").blur(function()
         	{
-        		e.preventDefault();
-				
 				var email = $("#email").val();
 				
 				if(email != "")
@@ -95,11 +99,67 @@
 					{
 						"email" : email
 					};
-					req.url = "login/checkForgotPassword";
-					RequestHandler(req, showResponse);
+					req.url = "login/getUserDetailsByEmail";
+					RequestHandler(req, isEmailAvail);
 				}
         	});
         	
+        	function isEmailAvail(data)
+        	{
+				data = JSON.parse(data);
+				
+				var isError = data.isError;
+				var msg = data.msg;
+				if(isError)
+				{
+					alert(msg);
+				}
+				else
+				{
+					var res = data.res;
+					if(res.length == 1)
+					{
+					}
+					else
+					{
+						alert('No User Name Or Email Found.');
+						$("#email").val('');
+						return;
+					}
+				}
+			}
+			
+			$("#forgotPassword").submit(function(e)
+			{
+				e.preventDefault();	
+				
+				var email = $("#email").val();
+				var newPassword = $("#newPassword").val();
+				var confirmPassword = $("#confirmPassword").val();
+				
+				if(email != "" && newPassword != "" && confirmPassword != "" && (newPassword == confirmPassword))
+				{
+					$("#responseMsg").html('');
+					var req = new Request();
+					req.data =
+					{
+						"email" : email, 
+						"newPassword" : newPassword,
+						"confirmPassword" : confirmPassword
+					}
+					req.url = "login/resetNewPassword";
+					RequestHandler(req,showResponse);
+				}
+				else
+				{
+					var str = '<div role="alert" class="alert alert-danger">';
+					str += 'OOPS! Please Fill All Fields.';
+					str += '</div>';
+					$("#responseMsg").html(str);
+					return;
+				}
+			});
+
         	function showResponse(data)
 			{
 				data = JSON.parse(data);

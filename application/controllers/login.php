@@ -73,7 +73,7 @@ public function forgotpassword()
 	$this->load->view("forgotpassword");
 }
 
-public function checkForgotPassword()
+/*public function checkForgotPassword()
 {
  	$email = $this->input->post("email");
 	$res = $this->adminmodel->getUserDetailsByEmail($email);
@@ -113,17 +113,17 @@ public function resetpassword($email)
 	{
 		redirect(base_url());
 	}
-}
+}*/
 
 public function resetNewPassword()
 {
-	$userId = $this->input->post('userId');
+	$email = $this->input->post('email');
 	$newPassword = $this->input->post('newPassword');
 	$confirmPassword = $this->input->post('confirmPassword');
 	
-	if($userId > 0 && $newPassword != "" && $confirmPassword != "" && ($newPassword == $confirmPassword))
+	if($email != "" && $newPassword != "" && $confirmPassword != "" && ($newPassword == $confirmPassword))
 	{
-		$this->adminmodel->updatePassword($userId, $newPassword);
+		$this->adminmodel->updatePassword($email, $newPassword);
  	
 	 	$data["isError"] = FALSE;
 		$data["msg"] = "Password Resetted Successfully.";

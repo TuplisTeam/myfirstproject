@@ -148,11 +148,11 @@ public function checkLogin($email, $password, $sectionName)
 	return;
 }
 
-public function checkForgotPassword($email)
+/*public function checkForgotPassword($email)
 {
  	$myURL = base_url().'common/sendForgotPassword/'.$email;
 	$this->initializeCURL($myURL);
-}
+}*/
 
 public function getUserDetails($userType = '', $userId = '')
 {
@@ -240,11 +240,11 @@ public function saveUser($userId, $userName, $userEmail, $userType, $userPasswor
 	}
 }
 
-public function updatePassword($userId, $newPassword)
+public function updatePassword($email, $newPassword)
 {
 	$sql = "UPDATE users SET 
 				PASSWORD = md5('".mysql_real_escape_string($newPassword)."') 
-			WHERE userid = $userId";
+			WHERE email = '".$email."'";
 	$this->db->query($sql);
 }
 

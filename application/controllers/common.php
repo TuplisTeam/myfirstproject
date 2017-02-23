@@ -5,7 +5,7 @@ class Common extends CI_Controller
 
 /*Manju Starts*/
 
-public function sendForgotPassword($email)
+/*public function sendForgotPassword($email)
 {
  	$subject = "Forget Password | Tracking System"; 
 	$heading = "Reset Password Link"; 
@@ -35,7 +35,7 @@ public function sendEmail($toEmail, $subject, $heading, $msg)
 	$msgHTML = $this->load->view('emailtemplate', $arr, TRUE);
 	$this->email->message($msgHTML);
 	$this->email->send();
-}
+}*/
 
 /*Manju Ends*/
 
