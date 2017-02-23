@@ -218,6 +218,14 @@
 							<span style="font-weight: bold;">Customer Name : </span>
 							<?php echo $customerName; ?>
 						</p>
+						<p>
+							<span style="font-weight: bold;">Delivered From : </span>
+							<?php echo $deliveryFrom; ?>
+						</p>
+						<p>
+							<span style="font-weight: bold;">Delivered By : </span>
+							<?php echo $deliveredBy; ?>
+						</p>
 					</td>
 					<td colspan="3">
 						<p style="font-weight: bold;">RECEIVER DETAILS : </p>

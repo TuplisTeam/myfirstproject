@@ -247,8 +247,8 @@
 				                        		<thead>
 				                        			<tr>
 				                        				<th width="20%">Operation Desc</th>
-				                        				<th width="10%">Freq</th>
 				                        				<th width="10%">Machine</th>
+				                        				<th width="10%">Freq</th>
 				                        				<th width="10%">SMV</th>
 				                        				<th width="10%">No. Of W/s</th>
 				                        				<th width="10%">Balanced W/s</th>
@@ -270,7 +270,7 @@
 														?>
 														<tr class="operationDetailsTR" rowNo="<?php echo $cnt; ?>">
 															<td>
-																<select class="form-control op_operationId_<?php echo $cnt; ?>" style="width: 100%;" data-placeholder="Select">
+																<select class="form-control operationSelect op_operationId_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" style="width: 100%;" data-placeholder="Select">
 																	<option value=""></option>
 																	<?php
 																	foreach($operations as $res)
@@ -286,10 +286,7 @@
 																</select>
 															</td>
 															<td>
-																<input type="text" class="form-control op_frequency_<?php echo $cnt; ?>" placeholder="Frequency" value="<?php echo $row->frequency; ?>">
-															</td>
-															<td>
-																<select class="form-control op_machine_<?php echo $cnt; ?>" style="width: 100%;" data-placeholder="Select">
+																<select class="form-control machinarySelect op_machine_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" style="width: 100%;" data-placeholder="Select">
 																	<option value=""></option>
 																	<?php
 																	foreach($machinaryRequirements as $res)
@@ -303,6 +300,9 @@
 																	}
 																	?>
 																</select>
+															</td>
+															<td>
+																<input type="text" class="form-control op_frequency_<?php echo $cnt; ?>" placeholder="Frequency" value="<?php echo $row->frequency; ?>">
 															</td>
 															<td>
 																<input type="text" class="form-control numeric onBlurOperationFields op_smv_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="SMV" value="<?php echo $row->smv; ?>">
@@ -580,7 +580,7 @@
 		
 			str += '<tr class="operationDetailsTR" rowNo="'+parseInt(rowNo)+'">';
 			str += '<td>';
-			str += '<select class="form-control op_operationId_'+parseInt(rowNo)+'" style="width: 100%;" data-placeholder="Select">';
+			str += '<select class="form-control operationSelect op_operationId_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" style="width: 100%;" data-placeholder="Select">';
 			str += '<option value=""></option>';
 			for(var k=0; k<operations.length; k++)
 			{
@@ -590,10 +590,7 @@
 			str += '</select>';
 			str += '</td>';
 			str += '<td>';
-			str += '<input type="text" class="form-control op_frequency_'+parseInt(rowNo)+'" placeholder="Frequency" value="">';
-			str += '</td>';
-			str += '<td>';
-			str += '<select class="form-control op_machine_'+parseInt(rowNo)+'" style="width: 100%;" data-placeholder="Select">';
+			str += '<select class="form-control machinarySelect op_machine_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" style="width: 100%;" data-placeholder="Select">';
 			str += '<option value=""></option>';
 			for(var k=0; k<machinaryRequirements.length; k++)
 			{
@@ -601,6 +598,9 @@
 				str += '>'+machinaryRequirements[k].machineryname+'</option>';
 			}
 			str += '</select>';
+			str += '</td>';
+			str += '<td>';
+			str += '<input type="text" class="form-control op_frequency_'+parseInt(rowNo)+'" placeholder="Frequency" value="">';
 			str += '</td>';
 			str += '<td>';
 			str += '<input type="text" class="form-control numeric onBlurOperationFields op_smv_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="SMV" value="">';
@@ -626,6 +626,89 @@
 			
 			$("select").select2();
 			$(".numeric").numeric();
+		}
+	}
+	
+	$(document).on('change','.operationSelect,.machinarySelect',function()
+	{
+		var rowNo = $(this).attr('rowNo');
+		if(rowNo > 0)
+		{
+			var operationId = $(".op_operationId_"+rowNo).val();
+			var machinaryId = $(".op_machine_"+rowNo).val();
+			
+			if(operationId > 0 && machinaryId > 0)
+			{
+				var isError = false;
+				
+				$(".operationDetailsTR").each(function()
+				{
+					var tempRowNo = $(this).attr('rowNo');
+					var tempOperationId = $(".op_operationId_"+tempRowNo).val();
+					var tempMachinaryId = $(".op_machine_"+tempRowNo).val();
+					
+					if(rowNo != tempRowNo && operationId == tempOperationId && machinaryId == tempMachinaryId)
+					{
+						isError = true;
+					}
+				});
+				
+				if(isError)
+				{
+					alert('This Combination Is Already Available. Please Check.');
+					$(".op_operationId_"+rowNo).select2('val','');
+					$(".op_machine_"+rowNo).select2('val','');
+					return;
+				}
+				else
+				{
+					var styleId = $("#styleId").val();
+					
+					if(styleId > 0)
+					{
+						var req = new Request();
+						req.data = 
+						{
+							"styleId" : styleId, 
+							"operationId" : operationId, 
+							"machinaryId" : machinaryId
+						};
+						req.url = "admin/getStyle_Operation_Details";
+						RequestHandler(req, setStyleSMVDetails, rowNo);
+					}
+					else
+					{
+						alert('Please select style.');
+						return;
+					}
+				}
+			}
+		}
+	});
+	
+	function setStyleSMVDetails(data, rowNo)
+	{
+		data = JSON.parse(data);
+		var isError = data.isError;
+		var msg = data.msg;
+		if(isError)
+		{
+			alert(msg);
+		}
+		else
+		{
+			var res = data.res;
+			if(res.length > 0)
+			{
+				$(".op_smv_"+rowNo).val(res[0].smv);
+			}
+			else
+			{
+				alert('No Combination Found.');
+				$(".op_operationId_"+rowNo).select2('val','');
+				$(".op_machine_"+rowNo).select2('val','');
+				return;
+			}
 		}
 	}
 	
@@ -1134,4 +1217,5 @@
 		calculatePossibleDailyOutput();
 		calculateTotalSAM();
 	}
+
 </script>

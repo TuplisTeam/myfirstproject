@@ -382,6 +382,8 @@ public function deliverynote($deliveryNoteId = '')
 	$data["customerName"] = '';
 	$data["receiverName"] = '';
 	$data["totalAmount"] = '';
+	$data["deliveryFrom"] = '';
+	$data["deliveredBy"] = '';
 	$data["remarks"] = '';
 	
 	$data["deliveryNoteHdrDtls"] = array();
@@ -402,6 +404,8 @@ public function deliverynote($deliveryNoteId = '')
 				$data["customerName"] = $row->customername;
 				$data["receiverName"] = $row->receivername;
 				$data["totalAmount"] = $row->totalamount;
+				$data["deliveryFrom"] = $row->delivered_from;
+				$data["deliveredBy"] = $row->delivered_by;
 				$data["remarks"] = $row->remarks;
 				
 				$data["itemDtls"] = $this->adminmodel->getDeliveryNoteItemDetails($deliveryNoteId, 'no');
@@ -421,14 +425,13 @@ public function deliverynote($deliveryNoteId = '')
 public function getBarcodeDetails()
 {
 	$barcode = $this->input->post('barcode');
-	if($barcode > 0)
+	if($barcode != "")
 	{
 		$res = $this->adminmodel->getBarcodeDetails('', $barcode);
 		
 		$data["res"] = $res;
-		
 		$data["isError"] = FALSE;
-		$data["msg"] = "Delivery Challan Details Removed Successfully.";
+		$data["msg"] = "";
 	}
 	else
 	{
@@ -449,6 +452,8 @@ public function saveDeliveryNote()
 	$customerName = $this->input->post('customerName');
 	$receiverName = $this->input->post('receiverName');
 	$totalAmount = $this->input->post('totalAmount');
+	$deliveryFrom = $this->input->post('deliveryFrom');
+	$deliveredBy = $this->input->post('deliveredBy');
 	$remarks = $this->input->post('remarks');
 	$dtlArr = $this->input->post('dtlArr');
 	$dtlArr = json_decode($dtlArr);
@@ -465,11 +470,11 @@ public function saveDeliveryNote()
 		return;
 	}
 	
-	if($deliveryNo != "" && $dcDate != "" && $supplierName != "" && $supplierAddress != "" && $customerName != "" && $receiverName != "" && $totalAmount > 0 && count($dtlArr) > 0)
+	if($deliveryNo != "" && $dcDate != "" && $supplierName != "" && $supplierAddress != "" && $customerName != "" && $receiverName != "" && $totalAmount > 0 && $deliveryFrom != "" && $deliveredBy != "" && count($dtlArr) > 0)
 	{
-		$this->adminmodel->saveDeliveryNote($deliveryNoteId, $deliveryNo, $dcDate, $supplierName, $supplierAddress, $customerName, $receiverName, $totalAmount, $remarks, $dtlArr);
+		$this->adminmodel->saveDeliveryNote($deliveryNoteId, $deliveryNo, $dcDate, $supplierName, $supplierAddress, $customerName, $receiverName, $totalAmount, $deliveryFrom, $deliveredBy, $remarks, $dtlArr);
 		
-		if($deliveryNo > 0)
+		if($deliveryNoteId > 0)
 		{
 			$data["isError"] = FALSE;
 			$data["msg"] = "Delivery Note Details Updated Successfully";
@@ -499,6 +504,8 @@ public function printDeliveryNote($deliveryNoteId)
 	$data["customerName"] = '';
 	$data["receiverName"] = '';
 	$data["totalAmount"] = '';
+	$data["deliveryFrom"] = '';
+	$data["deliveredBy"] = '';
 	$data["remarks"] = '';
 	$data["itemDtls"] = array();
 	
@@ -515,6 +522,8 @@ public function printDeliveryNote($deliveryNoteId)
 			$data["customerName"] = $row->customername;
 			$data["receiverName"] = $row->receivername;
 			$data["totalAmount"] = $row->totalamount;
+			$data["deliveryFrom"] = $row->delivered_from;
+			$data["deliveredBy"] = $row->delivered_by;
 			$data["remarks"] = $row->remarks;
 			$data["itemDtls"] = $this->adminmodel->getDeliveryNoteItemDetails($deliveryNoteId);
 		}
@@ -1199,7 +1208,7 @@ public function skillmatrix($skillMatrixId = '')
 	$data["skillMatrixId"] = $skillMatrixId;
 	
 	$data["empDtls"] = $this->adminmodel->getEmployeeDetails();
-	$data["styleDtls"] = $this->adminmodel->getStyleDetails();
+	$data["styleDtls"] = $this->adminmodel->getStyleHeaderDetails();
 	$data["operationDtls"] = $this->adminmodel->getOperationDetails();
 	
 	$res = $this->adminmodel->getSkillMatrix_HdrDetails($skillMatrixId);
@@ -1671,7 +1680,10 @@ public function style($styleId = '')
 	$data["size"] = '';
 	$data["styleImage"] = '';
 	
-	$res = $this->adminmodel->getStyleDetails($styleId);
+	$data["machinaryRequirements"] = $this->adminmodel->getMachineryDetails();
+	$data["operations"] = $this->adminmodel->getOperationDetails();
+	
+	$res = $this->adminmodel->getStyleHeaderDetails($styleId);
 	
 	if($styleId > 0)
 	{
@@ -1687,6 +1699,8 @@ public function style($styleId = '')
 				$data["size"] = $row->size;
 				$data["styleImage"] = $row->imagepath;
 			}
+			
+			$data["dtlArr"] = $this->adminmodel->getStyleListDetails($styleId);
 		}
 	}
 	else
@@ -1710,6 +1724,8 @@ public function saveStyle()
 	$colour = $this->input->post('colour');
 	$size = $this->input->post('size');
 	$oldStyleImagePath = $this->input->post('oldStyleImagePath');
+	$dtlArr = $this->input->post('dtlArr');
+	$dtlArr = json_decode($dtlArr);
 	
 	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $styleId);
 	
@@ -1734,7 +1750,7 @@ public function saveStyle()
 		}
 		$styleImage = $imgArr["imageSrc"];
 		
-		$this->adminmodel->saveStyle($styleId, $buyer, $merchant, $styleNo, $styleDesc, $colour, $size, $styleImage);
+		$this->adminmodel->saveStyle($styleId, $buyer, $merchant, $styleNo, $styleDesc, $colour, $size, $styleImage, $dtlArr);
 		
 		$data["isError"] = FALSE;
 		if($styleId > 0)
@@ -1760,7 +1776,7 @@ public function operationbulletin($bulletinId = '')
 	
 	$data["bulletinId"] = $bulletinId;
 	
-	$data["styleDtls"] = $this->adminmodel->getStyleDetails();
+	$data["styleDtls"] = $this->adminmodel->getStyleHeaderDetails();
 	
 	$res = $this->adminmodel->getOperationBulletinDetails($bulletinId);
 	
@@ -1832,6 +1848,26 @@ public function operationbulletin($bulletinId = '')
 	$this->load->view('header');
 	$this->load->view('operationbulletin', $data);
 	$this->load->view('footer');
+}
+
+public function getStyle_Operation_Details()
+{
+	$styleId = $this->input->post('styleId');
+	$operationId = $this->input->post('operationId');
+	$machinaryId = $this->input->post('machinaryId');
+	
+	if($styleId > 0 && $operationId > 0 && $machinaryId > 0)
+	{
+		$data["res"] = $this->adminmodel->getStyleListDetails($styleId, $operationId, $machinaryId);
+		$data["isError"] = FALSE;
+		$data["msg"] = "";
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
 }
 
 public function saveOperationBulletin()

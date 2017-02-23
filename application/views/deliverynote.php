@@ -172,6 +172,30 @@
 	                    		</div>
 	                    	</div>
 	                    	<div class="row">
+	                    		<div class="col-md-12">
+	                    			<div class="col-md-6">
+	                    				<div class="form-group">
+				                            <label class="col-sm-4 control-label">
+												Delivery From&nbsp;<span style="color: red;">*</span>
+											</label>
+				                            <div class="col-sm-8">
+				                                <input type="text" class="form-control" id="deliveryFrom" name="deliveryFrom" placeholder="Delivery From" value="<?php echo $deliveryFrom; ?>" required="">
+				                            </div>
+				                        </div>
+	                    			</div>
+	                    			<div class="col-md-6">
+	                    				<div class="form-group">
+				                            <label class="col-sm-4 control-label">
+												Delivered By&nbsp;<span style="color: red;">*</span>
+											</label>
+				                            <div class="col-sm-8">
+				                                <input type="text" class="form-control" id="deliveredBy" name="deliveredBy" placeholder="Delivered By" value="<?php echo $deliveredBy; ?>" required="">
+				                            </div>
+				                        </div>
+	                    			</div>
+	                    		</div>
+	                    	</div>
+	                    	<div class="row">
 	                    		<div class="form-group">
 		                        	<div class="col-md-12">
 		                        		<div class="table-responsive">
@@ -386,13 +410,24 @@
 			var barcode = $(".barcode_"+rowNo).val();
 			if(barcode != "")
 			{
-				var req = new Request();
-				req.data = 
+				var isDuplicate = checkDuplicateBarcode(rowNo, barcode);
+				
+				if(isDuplicate)
 				{
-					"barcode" : barcode
-				};
-				req.url = "admin/getBarcodeDetails";
-				RequestHandler(req, setBarcodeDetails, rowNo);
+					alert('This Barcode Is Already Entered. Please Check.');
+					$(".barcode_"+rowNo).val('');
+					return;
+				}
+				else
+				{
+					var req = new Request();
+					req.data = 
+					{
+						"barcode" : barcode
+					};
+					req.url = "admin/getBarcodeDetails";
+					RequestHandler(req, setBarcodeDetails, rowNo);
+				}
 			}
 			else
 			{
@@ -400,6 +435,22 @@
 			}
 		}
 	});
+	
+	function checkDuplicateBarcode(rowNo, barcode)
+	{
+		var isError = false;
+		$(".itemDetailsTR").each(function()
+		{
+			var tempRowNo = $(this).attr('rowNo');
+			var tempBarcode = $(".barcode_"+tempRowNo).val();
+			
+			if(tempRowNo != rowNo && tempBarcode == barcode)
+			{
+				isError = true;
+			}
+		});
+		return isError;
+	}
 	
 	function setBarcodeDetails(data, rowNo)
 	{
@@ -470,6 +521,8 @@
 		var customerName = $("#customerName").val();
 		var receiverName = $("#receiverName").val();
 		var totalAmount = $("#totalAmount").val();
+		var deliveryFrom = $("#deliveryFrom").val();
+		var deliveredBy = $("#deliveredBy").val();
 		var remarks = $("#remarks").val();
 		
 		var dtlArr = [];
@@ -510,7 +563,7 @@
 			return;
 		}
 		
-		if(deliveryNo != "" && supplierName != "" && supplierAddress != "" && customerName != "" && receiverName != "" && totalAmount > 0 && dtlArr.length > 0)
+		if(deliveryNo != "" && supplierName != "" && supplierAddress != "" && customerName != "" && receiverName != "" && totalAmount > 0 && deliveryFrom != "" && deliveredBy != "" && dtlArr.length > 0)
 		{
 			$("#responseMsg").html('');
 			
@@ -528,6 +581,8 @@
 					"customerName" : customerName,
 					"receiverName" : receiverName, 
 					"totalAmount" : totalAmount, 
+					"deliveryFrom" : deliveryFrom, 
+					"deliveredBy" : deliveredBy, 
 					"remarks" : remarks, 
 					"dtlArr" : JSON.stringify(dtlArr)
 				};

@@ -349,7 +349,7 @@ public function getDeliveryNoteItemDetails($deliveryNoteId = '', $isReceived = '
 	return $res->result();
 }
 
-public function saveDeliveryNote($deliveryNoteId, $deliveryNo, $dcDate, $supplierName, $supplierAddress, $customerName, $receiverName, $totalAmount, $remarks, $dtlArr)
+public function saveDeliveryNote($deliveryNoteId, $deliveryNo, $dcDate, $supplierName, $supplierAddress, $customerName, $receiverName, $totalAmount, $deliveryFrom, $deliveredBy, $remarks, $dtlArr)
 {
 	$supplierAddress = str_replace("'", "\'", $supplierAddress);
 	$remarks = str_replace("'", "\'", $remarks);
@@ -362,7 +362,10 @@ public function saveDeliveryNote($deliveryNoteId, $deliveryNo, $dcDate, $supplie
 					supplieraddress = '".$supplierAddress."', 
 					customername = '".$customerName."', 
 					receivername = '".$receiverName."', 
-					totalamount = '".$totalAmount."', remarks = '".$remarks."', 
+					totalamount = '".$totalAmount."', 
+					delivered_from = '".$deliveryFrom."', 
+					delivered_by = '".$deliveredBy."', 
+					remarks = '".$remarks."', 
 					modified_on = NOW(), 
 					modified_by = '".$this->session->userdata('userid')."'
 				WHERE id = $deliveryNoteId";
@@ -376,7 +379,10 @@ public function saveDeliveryNote($deliveryNoteId, $deliveryNo, $dcDate, $supplie
 					supplieraddress = '".$supplierAddress."', 
 					customername = '".$customerName."', 
 					receivername = '".$receiverName."', 
-					totalamount = '".$totalAmount."', remarks = '".$remarks."', 
+					totalamount = '".$totalAmount."', 
+					delivered_from = '".$deliveryFrom."', 
+					delivered_by = '".$deliveredBy."', 
+					remarks = '".$remarks."', 
 					created_on = NOW(), 
 					created_by = '".$this->session->userdata('userid')."'";
 		$this->db->query($sql);
@@ -1133,9 +1139,9 @@ public function getLineDetails($entryDate, $lineName, $shift)
 	return $res->result();
 }
 
-public function getStyleDetails($styleId = '')
+public function getStyleHeaderDetails($styleId = '')
 {
-	$sql = "SELECT * FROM style WHERE status <> 'inactive'";
+	$sql = "SELECT * FROM style_hdr WHERE status <> 'inactive'";
 	if($styleId > 0)
 	{
 		$sql .= " AND id = $styleId";	
@@ -1144,11 +1150,36 @@ public function getStyleDetails($styleId = '')
 	return $res->result();
 }
 
-public function saveStyle($styleId, $buyer, $merchant, $styleNo, $styleDesc, $colour, $size, $styleImage)
+public function getStyleListDetails($styleId, $operationId = '', $machinaryId = '')
+{
+	$sql = "SELECT 
+				h.id, d.operationid, o.operationname, 
+				d.machineid, m.machineryname, d.smv
+			FROM 
+				style_hdr h 
+				INNER JOIN style_dtl d ON h.id = d.styleid
+				INNER JOIN operations o ON d.operationid = o.id
+				INNER JOIN machineries m ON d.machineid = m.id
+			WHERE 
+				h.status <> 'inactive' AND o.status <> 'inactive' AND 
+				m.status <> 'inactive' AND h.id = $styleId";
+	if($operationId > 0)
+	{
+		$sql .= " AND d.operationid = $operationId";
+	}
+	if($machinaryId > 0)
+	{
+		$sql .= " AND d.machineid = $machinaryId";
+	}
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function saveStyle($styleId, $buyer, $merchant, $styleNo, $styleDesc, $colour, $size, $styleImage, $dtlArr)
 {
 	if($styleId > 0)
 	{
-		$sql = "UPDATE style SET 
+		$sql = "UPDATE style_hdr SET 
 					buyer = '".$buyer."', 
 					merchant = '".$merchant."', 
 					styleno = '".$styleNo."', 
@@ -1159,10 +1190,14 @@ public function saveStyle($styleId, $buyer, $merchant, $styleNo, $styleDesc, $co
 					modified_on = NOW(), 
 					modified_by = '".$this->session->userdata('userid')."'
 				WHERE id = $styleId";
+		$this->db->query($sql);
+		
+		$delSQL = "DELETE FROM style_dtl WHERE styleid = $styleId";
+		$this->db->query($delSQL);
 	}
 	else
 	{
-		$sql = "INSERT INTO style SET 
+		$sql = "INSERT INTO style_hdr SET 
 					buyer = '".$buyer."', 
 					merchant = '".$merchant."', 
 					styleno = '".$styleNo."', 
@@ -1172,8 +1207,20 @@ public function saveStyle($styleId, $buyer, $merchant, $styleNo, $styleDesc, $co
 					imagepath = '".$styleImage."', 
 					created_on = NOW(), 
 					created_by = '".$this->session->userdata('userid')."'";
+		$this->db->query($sql);
+		$styleId = $this->db->insert_id();
 	}
-	$this->db->query($sql);
+	
+	if(count($dtlArr) > 0)
+	{
+		foreach($dtlArr as $row)
+		{
+			$sql = "INSERT INTO style_dtl SET 
+						styleid = $styleId, operationid = '".$row->operationId."', 
+						machineid = '".$row->machinaryId."', smv = '".$row->smv."'";
+			$this->db->query($sql);
+		}
+	}
 }
 
 public function getOperationBulletinDetails($bulletinId = '')
@@ -1184,7 +1231,7 @@ public function getOperationBulletinDetails($bulletinId = '')
 				s.styleno, s.styleno, s.styledesc, u.firstname
 			FROM 
 				operationbulletin_hdr h 
-				INNER JOIN style s ON h.styleid = s.id 
+				INNER JOIN style_hdr s ON h.styleid = s.id 
 				INNER JOIN users u ON h.created_by = u.userid
 			WHERE 
 				h.status <> 'inactive' AND s.status <> 'inactive' AND 
