@@ -1386,11 +1386,12 @@ public function assemblyloading($assemblyLoadingId = '')
 	$data["assemblyLoadingId"] = $assemblyLoadingId;
 	
 	$data["empDtls"] = $this->adminmodel->getEmployeeDetails();
+	$data["shiftTimingDtls"] = $this->adminmodel->getShiftTimings();
 	$res = $this->adminmodel->getAssemblyLoadingDetails($assemblyLoadingId);
 	
 	$data["entryDate"] = "";
 	$data["lineName"] = "";
-	$data["shiftName"] = "";
+	$data["shiftId"] = "";
 	$data["lineIncharge"] = "";
 	$data["target"] = "";
 	$data["hour1"] = "";
@@ -1403,6 +1404,7 @@ public function assemblyloading($assemblyLoadingId = '')
 	$data["hour8"] = "";
 	$data["otHour"] = "";
 	$data["totalPieces"] = "";
+	$data["isTargetAchieved"] = "No";
 	
 	if($assemblyLoadingId > 0)
 	{
@@ -1410,7 +1412,7 @@ public function assemblyloading($assemblyLoadingId = '')
 		{
 			$data["entryDate"] = $row->entrydate;
 			$data["lineName"] = $row->linename;
-			$data["shiftName"] = $row->shift;
+			$data["shiftId"] = $row->shiftid;
 			$data["lineIncharge"] = $row->lineincharge;
 			$data["target"] = $row->target;
 			$data["hour1"] = $row->hour1;
@@ -1421,8 +1423,9 @@ public function assemblyloading($assemblyLoadingId = '')
 			$data["hour6"] = $row->hour6;
 			$data["hour7"] = $row->hour7;
 			$data["hour8"] = $row->hour8;
-			$data["othour"] = $row->othour;
+			$data["otHour"] = $row->othour;
 			$data["totalPieces"] = $row->totalpieces;
+			$data["isTargetAchieved"] = $row->is_targetachieved;
 		}
 	}
 	else
@@ -1435,18 +1438,20 @@ public function assemblyloading($assemblyLoadingId = '')
 	$this->load->view('footer');
 }
 
-public function getEmployeesByEntryDateLineName()
+public function getPieceLogsDetailsByDateLine()
 {
 	$entryDate = $this->input->post('entryDate');
 	$lineName = $this->input->post('lineName');
+	$shiftId = $this->input->post('shiftId');
 	
 	$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
 	
-	if($entryDate != "" && $lineName != "")
+	if($entryDate != "" && $lineName != "" && $shiftId > 0)
 	{
 		$data["isError"] = FALSE;
 		$data["msg"] = "";
-		$data["res"] = $this->adminmodel->getEmployeeVsOperationDetails('', $entryDate, $lineName);
+		$data["lineInchargeDtls"] = $this->adminmodel->getEmployeeVsOperationDetails('', $entryDate, $lineName);
+		$data["pieceLogDtls"] = $this->adminmodel->getPieceLogsDetailsByDateLine($entryDate, $lineName, $shiftId);
 	}
 	else
 	{
@@ -1462,9 +1467,8 @@ public function saveAssemblyLoading()
 	$assemblyLoadingId = $this->input->post('assemblyLoadingId');
 	$entryDate = $this->input->post('entryDate');
 	$lineName = $this->input->post('lineName');
-	$shiftName = $this->input->post('shiftName');
+	$shiftId = $this->input->post('shiftId');
 	$lineIncharge = $this->input->post('lineIncharge');
-	$target = $this->input->post('target');
 	$hour1 = $this->input->post('hour1');
 	$hour2 = $this->input->post('hour2');
 	$hour3 = $this->input->post('hour3');
@@ -1475,11 +1479,12 @@ public function saveAssemblyLoading()
 	$hour8 = $this->input->post('hour8');
 	$otHour = $this->input->post('otHour');
 	$totalPieces = $this->input->post('totalPieces');
-		
+	$target = $this->input->post('target');
+	$isTargetAchieved = $this->input->post('isTargetAchieved');
+	
 	$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
 	
 	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $assemblyLoadingId);
-	
 	if($permissions["isError"])
 	{
 		$data["isError"] = TRUE;
@@ -1488,9 +1493,9 @@ public function saveAssemblyLoading()
 		return;
 	}
 	
-	if($entryDate != "" && $lineName != "" && $shiftName != "" && $lineIncharge > 0 && $totalPieces > 0)
+	if($entryDate != "" && $lineName != "" && $shiftId > 0 && $lineIncharge > 0 && $totalPieces > 0 && $target > 0)
 	{
-		$availRes = $this->adminmodel->checkDateLineNameAvailability_AssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $shiftName);
+		$availRes = $this->adminmodel->checkDateLineNameAvailability_AssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $shiftId);
 		if($availRes > 0)
 		{
 			$data["isError"] = TRUE;
@@ -1498,7 +1503,7 @@ public function saveAssemblyLoading()
 		}
 		else
 		{
-			$this->adminmodel->saveAssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $shiftName, $lineIncharge, $target, $hour1, $hour2, $hour3, $hour4, $hour5, $hour6, $hour7, $hour8, $otHour, $totalPieces);
+			$this->adminmodel->saveAssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $shiftId, $lineIncharge, $hour1, $hour2, $hour3, $hour4, $hour5, $hour6, $hour7, $hour8, $otHour, $totalPieces, $target, $isTargetAchieved);
 		
 			$data["isError"] = FALSE;
 			if($assemblyLoadingId > 0)
@@ -2010,6 +2015,277 @@ public function operationbulletinprint($bulletinId = '')
 	$this->load->view('reports/header');
 	$this->load->view('operationbulletinprint',$data);
 	$this->load->view('reports/footer');
+}
+
+public function hanger($hangerId = '')
+{
+	$data["menuId"] = 32;
+	$data["hangerId"] = $hangerId;
+	
+	$data["hangerSlNo"] = '';
+	$data["hangerName"] = '';
+	
+	$res = $this->adminmodel->getHangerDetails($hangerId);
+	
+	if($hangerId > 0)
+	{
+		if(count($res) > 0)
+		{
+			foreach($res as $row)
+			{
+				$data["hangerSlNo"] = $row->hanger_slno;
+				$data["hangerName"] = $row->hanger_name;
+			}
+		}
+	}
+	else
+	{
+		$data["allHangers"] = $res;
+	}
+	
+	$this->load->view('header');
+	$this->load->view('hanger', $data);
+	$this->load->view('footer');
+}
+
+public function saveHanger()
+{
+	$menuId = $this->input->post('menuId');
+	$hangerId = $this->input->post('hangerId');
+	$hangerSlNo = $this->input->post('hangerSlNo');
+	$hangerName = $this->input->post('hangerName');
+	
+	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $hangerId);
+	
+	if($permissions["isError"])
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = $permissions["msg"];
+		echo json_encode($data);
+		return;
+	}
+	
+	if($hangerSlNo != "" && $hangerName != "")
+	{
+		$this->adminmodel->saveHanger($hangerId, $hangerSlNo, $hangerName);
+		
+		$data["isError"] = FALSE;
+		if($hangerId > 0)
+		{
+			$data["msg"] = "Hanger Details Updated Successfully.";
+		}
+		else
+		{
+			$data["msg"] = "Hanger Details Saved Successfully.";
+		}
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
+}
+
+public function line_vs_style($entryId = '')
+{
+	$data["menuId"] = 33;
+	$data["entryId"] = $entryId;
+	
+	$data["entryDate"] = '';
+	$data["lineName"] = '';
+	$data["styleId"] = '';
+	
+	$res = $this->adminmodel->getLineVsStyleDetails($entryId);
+	$data["styleDtls"] = $this->adminmodel->getStyleHeaderDetails();
+	if($entryId > 0)
+	{
+		if(count($res) > 0)
+		{
+			foreach($res as $row)
+			{
+				$data["entryDate"] = $row->entrydt;
+				$data["lineName"] = $row->line_name;
+				$data["styleId"] = $row->styleid;
+			}
+		}
+	}
+	else
+	{
+		$data["allDetails"] = $res;
+		$data["pieceLogDtls"] = $this->adminmodel->getPieceLogsHeaderDetails();
+	}
+	
+	$this->load->view('header');
+	$this->load->view('line_vs_style', $data);
+	$this->load->view('footer');
+}
+
+public function saveLineVsStyle()
+{
+	$menuId = $this->input->post('menuId');
+	$entryId = $this->input->post('entryId');
+	$entryDate = $this->input->post('entryDate');
+	$lineName = $this->input->post('lineName');
+	$styleId = $this->input->post('styleId');
+	
+	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $entryId);
+	
+	if($permissions["isError"])
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = $permissions["msg"];
+		echo json_encode($data);
+		return;
+	}
+	
+	if($entryDate != "" && $lineName != "" && $styleId > 0)
+	{
+		$this->adminmodel->saveLineVsStyle($entryId, $entryDate, $lineName, $styleId);
+		
+		$data["isError"] = FALSE;
+		if($entryId > 0)
+		{
+			$data["msg"] = "Line Vs Style Details Updated Successfully.";
+		}
+		else
+		{
+			$data["msg"] = "Line Vs Style Details Saved Successfully.";
+		}
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
+}
+
+public function assemblyloadingprint($entryId)
+{
+	$data["menuId"] = 23;
+	
+	$data["assemblyLoadingId"] = $entryId;
+	
+	$res = $this->adminmodel->getAssemblyLoadingDetails($entryId);
+	
+	$data["entryDate"] = "";
+	$data["lineName"] = "";
+	$data["shiftId"] = "";
+	$data["shiftName"] = "";
+	$data["lineIncharge"] = "";
+	$data["target"] = "";
+	$data["hour1"] = "";
+	$data["hour2"] = "";
+	$data["hour3"] = "";
+	$data["hour4"] = "";
+	$data["hour5"] = "";
+	$data["hour6"] = "";
+	$data["hour7"] = "";
+	$data["hour8"] = "";
+	$data["otHour"] = "";
+	$data["totalPieces"] = "";
+	$data["isTargetAchieved"] = "No";
+	
+	if($entryId > 0)
+	{
+		foreach($res as $row)
+		{
+			$data["entryDate"] = $row->entrydate;
+			$data["lineName"] = $row->linename;
+			$data["shiftId"] = $row->shiftid;
+			$data["shiftName"] = $row->shiftname;
+			$data["lineIncharge"] = $row->lineincharge;
+			$data["target"] = $row->target;
+			$data["hour1"] = $row->hour1;
+			$data["hour2"] = $row->hour2;
+			$data["hour3"] = $row->hour3;
+			$data["hour4"] = $row->hour4;
+			$data["hour5"] = $row->hour5;
+			$data["hour6"] = $row->hour6;
+			$data["hour7"] = $row->hour7;
+			$data["hour8"] = $row->hour8;
+			$data["otHour"] = $row->othour;
+			$data["totalPieces"] = $row->totalpieces;
+			$data["isTargetAchieved"] = $row->is_targetachieved;
+		}
+	}
+	
+	$this->load->view('reports/header');
+	$this->load->view('print/assemblyloading',$data);
+	$this->load->view('reports/footer');
+}
+
+public function shifttiming($entryId = '')
+{
+	$data["menuId"] = 33;
+	$data["entryId"] = $entryId;
+	
+	$data["shiftName"] = '';
+	$data["fromTime"] = '';
+	$data["toTime"] = '';
+	
+	$res = $this->adminmodel->getShiftTimings($entryId);
+	if($entryId > 0)
+	{
+		if(count($res) > 0)
+		{
+			foreach($res as $row)
+			{
+				$data["shiftName"] = $row->shiftname;
+				$data["fromTime"] = $row->fromtime;
+				$data["toTime"] = $row->totime;
+			}
+		}
+	}
+	else
+	{
+		$data["allDetails"] = $res;
+	}
+	
+	$this->load->view('header');
+	$this->load->view('shifttiming', $data);
+	$this->load->view('footer');
+}
+
+public function saveShiftTiming()
+{
+	$menuId = $this->input->post('menuId');
+	$entryId = $this->input->post('entryId');
+	$shiftName = $this->input->post('shiftName');
+	$fromTime = $this->input->post('fromTime');
+	$toTime = $this->input->post('toTime');
+	
+	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $entryId);
+	
+	if($permissions["isError"])
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = $permissions["msg"];
+		echo json_encode($data);
+		return;
+	}
+	
+	if($shiftName != "" && $fromTime != "" && $toTime != "")
+	{
+		$this->adminmodel->saveShiftTiming($entryId, $shiftName, $fromTime, $toTime);
+		
+		$data["isError"] = FALSE;
+		if($entryId > 0)
+		{
+			$data["msg"] = "Shift Timing Details Updated Successfully.";
+		}
+		else
+		{
+			$data["msg"] = "Shift Timing Details Saved Successfully.";
+		}
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
 }
 
 /*Report Starts*/

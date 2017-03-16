@@ -29,7 +29,7 @@
         <script src="<?php echo base_url(); ?>assets/plugins/curvedlines/curvedLines.js"></script>-->
         <script src="<?php echo base_url(); ?>assets/plugins/metrojs/MetroJs.min.js"></script>
         <script src="<?php echo base_url(); ?>assets/plugins/bootstrap-datepicker/js/bootstrap-datepicker.js"></script>
-        
+        <script src="<?php echo base_url(); ?>assets/plugins/bootstrap-timepicker/js/bootstrap-timepicker.min.js"></script>
         <script>
         	
         	$(window).scroll(function()

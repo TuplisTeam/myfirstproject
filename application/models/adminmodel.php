@@ -980,12 +980,15 @@ public function saveNoWorkTime($noWorkId, $entryDate, $lineName, $shiftName, $dt
 public function getAssemblyLoadingDetails($assemblyLoadingId = '')
 {
 	$sql = "SELECT 
-				h.*, DATE_FORMAT(h.entry_date,'%d/%m/%Y') AS entrydate, 
+				h.*, DATE_FORMAT(h.entry_date,'%d/%m/%Y') AS entrydate, s.shiftname, 
 				e.empname AS lineinchargename
 			FROM 
 				assemblyloading h 
+				INNER JOIN shifttiming s ON h.shiftid = s.id
 				INNER JOIN employee e ON h.lineincharge = e.id
-			WHERE h.status <> 'inactive' AND e.status <> 'inactive'";
+			WHERE 
+				h.status <> 'inactive' AND s.status <> 'inactive' AND 
+				e.status <> 'inactive'";
 	if($assemblyLoadingId > 0)
 	{
 		$sql .= " AND h.id = $assemblyLoadingId";
@@ -994,12 +997,12 @@ public function getAssemblyLoadingDetails($assemblyLoadingId = '')
 	return $res->result();
 }
 
-public function checkDateLineNameAvailability_AssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $shiftName)
+public function checkDateLineNameAvailability_AssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $shiftId)
 {
 	$sql = "SELECT * FROM assemblyloading 
 			WHERE 
 				STATUS <> 'inactive' AND entry_date = '".$entryDate."' AND 
-				linename = '".$lineName."' AND shift = '".$shiftName."'";
+				linename = '".$lineName."' AND shiftid = '".$shiftId."'";
 	if($assemblyLoadingId > 0)
 	{
 		$sql .= " AND id <> $assemblyLoadingId";
@@ -1008,26 +1011,60 @@ public function checkDateLineNameAvailability_AssemblyLoading($assemblyLoadingId
 	return $res->num_rows();
 }
 
-public function saveAssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $shiftName, $lineIncharge, $target, $hour1, $hour2, $hour3, $hour4, $hour5, $hour6, $hour7, $hour8, $otHour, $totalPieces)
+public function getPieceLogsDetailsByDateLine($entryDate, $lineName, $shiftId)
+{
+	$sql = "SELECT * FROM piecelogs_hdr 
+			WHERE 
+				STATUS <> 'inactive' AND lineid = '".$lineName."' AND 
+				created_dt = '".$entryDate."'";
+	$res = $this->db->query($sql);
+	$pieceLogId = 0;
+	foreach($res->result() as $row)
+	{
+		$pieceLogId = $row->id;
+	}
+	
+	$shiftTimings = $this->getShiftTimings($shiftId);
+	$shiftFromTiming = '';
+	$shiftToTiming = '';
+	foreach($shiftTimings as $row)
+	{
+		$shiftFromTiming = $entryDate.' '.$row->fromtime;
+		$shiftToTiming = $entryDate.' '.$row->totime;
+	}
+	
+	$res = $this->callPieceLogDetails_Procedure($pieceLogId, $shiftFromTiming, $shiftToTiming);
+	return $res;
+}
+
+public function callPieceLogDetails_Procedure($pieceLogId, $shiftFromTiming, $shiftToTiming)
+{
+	try
+	{
+		$this->db->reconnect();
+		$sql = "CALL get_piecelogs_dtl('".$pieceLogId."','".$shiftFromTiming."','".$shiftToTiming."')"; 
+		$result = $this->db->query($sql,$data);
+		$this->db->close();
+	}
+	catch(Exception $e)
+	{
+		echo $e->getMessage();
+	}
+	return $result->result();
+}
+
+public function saveAssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $shiftId, $lineIncharge, $hour1, $hour2, $hour3, $hour4, $hour5, $hour6, $hour7, $hour8, $otHour, $totalPieces, $target, $isTargetAchieved)
 {
 	if($assemblyLoadingId > 0)
 	{
 		$sql = "UPDATE assemblyloading SET 
-					entry_date = '".$entryDate."', 
-					linename = '".$lineName."', 
-					shift = '".$shiftName."', 
-					lineincharge = '".$lineIncharge."', 
-					target = '".$target."', 
-					hour1 = '".$hour1."', 
-					hour2 = '".$hour2."', 
-					hour3 = '".$hour3."', 
-					hour4 = '".$hour4."', 
-					hour5 = '".$hour5."', 
-					hour6 = '".$hour6."', 
-					hour7 = '".$hour7."', 
-					hour8 = '".$hour8."', 
-					othour = '".$otHour."', 
-					totalpieces = '".$totalPieces."', 
+					entry_date = '".$entryDate."', linename = '".$lineName."', 
+					shiftid = '".$shiftId."', lineincharge = '".$lineIncharge."', 
+					hour1 = '".$hour1."', hour2 = '".$hour2."', hour3 = '".$hour3."', 
+					hour4 = '".$hour4."', hour5 = '".$hour5."', hour6 = '".$hour6."', 
+					hour7 = '".$hour7."', hour8 = '".$hour8."', othour = '".$otHour."', 
+					totalpieces = '".$totalPieces."', target = '".$target."', 
+					is_targetachieved = '".$isTargetAchieved."', 
 					modified_on = NOW(), 
 					modified_by = '".$this->session->userdata('userid')."'
 				WHERE id = $assemblyLoadingId";
@@ -1035,21 +1072,13 @@ public function saveAssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $
 	else
 	{
 		$sql = "INSERT INTO assemblyloading SET 
-					entry_date = '".$entryDate."', 
-					linename = '".$lineName."', 
-					shift = '".$shiftName."', 
-					lineincharge = '".$lineIncharge."', 
-					target = '".$target."', 
-					hour1 = '".$hour1."', 
-					hour2 = '".$hour2."', 
-					hour3 = '".$hour3."', 
-					hour4 = '".$hour4."', 
-					hour5 = '".$hour5."', 
-					hour6 = '".$hour6."', 
-					hour7 = '".$hour7."', 
-					hour8 = '".$hour8."', 
-					othour = '".$otHour."', 
-					totalpieces = '".$totalPieces."', 
+					entry_date = '".$entryDate."', linename = '".$lineName."', 
+					shiftid = '".$shiftId."', lineincharge = '".$lineIncharge."', 
+					hour1 = '".$hour1."', hour2 = '".$hour2."', hour3 = '".$hour3."', 
+					hour4 = '".$hour4."', hour5 = '".$hour5."', hour6 = '".$hour6."', 
+					hour7 = '".$hour7."', hour8 = '".$hour8."', othour = '".$otHour."', 
+					totalpieces = '".$totalPieces."', target = '".$target."', 
+					is_targetachieved = '".$isTargetAchieved."', 
 					created_on = NOW(), 
 					created_by = '".$this->session->userdata('userid')."'";
 	}
@@ -1339,16 +1368,125 @@ public function saveOperationBulletin($bulletinId, $styleId, $stdNoOfWorkStation
 	}
 }
 
-/*Common Function Starts*/
-
-public function delEntry($entryId, $tableName, $columnName)
+public function getHangerDetails($hangerId = '')
 {
-	$sql = "UPDATE $tableName SET status = 'inactive' WHERE $columnName = $entryId";
+	$sql = "SELECT * FROM hanger WHERE status <> 'inactive'";
+	if($hangerId > 0)
+	{
+		$sql .= " AND id = $hangerId";	
+	}
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function saveHanger($hangerId, $hangerSlNo, $hangerName)
+{
+	if($hangerId > 0)
+	{
+		$sql = "UPDATE hanger SET 
+					hanger_slno = '".$hangerSlNo."', 
+					hanger_name = '".$hangerName."',
+					modified_on = NOW(), 
+					modified_by = '".$this->session->userdata('userid')."'
+				WHERE id = $hangerId";
+	}
+	else
+	{
+		$sql = "INSERT INTO hanger SET 
+					hanger_slno = '".$hangerSlNo."', 
+					hanger_name = '".$hangerName."',
+					created_on = NOW(), 
+					created_by = '".$this->session->userdata('userid')."'";
+	}
 	$this->db->query($sql);
 }
 
+public function getLineVsStyleDetails($entryId = '')
+{
+	$sql = "SELECT h.*, DATE_FORMAT(h.entrydate,'%d/%m/%Y') AS entrydt, s.styleno
+			FROM 
+				line_vs_style h 
+				INNER JOIN style_hdr s ON h.styleid = s.id
+			WHERE h.status <> 'inactive' AND s.status <> 'inactive'";
+	if($entryId > 0)
+	{
+		$sql .= " AND h.id = $entryId";
+	}
+	$res = $this->db->query($sql);
+	return $res->result();
+}
 
-/*Common Function Ends*/
+public function saveLineVsStyle($entryId, $entryDate, $lineName, $styleId)
+{
+	$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
+	if($entryId > 0)
+	{
+		$sql = "UPDATE line_vs_style SET 
+					entrydate = '".$entryDate."', 
+					line_name = '".$lineName."', 
+					styleid = '".$styleId."',
+					modified_on = NOW(), 
+					modified_by = '".$this->session->userdata('userid')."'
+				WHERE id = $entryId";
+	}
+	else
+	{
+		$sql = "INSERT INTO line_vs_style SET 
+					entrydate = '".$entryDate."', 
+					line_name = '".$lineName."', 
+					styleid = '".$styleId."',
+					created_on = NOW(), 
+					created_by = '".$this->session->userdata('userid')."'";
+	}
+	$this->db->query($sql);
+}
+
+public function getPieceLogsHeaderDetails()
+{
+	$sql = "SELECT h.id, h.lineid, h.styleid, IFNULL(s.styleno,'') AS styleno
+			FROM 
+				piecelogs_hdr h 
+				LEFT OUTER JOIN (SELECT * FROM style_hdr WHERE STATUS <> 'inactive') s 
+				ON h.styleid = s.id
+			WHERE h.status <> 'inactive'";
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function getShiftTimings($entryId = '')
+{
+	$sql = "SELECT * FROM shifttiming WHERE status <> 'inactive'";
+	if($entryId > 0)
+	{
+		$sql .= " AND id = $entryId";	
+	}
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function saveShiftTiming($entryId, $shiftName, $fromTime, $toTime)
+{
+	if($entryId > 0)
+	{
+		$sql = "UPDATE shifttiming SET 
+					shiftname = '".$shiftName."', 
+					fromtime = '".$fromTime."', 
+					totime = '".$toTime."',
+					modified_on = NOW(), 
+					modified_by = '".$this->session->userdata('userid')."'
+				WHERE id = $entryId";
+	}
+	else
+	{
+		$sql = "INSERT INTO shifttiming SET 
+					shiftname = '".$shiftName."', 
+					fromtime = '".$fromTime."', 
+					totime = '".$toTime."',
+					created_on = NOW(), 
+					created_by = '".$this->session->userdata('userid')."'";
+	}
+	$this->db->query($sql);
+}
 
 /*Report Starts*/
 
@@ -1577,6 +1715,12 @@ public function getAssemblyLoadingReport($fromDate, $toDate, $employeeId)
 
 /*Common Function Starts*/
 
+public function delEntry($entryId, $tableName, $columnName)
+{
+	$sql = "UPDATE $tableName SET status = 'inactive' WHERE $columnName = $entryId";
+	$this->db->query($sql);
+}
+
 public function generateBarcode($code)
 {
 	//load library
@@ -1600,8 +1744,5 @@ public function initializeCURL($url)
 /*Common Function Ends*/
 
 /*Manju Ends*/
-
-/*Pratheep Starts*/
-/*Pratheep Ends*/
 
 }

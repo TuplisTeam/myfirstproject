@@ -49,7 +49,7 @@
 									<tr>
 										<td><?php echo $row->entrydate; ?></td>
 										<td><?php echo $row->linename; ?></td>
-										<td><?php echo $row->shift; ?></td>
+										<td><?php echo $row->shiftname; ?></td>
 										<td><?php echo $row->lineinchargename; ?></td>
 										<td><?php echo $row->totalpieces; ?></td>
 										<td>
@@ -58,6 +58,9 @@
 											</button>
 											<button class="btn btn-sm btn-danger delEntry" entryId="<?php echo $row->id; ?>" title="Delete">
 												<span class="fa fa-close"></span>
+											</button>
+											<button class="btn btn-sm btn-info printEntry" entryId="<?php echo $row->id; ?>" title="Print">
+												<span class="fa fa-print"></span>
 											</button>
 										</td>
 									</tr>
@@ -108,7 +111,20 @@
 											Shift Name&nbsp;<span style="color: red;">*</span>
 										</label>
 			                            <div class="col-sm-7">
-			                                <input type="text" class="form-control" id="shiftName" name="shiftName" placeholder="Shift Name" value="<?php echo $shiftName; ?>" required="">
+			                            	<select class="form-control" id="shiftId" style="width: 100%;" data-placeholder="Select">
+												<option value=""></option>
+												<?php
+												foreach($shiftTimingDtls as $row)
+												{
+													echo '<option value="'.$row->id.'"';
+													if($row->id == $shiftId)
+													{
+														echo ' selected="selected"';
+													}
+													echo '>'.$row->shiftname.'</option>';
+												}
+												?>
+											</select>
 			                            </div>
 			                        </div>
 	                    		</div>
@@ -140,6 +156,116 @@
 								<div class="col-md-6">
 	                    			<div class="form-group">
 			                            <label class="col-sm-3 control-label">
+											Hour 1
+										</label>
+			                            <div class="col-sm-7">
+			                                <input type="text" class="form-control numeric" id="hour1" name="hour1" placeholder="Hour 1" value="<?php echo $hour1; ?>" disabled="">
+			                            </div>
+			                        </div>
+	                    		</div>
+	                    		<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											Hour 2
+										</label>
+			                            <div class="col-sm-7">
+			                                <input type="text" class="form-control numeric" id="hour2" name="hour2" placeholder="Hour 2" value="<?php echo $hour2; ?>" disabled="">
+			                            </div>
+			                        </div>
+	                    		</div>
+	                    	</div>
+							<div class="row">
+								<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											Hour 3
+										</label>
+			                            <div class="col-sm-7">
+			                                <input type="text" class="form-control numeric" id="hour3" name="hour3" placeholder="Hour 3" value="<?php echo $hour3; ?>" disabled="">
+			                            </div>
+			                        </div>
+	                    		</div>
+	                    		<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											Hour 4
+										</label>
+			                            <div class="col-sm-7">
+			                                <input type="text" class="form-control numeric" id="hour4" name="hour4" placeholder="Hour 4" value="<?php echo $hour4; ?>" disabled="">
+			                            </div>
+			                        </div>
+	                    		</div>
+	                    	</div>
+							<div class="row">
+								<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											Hour 5
+										</label>
+			                            <div class="col-sm-7">
+			                                <input type="text" class="form-control numeric" id="hour5" name="hour5" placeholder="Hour 5" value="<?php echo $hour5; ?>" disabled="">
+			                            </div>
+			                        </div>
+	                    		</div>
+	                    		<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											Hour 6
+										</label>
+			                            <div class="col-sm-7">
+			                                <input type="text" class="form-control numeric" id="hour6" name="hour6" placeholder="Hour 6" value="<?php echo $hour6; ?>" disabled="">
+			                            </div>
+			                        </div>
+	                    		</div>
+	                    	</div>
+							<div class="row">
+								<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											Hour 7
+										</label>
+			                            <div class="col-sm-7">
+			                                <input type="text" class="form-control numeric" id="hour7" name="hour7" placeholder="Hour 7" value="<?php echo $hour7; ?>" disabled="">
+			                            </div>
+			                        </div>
+	                    		</div>
+	                    		<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											Hour 8
+										</label>
+			                            <div class="col-sm-7">
+			                                <input type="text" class="form-control numeric" id="hour8" name="hour8" placeholder="Hour 8" value="<?php echo $hour8; ?>" disabled="">
+			                            </div>
+			                        </div>
+	                    		</div>
+	                    	</div>
+							<div class="row">
+								<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											OT Hour
+										</label>
+			                            <div class="col-sm-7">
+			                                <input type="text" class="form-control numeric" id="otHour" name="otHour" placeholder="OT Hour" value="<?php echo $otHour; ?>" disabled="">
+			                            </div>
+			                        </div>
+	                    		</div>
+	                    		<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											Total Pieces
+										</label>
+			                            <div class="col-sm-7">
+			                                <input type="text" class="form-control numeric" id="totalPieces" name="totalPieces" placeholder="Total Pieces" value="<?php echo $totalPieces; ?>" disabled="">
+			                            </div>
+			                        </div>
+	                    		</div>
+	                    	</div>
+							<div class="row">
+								<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
 											Target&nbsp;<span style="color: red;">*</span>
 										</label>
 			                            <div class="col-sm-7">
@@ -147,113 +273,26 @@
 			                            </div>
 			                        </div>
 	                    		</div>
-								<div class="col-md-6">
+	                    		<div class="col-md-6">
 	                    			<div class="form-group">
 			                            <label class="col-sm-3 control-label">
-											Hour 1
+											Is Target Achieved
 										</label>
 			                            <div class="col-sm-7">
-			                                <input type="text" class="form-control numeric onBlurHours" id="hour1" name="hour1" placeholder="Hour 1" value="<?php echo $hour1; ?>">
-			                            </div>
-			                        </div>
-	                    		</div>
-	                    	</div>
-							<div class="row">
-								<div class="col-md-6">
-	                    			<div class="form-group">
-			                            <label class="col-sm-3 control-label">
-											Hour 2
-										</label>
-			                            <div class="col-sm-7">
-			                                <input type="text" class="form-control numeric onBlurHours" id="hour2" name="hour2" placeholder="Hour 2" value="<?php echo $hour2; ?>">
-			                            </div>
-			                        </div>
-	                    		</div>
-								<div class="col-md-6">
-	                    			<div class="form-group">
-			                            <label class="col-sm-3 control-label">
-											Hour 3
-										</label>
-			                            <div class="col-sm-7">
-			                                <input type="text" class="form-control numeric onBlurHours" id="hour3" name="hour3" placeholder="Hour 3" value="<?php echo $hour3; ?>">
-			                            </div>
-			                        </div>
-	                    		</div>
-	                    	</div>
-							<div class="row">
-								<div class="col-md-6">
-	                    			<div class="form-group">
-			                            <label class="col-sm-3 control-label">
-											Hour 4
-										</label>
-			                            <div class="col-sm-7">
-			                                <input type="text" class="form-control numeric onBlurHours" id="hour4" name="hour4" placeholder="Hour 4" value="<?php echo $hour4; ?>">
-			                            </div>
-			                        </div>
-	                    		</div>
-								<div class="col-md-6">
-	                    			<div class="form-group">
-			                            <label class="col-sm-3 control-label">
-											Hour 5
-										</label>
-			                            <div class="col-sm-7">
-			                                <input type="text" class="form-control numeric onBlurHours" id="hour5" name="hour5" placeholder="Hour 5" value="<?php echo $hour5; ?>">
-			                            </div>
-			                        </div>
-	                    		</div>
-	                    	</div>
-							<div class="row">
-								<div class="col-md-6">
-	                    			<div class="form-group">
-			                            <label class="col-sm-3 control-label">
-											Hour 6
-										</label>
-			                            <div class="col-sm-7">
-			                                <input type="text" class="form-control numeric onBlurHours" id="hour6" name="hour6" placeholder="Hour 6" value="<?php echo $hour6; ?>">
-			                            </div>
-			                        </div>
-	                    		</div>
-								<div class="col-md-6">
-	                    			<div class="form-group">
-			                            <label class="col-sm-3 control-label">
-											Hour 7
-										</label>
-			                            <div class="col-sm-7">
-			                                <input type="text" class="form-control numeric onBlurHours" id="hour7" name="hour7" placeholder="Hour 7" value="<?php echo $hour7; ?>">
-			                            </div>
-			                        </div>
-	                    		</div>
-	                    	</div>
-							<div class="row">
-								<div class="col-md-6">
-	                    			<div class="form-group">
-			                            <label class="col-sm-3 control-label">
-											Hour 8
-										</label>
-			                            <div class="col-sm-7">
-			                                <input type="text" class="form-control numeric onBlurHours" id="hour8" name="hour8" placeholder="Hour 8" value="<?php echo $hour8; ?>">
-			                            </div>
-			                        </div>
-	                    		</div>
-								<div class="col-md-6">
-	                    			<div class="form-group">
-			                            <label class="col-sm-3 control-label">
-											OT
-										</label>
-			                            <div class="col-sm-7">
-			                                <input type="text" class="form-control numeric onBlurHours" id="otHour" name="otHour" placeholder="OT" value="<?php echo $otHour; ?>">
-			                            </div>
-			                        </div>
-	                    		</div>
-	                    	</div>
-							<div class="row">
-								<div class="col-md-6">
-	                    			<div class="form-group">
-			                            <label class="col-sm-3 control-label">
-											Total Pieces
-										</label>
-			                            <div class="col-sm-7">
-			                                <input type="text" class="form-control numeric" id="totalPieces" name="totalPieces" placeholder="Total Pieces" value="<?php echo $totalPieces; ?>" disabled="">
+			                                <select class="form-control" id="isTargetAchieved" style="width: 100%;" data-placeholder="Select" disabled="">
+												<option value="No" <?php
+												if($isTargetAchieved == "No")
+												{
+													echo ' selected="selected"';
+												}
+												?>>No</option>
+												<option value="Yes" <?php
+												if($isTargetAchieved == "Yes")
+												{
+													echo ' selected="selected"';
+												}
+												?>>Yes</option>
+											</select>
 			                            </div>
 			                        </div>
 	                    		</div>
@@ -313,21 +352,41 @@
 	{
 		var entryDate = $("#entryDate").val();
 		var lineName = $("#lineName").val();
+		var shiftId = $("#shiftId").val();
 		
-		if(entryDate != "" && lineName != "")
+		getPiecelogDetails(entryDate, lineName, shiftId);
+	});
+	
+	$(document).on('change','#shiftId',function()
+	{
+		var entryDate = $("#entryDate").val();
+		var lineName = $("#lineName").val();
+		var shiftId = $("#shiftId").val();
+		
+		getPiecelogDetails(entryDate, lineName, shiftId);
+	});
+	
+	function getPiecelogDetails(entryDate = '', lineName = '', shiftId = '')
+	{
+		if(entryDate != "" && lineName != "" && shiftId > 0)
 		{
 			var req = new Request();
 			req.data = 
 			{
 				"entryDate" : entryDate, 
-				"lineName" : lineName
+				"lineName" : lineName, 
+				"shiftId" : shiftId
 			};
-			req.url = "admin/getEmployeesByEntryDateLineName";
-			RequestHandler(req, setEmployees);
+			req.url = "admin/getPieceLogsDetailsByDateLine";
+			RequestHandler(req, setPieceLogs);
 		}
-	});
+		else
+		{
+			return;
+		}
+	}
 	
-	function setEmployees(data)
+	function setPieceLogs(data)
 	{
 		data = JSON.parse(data);
 		
@@ -335,39 +394,50 @@
 		var msg = data.msg;
 		if(isError == false)
 		{
-			var res = data.res;
-			if(res.length > 0)
+			var lineInchargeDtls = data.lineInchargeDtls;
+			var pieceLogDtls = data.pieceLogDtls;
+			if(lineInchargeDtls.length > 0)
 			{
 				var tempArr = [];
 				var cri = [];
 				cri["id"] = "";
 				cri["text"] = "";
 				tempArr.push(cri);
-				for(var a=0; a<res.length; a++)
+				for(var a=0; a<lineInchargeDtls.length; a++)
 				{
 					var cri = {};
-					cri["id"] = res[a].empid;
-					cri["text"] = res[a].empname;
+					cri["id"] = lineInchargeDtls[a].empid;
+					cri["text"] = lineInchargeDtls[a].empname;
 					tempArr.push(cri);
 				}
 				$("#lineIncharge").select2('destroy').empty().select2({data:tempArr});
 			}
-		}
-	}
-	
-	$(document).on('blur','.onBlurHours',function()
-	{
-		var hour1 = $("#hour1").val();
-		var hour2 = $("#hour2").val();
-		var hour3 = $("#hour3").val();
-		var hour4 = $("#hour4").val();
-		var hour5 = $("#hour5").val();
-		var hour6 = $("#hour6").val();
-		var hour7 = $("#hour7").val();
-		var hour8 = $("#hour8").val();
-		var otHour = $("#otHour").val();
-		
-		var totalPieces = parseFloat(hour1 ? hour1 : 0) + 
+			if(pieceLogDtls.length > 0)
+			{
+				var hour1 = pieceLogDtls[0].Nos, 
+					hour2 = pieceLogDtls[1].Nos, 
+					hour3 = pieceLogDtls[2].Nos, 
+					hour4 = pieceLogDtls[3].Nos, 
+					hour5 = pieceLogDtls[4].Nos, 
+					hour6 = pieceLogDtls[5].Nos, 
+					hour7 = pieceLogDtls[6].Nos, 
+					hour8 = pieceLogDtls[7].Nos,  
+					otHour = 0;
+				if(pieceLogDtls.length = 9)
+				{
+					otHour = pieceLogDtls[8].Nos;
+				}
+				$("#hour1").val(hour1);
+				$("#hour2").val(hour2);
+				$("#hour3").val(hour3);
+				$("#hour4").val(hour4);
+				$("#hour5").val(hour5);
+				$("#hour6").val(hour6);
+				$("#hour7").val(hour7);
+				$("#hour8").val(hour8);
+				$("#otHour").val(otHour);
+				
+				var totalPieces = parseFloat(hour1 ? hour1 : 0) + 
 							parseFloat(hour2 ? hour2 : 0) + 
 							parseFloat(hour3 ? hour3 : 0) + 
 							parseFloat(hour4 ? hour4 : 0) + 
@@ -376,7 +446,21 @@
 							parseFloat(hour7 ? hour7 : 0) + 
 							parseFloat(hour8 ? hour8 : 0) + 
 							parseFloat(otHour ? otHour : 0);
-		$("#totalPieces").val(totalPieces);
+				$("#totalPieces").val(parseInt(totalPieces ? totalPieces : 0));
+			}
+		}
+	}
+	
+	$("#target").blur(function()
+	{
+		var target = $(this).val();
+		var totalPieces = $("#totalPieces").val();
+		var isTargetAchieved = 'Yes';
+		if(parseFloat(target) > parseFloat(totalPieces))
+		{
+			isTargetAchieved = 'No';
+		}
+		$("#isTargetAchieved").select2('val', isTargetAchieved);
 	});
 	
 	$("#entryForm").submit(function(e)
@@ -386,9 +470,8 @@
 		var assemblyLoadingId = '<?php echo $assemblyLoadingId; ?>';
 		var entryDate = $("#entryDate").val();
 		var lineName = $("#lineName").val();
-		var shiftName = $("#shiftName").val();
+		var shiftId = $("#shiftId").val();
 		var lineIncharge = $("#lineIncharge").val();
-		var target = $("#target").val();
 		var hour1 = $("#hour1").val();
 		var hour2 = $("#hour2").val();
 		var hour3 = $("#hour3").val();
@@ -399,8 +482,10 @@
 		var hour8 = $("#hour8").val();
 		var otHour = $("#otHour").val();
 		var totalPieces = $("#totalPieces").val();
+		var target = $("#target").val();
+		var isTargetAchieved = $("#isTargetAchieved").val();
 		
-		if(entryDate != "" && lineName != "" && shiftName != "" && lineIncharge > 0 && totalPieces > 0)
+		if(entryDate != "" && lineName != "" && shiftId > 0 && lineIncharge > 0 && parseFloat(totalPieces) > 0 && parseFloat(target) > 0)
 		{
 			$("#responseMsg").html('');
 			
@@ -413,9 +498,8 @@
 					"assemblyLoadingId" : assemblyLoadingId,
 					"entryDate" : entryDate,
 					"lineName" : lineName,
-					"shiftName" : shiftName, 
+					"shiftId" : shiftId, 
 					"lineIncharge" : lineIncharge, 
-					"target" : target, 
 					"hour1" : hour1, 
 					"hour2" : hour2, 
 					"hour3" : hour3, 
@@ -425,7 +509,9 @@
 					"hour7" : hour7, 
 					"hour8" : hour8, 
 					"otHour" : otHour, 
-					"totalPieces" : totalPieces
+					"totalPieces" : totalPieces, 
+					"target" : target, 
+					"isTargetAchieved" : isTargetAchieved
 				};
 				req.url = "admin/saveAssemblyLoading";
 				RequestHandler(req, showResponse);
@@ -477,6 +563,19 @@
 				req.url = "admin/delEntry";
 				RequestHandler(req, showResponse);
 			}
+		}
+		else
+		{
+			return;
+		}
+	});
+	
+	$(".printEntry").on("click",function()
+	{
+		var entryId = $(this).attr('entryId');
+		if(entryId > 0)
+		{
+			window.open('<?php echo base_url(); ?>admin/assemblyloadingprint/'+entryId);
 		}
 		else
 		{
