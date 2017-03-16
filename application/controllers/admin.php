@@ -1112,6 +1112,7 @@ public function employee_vs_operation($entryId = '')
 	$data["entryDate"] = '';
 	$data["employeeId"] = '';
 	$data["lineName"] = '';
+	$data["shiftId"] = '';
 	$data["operationId"] = '';
 	$data["machinaryId"] = '';
 	$data["smv"] = '';
@@ -1119,6 +1120,7 @@ public function employee_vs_operation($entryId = '')
 	$data["empDtls"] = $this->adminmodel->getEmployeeDetails();
 	$data["machinaryDtls"] = $this->adminmodel->getMachineryDetails();
 	$data["operationDtls"] = $this->adminmodel->getOperationDetails();
+	$data["shiftTimingDtls"] = $this->adminmodel->getShiftTimings();
 	
 	$res = $this->adminmodel->getEmployeeVsOperationDetails($entryId);
 	
@@ -1131,6 +1133,7 @@ public function employee_vs_operation($entryId = '')
 				$data["entryDate"] = $row->entrydate;
 				$data["employeeId"] = $row->empid;
 				$data["lineName"] = $row->linename;
+				$data["shiftId"] = $row->shiftid;
 				$data["operationId"] = $row->operationid;
 				$data["machinaryId"] = $row->machinaryid;
 				$data["smv"] = $row->smv;
@@ -1154,6 +1157,7 @@ public function saveEmployeeVsOperation()
 	$entryDate = $this->input->post('entryDate');
 	$employeeId = $this->input->post('employeeId');
 	$lineName = $this->input->post('lineName');
+	$shiftId = $this->input->post('shiftId');
 	$operationId = $this->input->post('operationId');
 	$machinaryId = $this->input->post('machinaryId');
 	$smv = $this->input->post('smv');
@@ -1172,7 +1176,7 @@ public function saveEmployeeVsOperation()
 	
 	if($entryDate != "" && $employeeId > 0 && $operationId > 0 && $machinaryId > 0 && $smv != "")
 	{
-		$res = $this->adminmodel->checkEmployeeVsOperationavailability($entryId, $entryDate, $employeeId);
+		$res = $this->adminmodel->checkEmployeeVsOperationavailability($entryId, $entryDate, $employeeId, $lineName, $shiftId);
 		if($res > 0)
 		{
 			$data["isError"] = TRUE;
@@ -1180,7 +1184,7 @@ public function saveEmployeeVsOperation()
 		}
 		else
 		{
-			$this->adminmodel->saveEmployeeVsOperation($entryId, $entryDate, $employeeId, $lineName, $operationId, $machinaryId, $smv);
+			$this->adminmodel->saveEmployeeVsOperation($entryId, $entryDate, $employeeId, $lineName, $shiftId, $operationId, $machinaryId, $smv);
 			
 			$data["isError"] = FALSE;
 			if($empId > 0)

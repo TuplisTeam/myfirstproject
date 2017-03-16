@@ -35,6 +35,7 @@
                                     <th>Entry Date</th>
                                     <th>Employee Name</th>
                                     <th>Line Name</th>
+                                    <th>Shift Name</th>
                                     <th>Operation Name</th>
                                     <th>Machine Name</th>
                                     <th>SMV</th>
@@ -52,6 +53,7 @@
 									<td><?php echo $row->entrydate; ?></td>
 									<td><?php echo $row->empname; ?></td>
 									<td><?php echo $row->linename; ?></td>
+									<td><?php echo $row->shiftname; ?></td>
 									<td><?php echo $row->operationname; ?></td>
 									<td><?php echo $row->machineryname; ?></td>
 									<td><?php echo $row->smv; ?></td>
@@ -118,6 +120,27 @@
 								</label>
 	                            <div class="col-sm-6">
 	                                <input type="text" class="form-control" id="lineName" name="lineName" placeholder="Line Name" value="<?php echo $lineName; ?>" required="">
+	                            </div>
+	                        </div>
+	                        <div class="form-group">
+	                            <label class="col-sm-2 control-label">
+									Shift Name&nbsp;<span style="color: red;">*</span>
+								</label>
+	                            <div class="col-sm-6">
+	                            	<select class="form-control" id="shiftId" style="width: 100%;" data-placeholder="Select">
+										<option value=""></option>
+										<?php
+										foreach($shiftTimingDtls as $row)
+										{
+											echo '<option value="'.$row->id.'"';
+											if($row->id == $shiftId)
+											{
+												echo ' selected="selected"';
+											}
+											echo '>'.$row->shiftname.'</option>';
+										}
+										?>
+									</select>
 	                            </div>
 	                        </div>
 	                        <div class="form-group">
@@ -225,11 +248,12 @@
 		var entryDate = $("#entryDate").val();
 		var employeeId = $("#employeeId").val();
 		var lineName = $("#lineName").val();
+		var shiftId = $("#shiftId").val();
 		var operationId = $("#operationId").val();
 		var machinaryId = $("#machinaryId").val();
 		var smv = $("#smv").val();
 		
-		if(entryDate != "" && employeeId > 0 && lineName != "" && operationId > 0 && machinaryId > 0 && smv != "")
+		if(entryDate != "" && employeeId > 0 && lineName != "" && shiftId > 0 && operationId > 0 && machinaryId > 0 && smv != "")
 		{
 			$("#responseMsg").html('');
 			
@@ -241,6 +265,7 @@
 				"entryDate" : entryDate, 
 				"employeeId" : employeeId, 
 				"lineName" : lineName, 
+				"shiftId" : shiftId, 
 				"operationId" : operationId, 
 				"machinaryId" : machinaryId, 
 				"smv" : smv

@@ -750,7 +750,7 @@ public function getEmployeeVsOperationDetails($entryId = '', $entryDate = '', $l
 {
 	$sql = "SELECT 
 				h.id, DATE_FORMAT(h.entrydate,'%d/%m/%Y') AS entrydate, h.linename, 
-				h.empid, e.empname, h.operationid, o.operationname, h.smv, 
+				h.shiftid, h.empid, e.empname, h.operationid, o.operationname, h.smv, 
 				h.machinaryid, m.machineryname
 			FROM 
 				employee_vs_operation h
@@ -776,12 +776,13 @@ public function getEmployeeVsOperationDetails($entryId = '', $entryDate = '', $l
 	return $res->result();
 }
 
-public function checkEmployeeVsOperationavailability($entryId, $entryDate, $employeeId)
+public function checkEmployeeVsOperationavailability($entryId, $entryDate, $employeeId, $lineName, $shiftId)
 {
 	$sql = "SELECT * FROM employee_vs_operation 
 			WHERE 
 				status <> 'inactive' AND entrydate = '".$entryDate."' AND 
-				empid = '".$employeeId."'";
+				empid = '".$employeeId."' AND linename = '".$lineName."' AND 
+				shiftid = '".$shiftId."'";
 	if($entryId > 0)
 	{
 		$sql .= " AND id <> $entryId";
@@ -790,7 +791,7 @@ public function checkEmployeeVsOperationavailability($entryId, $entryDate, $empl
 	return $res->num_rows();
 }
 
-public function saveEmployeeVsOperation($entryId, $entryDate, $employeeId, $lineName, $operationId, $machinaryId, $smv)
+public function saveEmployeeVsOperation($entryId, $entryDate, $employeeId, $lineName, $shiftId, $operationId, $machinaryId, $smv)
 {
 	if($entryId > 0)
 	{
@@ -798,6 +799,7 @@ public function saveEmployeeVsOperation($entryId, $entryDate, $employeeId, $line
 					entrydate = '".$entryDate."', 
 					empid = '".$employeeId."', 
 					linename = '".$lineName."', 
+					shiftid = '".$shiftId."', 
 					operationid = '".$operationId."', 
 					machinaryid = '".$machinaryId."', 
 					smv = '".$smv."', 
@@ -811,6 +813,7 @@ public function saveEmployeeVsOperation($entryId, $entryDate, $employeeId, $line
 					entrydate = '".$entryDate."', 
 					empid = '".$employeeId."', 
 					linename = '".$lineName."', 
+					shiftid = '".$shiftId."', 
 					operationid = '".$operationId."', 
 					machinaryid = '".$machinaryId."', 
 					smv = '".$smv."', 
