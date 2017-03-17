@@ -1113,6 +1113,7 @@ public function employee_vs_operation($entryId = '')
 	$data["employeeId"] = '';
 	$data["lineName"] = '';
 	$data["shiftId"] = '';
+	$data["tableName"] = '';
 	$data["operationId"] = '';
 	$data["machinaryId"] = '';
 	$data["smv"] = '';
@@ -1134,6 +1135,7 @@ public function employee_vs_operation($entryId = '')
 				$data["employeeId"] = $row->empid;
 				$data["lineName"] = $row->linename;
 				$data["shiftId"] = $row->shiftid;
+				$data["tableName"] = $row->tablename;
 				$data["operationId"] = $row->operationid;
 				$data["machinaryId"] = $row->machinaryid;
 				$data["smv"] = $row->smv;
@@ -1158,6 +1160,7 @@ public function saveEmployeeVsOperation()
 	$employeeId = $this->input->post('employeeId');
 	$lineName = $this->input->post('lineName');
 	$shiftId = $this->input->post('shiftId');
+	$tableName = $this->input->post('tableName');
 	$operationId = $this->input->post('operationId');
 	$machinaryId = $this->input->post('machinaryId');
 	$smv = $this->input->post('smv');
@@ -1176,7 +1179,7 @@ public function saveEmployeeVsOperation()
 	
 	if($entryDate != "" && $employeeId > 0 && $operationId > 0 && $machinaryId > 0 && $smv != "")
 	{
-		$res = $this->adminmodel->checkEmployeeVsOperationavailability($entryId, $entryDate, $employeeId, $lineName, $shiftId);
+		$res = $this->adminmodel->checkEmployeeVsOperationavailability($entryId, $entryDate, $employeeId, $lineName, $shiftId, $tableName);
 		if($res > 0)
 		{
 			$data["isError"] = TRUE;
@@ -1184,7 +1187,7 @@ public function saveEmployeeVsOperation()
 		}
 		else
 		{
-			$this->adminmodel->saveEmployeeVsOperation($entryId, $entryDate, $employeeId, $lineName, $shiftId, $operationId, $machinaryId, $smv);
+			$this->adminmodel->saveEmployeeVsOperation($entryId, $entryDate, $employeeId, $lineName, $shiftId, $tableName, $operationId, $machinaryId, $smv);
 			
 			$data["isError"] = FALSE;
 			if($empId > 0)
@@ -1214,6 +1217,7 @@ public function skillmatrix($skillMatrixId = '')
 	$data["empDtls"] = $this->adminmodel->getEmployeeDetails();
 	$data["styleDtls"] = $this->adminmodel->getStyleHeaderDetails();
 	$data["operationDtls"] = $this->adminmodel->getOperationDetails();
+	$data["shiftTimingDtls"] = $this->adminmodel->getShiftTimings();
 	
 	$res = $this->adminmodel->getSkillMatrix_HdrDetails($skillMatrixId);
 	
@@ -1242,12 +1246,37 @@ public function skillmatrix($skillMatrixId = '')
 	$this->load->view('footer');
 }
 
+public function getPieceLogsDetailsByEmployee()
+{
+	$entryDate = $this->input->post('entryDate');
+	$shiftId = $this->input->post('shiftId');
+	$lineName = $this->input->post('lineName');
+	$empId = $this->input->post('empId');
+	
+	$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
+	
+	if($entryDate != "" && $shiftId > 0 && $lineName != "" && $empId > 0)
+	{
+		$res = $this->adminmodel->getPieceLogsDetailsByEmployee($entryDate, $shiftId, $lineName, $empId);
+		
+			$data["isError"] = FALSE;
+			$data["msg"] = "";
+			$data["res"] = $res;
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
+}
+
 public function saveSkillMatrix()
 {
 	$menuId = $this->input->post('menuId');
 	$skillMatrixId = $this->input->post('skillMatrixId');
 	$entryDate = $this->input->post('entryDate');
-	$shiftTime = $this->input->post('shiftTime');
+	$shiftId = $this->input->post('shiftId');
 	$lineName = $this->input->post('lineName');
 	$dtlArr = $this->input->post('dtlArr');
 	$dtlArr = json_decode($dtlArr);
@@ -1264,9 +1293,9 @@ public function saveSkillMatrix()
 		return;
 	}
 	
-	if($entryDate != "" && $shiftTime != "" && $lineName != "" && count($dtlArr) > 0)
+	if($entryDate != "" && $shiftId > 0 && $lineName != "" && count($dtlArr) > 0)
 	{
-		$availRes = $this->adminmodel->checkDateLineNameAvailability_SkillMatrix($skillMatrixId, $entryDate, $shiftTime, $lineName);
+		$availRes = $this->adminmodel->checkDateLineNameAvailability_SkillMatrix($skillMatrixId, $entryDate, $shiftId, $lineName);
 		if($availRes > 0)
 		{
 			$data["isError"] = TRUE;
@@ -1274,7 +1303,7 @@ public function saveSkillMatrix()
 		}
 		else
 		{
-			$this->adminmodel->saveSkillMatrix($skillMatrixId, $entryDate, $shiftTime, $lineName, $dtlArr);
+			$this->adminmodel->saveSkillMatrix($skillMatrixId, $entryDate, $shiftId, $lineName, $dtlArr);
 		
 			$data["isError"] = FALSE;
 			if($skillMatrixId > 0)
@@ -2155,6 +2184,50 @@ public function saveLineVsStyle()
 		else
 		{
 			$data["msg"] = "Line Vs Style Details Saved Successfully.";
+		}
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
+}
+
+public function piecelogdtl($entryId)
+{
+	$data["pieceLogId"] = $entryId;
+	$pieceLogDtls = $this->adminmodel->getPieceLogsDetails($entryId);
+	$data["pieceLogDtls"] = $pieceLogDtls;
+	$data["styleDtls"] = $this->adminmodel->getStyleHeaderDetails();
+	$data["styleId"] = 0;
+	foreach($pieceLogDtls as $row)
+	{
+		$data["styleId"] = $row->styleid;
+	}
+	$this->load->view('header');
+	$this->load->view('piecelogdtl', $data);
+	$this->load->view('footer');
+}
+
+public function updatePieceLogDtlId()
+{
+	$pieceLogId = $this->input->post('pieceLogId');
+	$pieceLogDtlId = $this->input->post('pieceLogDtlId');
+	$styleId = $this->input->post('styleId');
+	
+	if($pieceLogId > 0 && $pieceLogDtlId > 0 && $styleId > 0)
+	{
+		$res = $this->adminmodel->updatePieceLogDtlId($pieceLogId, $pieceLogDtlId, $styleId);
+		if($res)
+		{
+			$data["isError"] = TRUE;
+			$data["msg"] = "There Is Some Error In Updating. May Be Line Style Not Available.";
+		}
+		else
+		{
+			$data["isError"] = FALSE;
+			$data["msg"] = "PieceLog Details Updated Successfully.";
 		}
 	}
 	else

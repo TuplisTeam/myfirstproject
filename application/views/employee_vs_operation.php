@@ -36,6 +36,7 @@
                                     <th>Employee Name</th>
                                     <th>Line Name</th>
                                     <th>Shift Name</th>
+                                    <th>Table Name</th>
                                     <th>Operation Name</th>
                                     <th>Machine Name</th>
                                     <th>SMV</th>
@@ -54,6 +55,7 @@
 									<td><?php echo $row->empname; ?></td>
 									<td><?php echo $row->linename; ?></td>
 									<td><?php echo $row->shiftname; ?></td>
+									<td><?php echo $row->tablename; ?></td>
 									<td><?php echo $row->operationname; ?></td>
 									<td><?php echo $row->machineryname; ?></td>
 									<td><?php echo $row->smv; ?></td>
@@ -141,6 +143,14 @@
 										}
 										?>
 									</select>
+	                            </div>
+	                        </div>
+							<div class="form-group">
+	                            <label class="col-sm-2 control-label">
+									Table Name&nbsp;<span style="color: red;">*</span>
+								</label>
+	                            <div class="col-sm-6">
+	                                <input type="text" class="form-control" id="tableName" name="tableName" placeholder="Table Name" value="<?php echo $tableName; ?>" required="">
 	                            </div>
 	                        </div>
 	                        <div class="form-group">
@@ -249,11 +259,12 @@
 		var employeeId = $("#employeeId").val();
 		var lineName = $("#lineName").val();
 		var shiftId = $("#shiftId").val();
+		var tableName = $("#tableName").val();
 		var operationId = $("#operationId").val();
 		var machinaryId = $("#machinaryId").val();
 		var smv = $("#smv").val();
 		
-		if(entryDate != "" && employeeId > 0 && lineName != "" && shiftId > 0 && operationId > 0 && machinaryId > 0 && smv != "")
+		if(entryDate != "" && employeeId > 0 && lineName != "" && shiftId > 0 && tableName != "" && operationId > 0 && machinaryId > 0 && smv != "")
 		{
 			$("#responseMsg").html('');
 			
@@ -266,6 +277,7 @@
 				"employeeId" : employeeId, 
 				"lineName" : lineName, 
 				"shiftId" : shiftId, 
+				"tableName" : tableName, 
 				"operationId" : operationId, 
 				"machinaryId" : machinaryId, 
 				"smv" : smv

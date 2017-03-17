@@ -68,6 +68,49 @@
                     </div>
                 </div>
 			</div>
+			<div class="col-md-12">
+				<div class="panel panel-white">
+                    <div class="panel-heading clearfix">
+                        <h4 class="panel-title">PieceLog Details</h4>
+                    </div>
+                    <div class="panel-body">
+						<div class="table-responsive">
+                        <table id="example1" class="display table" style="width: 100%; cellspacing: 0;">
+                            <thead>
+                                <tr>
+                                    <th>Entry Date</th>
+                                    <th>Line Name</th>
+                                    <th>Style Name</th>
+                                    <th>Manage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <?php
+							if(count($pieceLogDtls) > 0)
+							{
+								foreach($pieceLogDtls as $row)
+								{
+								?>
+								<tr>
+									<td><?php echo $row->createddt; ?></td>
+									<td><?php echo $row->lineid; ?></td>
+									<td><?php echo $row->styleno; ?></td>
+									<td>
+										<button class="btn btn-primary btn-xs viewPieceLogDetails" entryId="<?php echo $row->id; ?>">
+											View
+										</button>
+									</td>
+								</tr>
+								<?php
+								}
+							}
+							?>
+                            </tbody>
+                           </table>  
+                        </div>
+					</div>
+				</div>
+			</div>
 		</div>
         <div class="row" id="entryDetails" <?php echo $displayblock; ?>>
 			<div class="col-md-12">
@@ -146,12 +189,22 @@
 	$(document).ready(function()
 	{
 		$('#example').dataTable();
+		$('#example1').dataTable();
 		$('.datePicker').datepicker(
 		{
 			format: 'dd/mm/yyyy', 
 			autoclose: true
 		});
 		$('select').select2();
+	});
+	
+	$(".viewPieceLogDetails").click(function()
+	{
+		var entryId = $(this).attr('entryId');
+		if(entryId > 0)
+		{
+			window.open('<?php echo base_url(); ?>admin/piecelogdtl/'+entryId);
+		}	
 	});
 	
 	$(".newEntry").click(function()

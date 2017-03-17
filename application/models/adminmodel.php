@@ -750,16 +750,18 @@ public function getEmployeeVsOperationDetails($entryId = '', $entryDate = '', $l
 {
 	$sql = "SELECT 
 				h.id, DATE_FORMAT(h.entrydate,'%d/%m/%Y') AS entrydate, h.linename, 
-				h.shiftid, h.empid, e.empname, h.operationid, o.operationname, h.smv, 
-				h.machinaryid, m.machineryname
+				h.shiftid, s.shiftname, h.tablename, h.empid, e.empname, 
+				h.operationid, o.operationname, h.smv, h.machinaryid, m.machineryname
 			FROM 
 				employee_vs_operation h
 				INNER JOIN employee e ON h.empid = e.id
+				INNER JOIN shifttiming s ON h.shiftid = s.id
 				INNER JOIN operations o ON h.operationid = o.id
 				INNER JOIN machineries m ON h.machinaryid = m.id
 			WHERE 
-				h.status <> 'inactive' AND o.status <> 'inactive' AND 
-				e.status <> 'inactive' AND m.status <> 'inactive'";
+				h.status <> 'inactive' AND s.status <> 'inactive' AND 
+				o.status <> 'inactive' AND e.status <> 'inactive' AND 
+				m.status <> 'inactive'";
 	if($entryId > 0)
 	{
 		$sql .= " AND h.id = $entryId";	
@@ -776,13 +778,13 @@ public function getEmployeeVsOperationDetails($entryId = '', $entryDate = '', $l
 	return $res->result();
 }
 
-public function checkEmployeeVsOperationavailability($entryId, $entryDate, $employeeId, $lineName, $shiftId)
+public function checkEmployeeVsOperationavailability($entryId, $entryDate, $employeeId, $lineName, $shiftId, $tableName)
 {
 	$sql = "SELECT * FROM employee_vs_operation 
 			WHERE 
 				status <> 'inactive' AND entrydate = '".$entryDate."' AND 
 				empid = '".$employeeId."' AND linename = '".$lineName."' AND 
-				shiftid = '".$shiftId."'";
+				shiftid = '".$shiftId."' AND tablename = '".$tableName."'";
 	if($entryId > 0)
 	{
 		$sql .= " AND id <> $entryId";
@@ -791,7 +793,7 @@ public function checkEmployeeVsOperationavailability($entryId, $entryDate, $empl
 	return $res->num_rows();
 }
 
-public function saveEmployeeVsOperation($entryId, $entryDate, $employeeId, $lineName, $shiftId, $operationId, $machinaryId, $smv)
+public function saveEmployeeVsOperation($entryId, $entryDate, $employeeId, $lineName, $shiftId, $tableName, $operationId, $machinaryId, $smv)
 {
 	if($entryId > 0)
 	{
@@ -800,6 +802,7 @@ public function saveEmployeeVsOperation($entryId, $entryDate, $employeeId, $line
 					empid = '".$employeeId."', 
 					linename = '".$lineName."', 
 					shiftid = '".$shiftId."', 
+					tablename = '".$tableName."', 
 					operationid = '".$operationId."', 
 					machinaryid = '".$machinaryId."', 
 					smv = '".$smv."', 
@@ -814,6 +817,7 @@ public function saveEmployeeVsOperation($entryId, $entryDate, $employeeId, $line
 					empid = '".$employeeId."', 
 					linename = '".$lineName."', 
 					shiftid = '".$shiftId."', 
+					tablename = '".$tableName."', 
 					operationid = '".$operationId."', 
 					machinaryid = '".$machinaryId."', 
 					smv = '".$smv."', 
@@ -848,6 +852,24 @@ public function getSkillMatrix_EmpDetails($skillMatrixId)
 	return $res->result();
 }
 
+public function getPieceLogsDetailsByEmployee($entryDate, $shiftId, $lineName, $empId)
+{
+	$sql = "SELECT COUNT(*) AS cnt, eo.operationid, eo.smv
+			FROM 
+				piecelogs_hdr h 
+				INNER JOIN piecelogs_dtl d ON h.id = d.piecelog_id
+				INNER JOIN employee_vs_operation eo 
+					ON DATE_FORMAT(d.in_time,'%Y-%m-%d') = eo.entrydate AND 
+					h.lineid = eo.linename AND d.tablename = eo.tablename
+			WHERE 
+				h.status <> 'inactive' AND eo.status <> 'inactive' AND 
+				eo.entrydate = '".$entryDate."' AND h.lineid = '".$lineName."' AND 
+				eo.empid = '".$empId."'
+			GROUP BY eo.entrydate, eo.linename, d.tablename = eo.tablename";
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
 public function checkDateLineNameAvailability_SkillMatrix($skillMatrixId, $entryDate, $shiftTime, $lineName)
 {
 	$sql = "SELECT * FROM skillmatrix_hdr 
@@ -862,13 +884,13 @@ public function checkDateLineNameAvailability_SkillMatrix($skillMatrixId, $entry
 	return $res->num_rows();
 }
 
-public function saveSkillMatrix($skillMatrixId, $entryDate, $shiftTime, $lineName, $dtlArr)
+public function saveSkillMatrix($skillMatrixId, $entryDate, $shiftId, $lineName, $dtlArr)
 {
 	if($skillMatrixId > 0)
 	{
 		$sql = "UPDATE skillmatrix_hdr SET 
 					entry_date = '".$entryDate."', 
-					shifttime = '".$shiftTime."', 
+					shiftid = '".$shiftId."', 
 					linename = '".$lineName."', 
 					modified_on = NOW(), 
 					modified_by = '".$this->session->userdata('userid')."'
@@ -879,7 +901,7 @@ public function saveSkillMatrix($skillMatrixId, $entryDate, $shiftTime, $lineNam
 	{
 		$sql = "INSERT INTO skillmatrix_hdr SET 
 					entry_date = '".$entryDate."', 
-					shifttime = '".$shiftTime."', 
+					shiftid = '".$shiftId."', 
 					linename = '".$lineName."', 
 					created_on = NOW(), 
 					created_by = '".$this->session->userdata('userid')."'";
@@ -1446,7 +1468,9 @@ public function saveLineVsStyle($entryId, $entryDate, $lineName, $styleId)
 
 public function getPieceLogsHeaderDetails()
 {
-	$sql = "SELECT h.id, h.lineid, h.styleid, IFNULL(s.styleno,'') AS styleno
+	$sql = "SELECT 
+				h.id, h.lineid, h.styleid, IFNULL(s.styleno,'') AS styleno, 
+				DATE_FORMAT(h.created_dt,'%d-%m-%Y') AS createddt
 			FROM 
 				piecelogs_hdr h 
 				LEFT OUTER JOIN (SELECT * FROM style_hdr WHERE STATUS <> 'inactive') s 
@@ -1454,6 +1478,63 @@ public function getPieceLogsHeaderDetails()
 			WHERE h.status <> 'inactive'";
 	$res = $this->db->query($sql);
 	return $res->result();
+}
+
+public function getPieceLogsDetails($entryId)
+{
+	$sql = "SELECT 
+				h.styleid, IFNULL(s.styleno,'') AS styleno, 
+				DATE_FORMAT(h.created_dt,'%d-%m-%Y') AS createddt, d.*
+			FROM 
+				piecelogs_hdr h 
+				LEFT OUTER JOIN (SELECT * FROM style_hdr WHERE STATUS <> 'inactive') s 
+				ON h.styleid = s.id
+				INNER JOIN piecelogs_dtl d ON h.id = d.piecelog_id
+			WHERE h.status <> 'inactive' AND h.id = $entryId";
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function updatePieceLogDtlId($pieceLogId, $pieceLogDtlId, $styleId)
+{
+	$sql = "SELECT *, DATE_FORMAT(created_dt,'%d-%m-%Y') AS createddt 
+			FROM piecelogs_hdr 
+			WHERE status <> 'inactive' AND id = $pieceLogId";
+	$res = $this->db->query($sql);
+	$result = $res->result();
+	$lineName = '';
+	$curStyleId = '';
+	$entryDate = '';
+	foreach($result as $row)
+	{
+		$lineName = $row->lineid;
+		$curStyleId = $row->styleid;
+		$entryDate = $row->created_dt;
+	}
+	$checkSql = "SELECT * FROM piecelogs_hdr 
+				WHERE 
+					status <> 'inactive' AND created_dt = '".$entryDate."' AND 
+					lineid = '".$lineName."' AND styleid = $styleId";
+	$checkRes = $this->db->query($checkSql);
+	
+	$isError = FALSE;
+	if($checkRes->num_rows() > 0)
+	{
+		$new_PieceLogId = 0;
+		foreach($checkRes->result() as $row)
+		{
+			$new_PieceLogId = $row->id;
+		}
+		$sql = "UPDATE piecelogs_dtl SET piecelog_id = $new_PieceLogId 
+				WHERE id = $pieceLogDtlId";
+		$this->db->query($sql);
+		$isError = FALSE;
+	}
+	else
+	{
+		$isError = TRUE;
+	}
+	return $isError;
 }
 
 public function getShiftTimings($entryId = '')

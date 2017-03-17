@@ -46,7 +46,7 @@
 									?>
 									<tr>
 										<td><?php echo $row->entrydate; ?></td>
-										<td><?php echo $row->shifttime; ?></td>
+										<td><?php echo $row->shiftname; ?></td>
 										<td><?php echo $row->linename; ?></td>
 										<td>
 											<button class="btn btn-sm btn-success editEntry" skillMatrixId="<?php echo $row->id; ?>" title="Edit">
@@ -92,10 +92,19 @@
 											Shift Time&nbsp;<span style="color: red;">*</span>
 										</label>
 			                            <div class="col-sm-8">
-			                                <select class="form-control" id="shiftTime" style="width: 100%;" data-placeholder="Select">
+			                                <select class="form-control" id="shiftId" style="width: 100%;" data-placeholder="Select">
 												<option value=""></option>
-												<option value="General">General</option>
-												<option value="Other">Other</option>
+												<?php
+												foreach($shiftTimingDtls as $row)
+												{
+													echo '<option value="'.$row->id.'"';
+													if($row->id == $shiftId)
+													{
+														echo ' selected="selected"';
+													}
+													echo '>'.$row->shiftname.'</option>';
+												}
+												?>
 											</select>
 			                            </div>
 			                        </div>
@@ -146,7 +155,7 @@
 														?>
 														<tr class="empDetailsTR" rowNo="<?php echo $cnt; ?>">
 															<td>
-																<select class="form-control empId_<?php echo $cnt; ?>" style="width: 100%;" data-placeholder="Select">
+																<select class="form-control employeeSelect empId_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" style="width: 100%;" data-placeholder="Select">
 																<option value=""></option>
 																<?php
 																foreach($empDtls as $res)
@@ -158,7 +167,7 @@
 																</select>
 															</td>
 															<td>
-																<select class="form-control operationId_<?php echo $cnt; ?>" style="width: 100%;" data-placeholder="Select">
+																<select class="form-control operationId_<?php echo $cnt; ?>" style="width: 100%;" data-placeholder="Select" disabled="">
 																<option value=""></option>
 																<?php
 																foreach($operationDtls as $res)
@@ -173,10 +182,10 @@
 																<input type="text" class="form-control numeric producedMin_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Target Minutes" value="<?php echo $row->producedmin; ?>">
 															</td>
 															<td>
-																<input type="text" class="form-control numeric pieces_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Target Pieces" value="<?php echo $row->pieces; ?>">
+																<input type="text" class="form-control numeric pieces_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Target Pieces" value="<?php echo $row->pieces; ?>" disabled="">
 															</td>
 															<td>
-																<input type="text" class="form-control numeric sam_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="SAM" value="<?php echo $row->sam; ?>">
+																<input type="text" class="form-control numeric sam_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="SAM" value="<?php echo $row->sam; ?>" disabled="">
 															</td>
 															<td>
 																<input type="text" class="form-control numeric shiftHrs_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Actual Minutes" value="<?php echo $row->shifthrs; ?>">
@@ -260,8 +269,6 @@
 		}
 		else
 		{
-			$("#shiftTime").select2('val', '<?php echo $shiftName; ?>');
-			
 			var myDtlArr = '<?php echo json_encode($dtlArr); ?>';
 			myDtlArr = JSON.parse(myDtlArr);
 			
@@ -309,7 +316,7 @@
 			
 			str += '<tr class="empDetailsTR" rowNo="'+parseInt(rowNo)+'">';
 			str += '<td>';
-			str += '<select class="form-control empId_'+parseInt(rowNo)+'" style="width: 100%;" data-placeholder="Select">';
+			str += '<select class="form-control employeeSelect empId_'+parseInt(rowNo)+'" style="width: 100%;" rowNo="'+parseInt(rowNo)+'" data-placeholder="Select">';
 			str += '<option value=""></option>';
 			for(var n=0; n<empDtls.length; n++)
 			{
@@ -318,7 +325,7 @@
 			str += '</select>';
 			str += '</td>';
 			str += '<td>';
-			str += '<select class="form-control operationId_'+parseInt(rowNo)+'" style="width: 100%;" data-placeholder="Select">';
+			str += '<select class="form-control operationId_'+parseInt(rowNo)+'" style="width: 100%;" data-placeholder="Select" disabled="">';
 			str += '<option value=""></option>';
 			for(var n=0; n<operationDtls.length; n++)
 			{
@@ -330,10 +337,10 @@
 			str += '<input type="text" class="form-control numeric producedMin_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Target Minutes">';
 			str += '</td>';
 			str += '<td>';
-			str += '<input type="text" class="form-control numeric pieces_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Target Pieces">';
+			str += '<input type="text" class="form-control numeric pieces_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Target Pieces" disabled="">';
 			str += '</td>';
 			str += '<td>';
-			str += '<input type="text" class="form-control numeric sam_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="SAM">';
+			str += '<input type="text" class="form-control numeric sam_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="SAM" disabled="">';
 			str += '</td>';
 			str += '<td>';
 			str += '<input type="text" class="form-control numeric shiftHrs_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Actual Minutes">';
@@ -353,6 +360,58 @@
 		}
 	}
 	
+	$(document).on('change','.employeeSelect',function()
+	{
+		var empId = $(this).val();
+		var rowNo = $(this).attr('rowNo');
+		if(empId > 0 && rowNo > 0)
+		{
+			setPieceLogsDetails(empId, rowNo);
+		}
+	});
+	
+	function setPieceLogsDetails(empId, rowNo)
+	{
+		var entryDate = $("#entryDate").val();
+		var shiftId = $("#shiftId").val();
+		var lineName = $("#lineName").val();
+		
+		if(entryDate != "" && shiftId > 0 && lineName != "" && empId > 0)
+		{
+			var req = new Request();
+			req.data = 
+			{
+				"entryDate" : entryDate, 
+				"shiftId" : shiftId, 
+				"lineName" : lineName, 
+				"empId" : empId
+			};
+			req.url = "admin/getPieceLogsDetailsByEmployee";
+			RequestHandler(req, setPieceLogEmployeeDetails, rowNo);
+		}
+	}
+	
+	function setPieceLogEmployeeDetails(data, rowNo)
+	{
+		data = JSON.parse(data);
+		var isError = data.isError;
+		var msg = data.msg;
+		if(isError)
+		{
+			alert(msg);
+		}
+		else
+		{
+			var res = data.res;
+			if(res.length > 0)
+			{
+				$(".pieces_"+rowNo).val(res[0].cnt);
+				$(".operationId_"+rowNo).select2('val',res[0].operationid);
+				$(".sam_"+rowNo).val(res[0].smv);
+			}
+		}
+	}
+	
 	$(document).on('click','.delEmpDtl',function()
 	{
 		var bool = confirm("Are you sure want to Remove this Employee Detail?");
@@ -369,7 +428,7 @@
 		
 		var skillMatrixId = '<?php echo $skillMatrixId; ?>';
 		var entryDate = $("#entryDate").val();
-		var shiftTime = $("#shiftTime").val();
+		var shiftId = $("#shiftId").val();
 		var lineName = $("#lineName").val();
 		
 		var dtlArr = [];
@@ -412,7 +471,7 @@
 			return;
 		}
 		
-		if(entryDate != "" && shiftTime != "" && lineName != "" && dtlArr.length > 0)
+		if(entryDate != "" && shiftId > 0 && lineName != "" && dtlArr.length > 0)
 		{
 			$("#responseMsg").html('');
 			
@@ -423,7 +482,7 @@
 				{
 					"menuId" : '<?php echo $menuId; ?>', 
 					"skillMatrixId" : skillMatrixId,
-					"shiftTime" : shiftTime,
+					"shiftId" : shiftId,
 					"entryDate" : entryDate,
 					"lineName" : lineName,
 					"dtlArr" : JSON.stringify(dtlArr)
