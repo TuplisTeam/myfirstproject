@@ -46,7 +46,7 @@
 								?>
 								<tr>
 									<td><?php echo $row->linename; ?></td>
-									<td><?php echo $row->shift; ?></td>
+									<td><?php echo $row->shiftname; ?></td>
 									<td>
 										<button class="btn btn-primary btn-xs editEntry" entryId="<?php echo $row->id; ?>">
 											Edit
@@ -101,10 +101,23 @@
 								<div class="col-md-6">
 									<div class="form-group">
 			                            <label class="col-sm-3 control-label">
-											Shift&nbsp;<span style="color: red;">*</span>
+											Shift Time&nbsp;<span style="color: red;">*</span>
 										</label>
 			                            <div class="col-sm-8">
-			                                <input type="text" class="form-control onBlurDateLine" id="shift" name="shift" placeholder="Shift" value="<?php echo $shiftName; ?>" required="">
+			                                <select class="form-control" id="shiftId" style="width: 100%;" data-placeholder="Select">
+												<option value=""></option>
+												<?php
+												foreach($shiftTimingDtls as $row)
+												{
+													echo '<option value="'.$row->id.'"';
+													if($row->id == $shiftId)
+													{
+														echo ' selected="selected"';
+													}
+													echo '>'.$row->shiftname.'</option>';
+												}
+												?>
+											</select>
 			                            </div>
 			                        </div>
 								</div>
@@ -325,24 +338,34 @@
 		$("#entryDetails").css('display', 'block');
 	});
 	
+	$("#shiftId").change(function()
+	{
+		getLineDetails();
+	});
+	
 	$(".onBlurDateLine").blur(function()
+	{
+		getLineDetails();
+	});
+	
+	function getLineDetails()
 	{
 		var entryDate = $("#entryDate").val();
 		var lineName = $("#lineName").val();
-		var shift = $("#shift").val();
-		if(entryDate != "" && lineName != "" && shift != "")
+		var shiftId = $("#shiftId").val();
+		if(entryDate != "" && lineName != "" && shiftId > 0)
 		{
 			var req = new Request();
 			req.data = 
 			{
 				"entryDate" : entryDate, 
 				"lineName" : lineName, 
-				"shift" : shift
+				"shiftId" : shiftId
 			};
 			req.url = "admin/getLineDetails";
 			RequestHandler(req, setLineDetails);
 		}
-	});
+	}
 	
 	function setLineDetails(data)
 	{
@@ -369,7 +392,7 @@
 		
 		var entryDate = $("#entryDate").val();
 		var lineName = $("#lineName").val();
-		var shift = $("#shift").val();
+		var shiftId = $("#shiftId").val();
 		var operationId = $("#operationId").val();
 		var noOfWorkers = $("#noOfWorkers").val();
 		var daysTarget = $("#daysTarget").val();
@@ -385,7 +408,7 @@
 		var noWorkTime = $("#noWorkTime").val();
 		var lineEfficiency = $("#lineEfficiency").val();
 		
-		if(entryDate != "" && lineName != "" && shift != "" && operationId > 0 && noOfWorkers > 0 && daysTarget > 0 && noOfOperators > 0 && availMinutes > 0 && currentTarget > 0 && issues != "")
+		if(entryDate != "" && lineName != "" && shiftId > 0 && operationId > 0 && noOfWorkers > 0 && daysTarget > 0 && noOfOperators > 0 && availMinutes > 0 && currentTarget > 0 && issues != "")
 		{
 			$("#responseMsg").html('');
 			
@@ -396,7 +419,7 @@
 				"lineId" : lineId,
 				"entryDate" : entryDate, 
 				"lineName" : lineName, 
-				"shift" : shift, 
+				"shiftId" : shiftId, 
 				"operationId" : operationId, 
 				"noOfWorkers" : noOfWorkers, 
 				"daysTarget" : daysTarget, 

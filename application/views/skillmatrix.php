@@ -409,6 +409,11 @@
 				$(".operationId_"+rowNo).select2('val',res[0].operationid);
 				$(".sam_"+rowNo).val(res[0].smv);
 			}
+			else
+			{
+				alert('No Details Found For This Employee.');
+				return;
+			}
 		}
 	}
 	

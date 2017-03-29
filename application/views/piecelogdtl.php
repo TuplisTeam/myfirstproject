@@ -6,7 +6,6 @@
 			</a>
 		</h3>
     </div>
-    <div class="col-md-6" id="responseMsg"></div>
 	<div id="main-wrapper">
 		<div class="row" id="listDetails">
 			<div class="col-md-12">
@@ -66,54 +65,6 @@
     </div>
 </div>
 
-<div id="showLineStyletModal" class="modal fade" tabindex="-1" aria-labelledby="selectLineStyle" aria-hidden="true" data-backdrop="static">
-	<div class="modal-dialog modal-md">
-		<div class="modal-content">
-            <div class="modal-header">
-                <h4 id="selectLineStyle" class="modal-title">
-					Change Line Style
-				</h4>
-            </div>
-            <div class="modal-body">
-            	<div class="row">
-            		<div class="col-sm-12">
-	            		<div class="form-group">
-	            			<label class="col-sm-2 control-label">
-								Style&nbsp;<span style="color: red;">*</span>
-							</label>
-	                        <div class="col-sm-10">
-	                        	<input type="hidden" id="pieceLogDtlId" name="pieceLogDtlId" />
-	                            <select class="form-control" style="width: 100%;" data-placeholder="Select" id="styleId" name="styleId">
-									<option value=""></option>
-									<?php
-									foreach($styleDtls as $res)
-									{
-										echo '<option value="'.$res->id.'"';
-										if($styleId == $res->id)
-										{
-											echo ' selected="selected"';
-										}
-										echo '>'.$res->styleno.'</option>';
-									}
-									?>
-								</select>
-	                        </div>
-	            		</div>
-            		</div>
-            	</div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success doneBtn">
-                	Done
-                </button>
-                <button type="button" class="btn btn-warning" data-dismiss="modal">
-                	Cancel
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
 	
 	$(document).ready(function()
@@ -122,34 +73,79 @@
 		$('select').select2();
 	});
 	
-	$(".editStyle").click(function()
+	$(".viewPieceLogDetails").click(function()
 	{
 		var entryId = $(this).attr('entryId');
-		var pieceLogId = $(this).attr('pieceLogId');
-		if(entryId > 0 && pieceLogId > 0)
+		if(entryId > 0)
 		{
-			$("#pieceLogDtlId").val(entryId);
-			$("#showLineStyletModal").modal('show');
+			window.open('<?php echo base_url(); ?>admin/piecelogdtl/'+entryId);
 		}	
 	});
 	
-	$(".doneBtn").on("click",function()
+	$("#hangerForm").submit(function(e)
 	{
+		e.preventDefault();
+		
+		var entryId = '<?php echo $entryId; ?>';
+		
+		var entryDate = $("#entryDate").val();
+		var lineName = $("#lineName").val();
 		var styleId = $("#styleId").val();
-		var pieceLogDtlId = $("#pieceLogDtlId").val();
-		if(pieceLogDtlId > 0 && styleId > 0)
+		
+		if(entryDate != "" && lineName != "" && styleId > 0)
 		{
-			var bool = confirm("Are You Sure Want To Update This Entry?");
+			$("#responseMsg").html('');
+			
+			var req = new Request();
+			req.data = 
+			{
+				"menuId" : '<?php echo $menuId; ?>', 
+				"entryId" : entryId,
+				"entryDate" : entryDate,
+				"lineName" : lineName, 
+				"styleId" : styleId
+			};
+			req.url = "admin/saveLineVsStyle";
+			RequestHandler(req, showResponse);
+		}
+		else
+		{
+			var str = '';
+			
+			str += '<div role="alert" class="alert alert-danger">';
+			str += 'OOPS! Please Fill All Details.';
+			str += '</div>';
+
+			$("#responseMsg").html(str);
+		}
+	});
+	
+	$(".editEntry").click(function()
+	{
+		var entryId = $(this).attr('entryId');
+		if(entryId > 0)
+		{
+			location.href = '<?php echo base_url(); ?>admin/line_vs_style/'+entryId;
+		}
+	});
+	
+	$(".delEntry").on("click",function()
+	{
+		var entryId = $(this).attr('entryId');
+		if(entryId > 0)
+		{
+			var bool = confirm("Are You Sure Want To Remove This Entry?");
 			if(bool)
 			{
 				var req = new Request();
 				req.data = 
 				{
-					"pieceLogId" : "<?php echo $pieceLogId; ?>", 
-					"pieceLogDtlId" : pieceLogDtlId, 
-					"styleId" : styleId
+					"menuId" : '<?php echo $menuId; ?>', 
+					"entryId" : entryId, 
+					"tableName" : "line_vs_style", 
+					"columnName" : "id"
 				};
-				req.url = "admin/updatePieceLogDtlId";
+				req.url = "admin/delEntry";
 				RequestHandler(req, showResponse);
 			}
 		}
@@ -162,8 +158,6 @@
 	function showResponse(data)
 	{
 		data = JSON.parse(data);
-		
-		$("#showLineStyletModal").modal('hide');
 		
 		var isError = data.isError;
 		var msg = data.msg;
@@ -183,7 +177,7 @@
 			str += 'WELL DONE! ' + msg;
 			str += '</div>';
 			
-			redirectURL = '<?php echo base_url(); ?>admin/piecelogdtl/<?php echo $pieceLogId; ?>';
+			redirectURL = '<?php echo base_url(); ?>admin/line_vs_style';
 		}
 		$("#responseMsg").html(str);
 		if(!isError)
@@ -194,5 +188,11 @@
 			},1000);
 		}
 	}
+	
+	$(".resetBtn").click(function()
+	{
+		$("#responseMsg").html('');
+		location.href = '<?php echo base_url(); ?>admin/line_vs_style/';
+	});
 	
 </script>
