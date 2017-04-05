@@ -58,7 +58,7 @@
 										<td><?php echo $i; ?></td>
 										<td><?php echo $row->entrydt; ?></td>
 										<td><?php echo $row->linename; ?></td>
-										<td><?php echo $row->shiftname; ?></td>
+										<td><?php echo $row->shift; ?></td>
 										<td><?php echo $row->operationname; ?></td>
 										<td><?php echo $row->no_of_workers; ?></td>
 										<td><?php echo $row->days_target; ?></td>

@@ -40,7 +40,7 @@
 										<td><?php echo $i; ?></td>
 										<td><?php echo $row->entrydt; ?></td>
 										<td><?php echo $row->linename; ?></td>
-										<td><?php echo $row->shiftname; ?></td>
+										<td><?php echo $row->shift; ?></td>
 										<td><?php echo $row->empno; ?></td>
 										<td><?php echo $row->empname; ?></td>
 										<td><?php echo $row->target; ?></td>
