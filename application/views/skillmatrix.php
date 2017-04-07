@@ -188,7 +188,7 @@
 																<input type="text" class="form-control numeric sam_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="SAM" value="<?php echo $row->sam; ?>" disabled="">
 															</td>
 															<td>
-																<input type="text" class="form-control numeric shiftHrs_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Actual Minutes" value="<?php echo $row->shifthrs; ?>">
+																<input type="text" class="form-control numeric shiftHrs_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Actual Minutes" value="<?php echo $row->shifthrs; ?>" disabled="">
 															</td>
 															<td>
 																<input type="text" class="form-control numeric otHours_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="OT Hours" value="<?php echo $row->othours; ?>">
@@ -343,7 +343,7 @@
 			str += '<input type="text" class="form-control numeric sam_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="SAM" disabled="">';
 			str += '</td>';
 			str += '<td>';
-			str += '<input type="text" class="form-control numeric shiftHrs_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Actual Minutes">';
+			str += '<input type="text" class="form-control numeric shiftHrs_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="Actual Minutes" disabled="">';
 			str += '</td>';
 			str += '<td>';
 			str += '<input type="text" class="form-control numeric otHours_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="OT Hours">';
@@ -399,6 +399,10 @@
 		if(isError)
 		{
 			alert(msg);
+			$(".pieces_"+rowNo).val('');
+			$(".operationId_"+rowNo).select2('val','');
+			$(".sam_"+rowNo).val('');
+			$(".shiftHrs_"+rowNo).val('');
 		}
 		else
 		{
@@ -408,10 +412,17 @@
 				$(".pieces_"+rowNo).val(res[0].cnt);
 				$(".operationId_"+rowNo).select2('val',res[0].operationid);
 				$(".sam_"+rowNo).val(res[0].smv);
+				$(".producedMin_"+rowNo).val('');
+				$(".shiftHrs_"+rowNo).val(res[0].actualtime);
 			}
 			else
 			{
 				alert('No Details Found For This Employee.');
+				$(".pieces_"+rowNo).val('');
+				$(".operationId_"+rowNo).select2('val','');
+				$(".sam_"+rowNo).val('');
+				$(".producedMin_"+rowNo).val('');
+				$(".shiftHrs_"+rowNo).val('');
 				return;
 			}
 		}

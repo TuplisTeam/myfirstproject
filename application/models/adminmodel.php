@@ -854,7 +854,9 @@ public function getSkillMatrix_EmpDetails($skillMatrixId)
 
 public function getPieceLogsDetailsByEmployee($entryDate, $shiftId, $lineName, $empId)
 {
-	$sql = "SELECT COUNT(*) AS cnt, eo.operationid, eo.smv
+	$sql = "SELECT 
+				COUNT(*) AS cnt, eo.operationid, eo.smv, 
+				TIME_TO_SEC(IF(CURTIME() > '19:00:00', TIMEDIFF('19:00:00', '08:30:00'), TIMEDIFF(CURTIME(), '08:30:00'))) AS actualtime
 			FROM 
 				piecelogs_hdr h 
 				INNER JOIN piecelogs_dtl d ON h.id = d.piecelog_id
@@ -870,12 +872,12 @@ public function getPieceLogsDetailsByEmployee($entryDate, $shiftId, $lineName, $
 	return $res->result();
 }
 
-public function checkDateLineNameAvailability_SkillMatrix($skillMatrixId, $entryDate, $shiftTime, $lineName)
+public function checkDateLineNameAvailability_SkillMatrix($skillMatrixId, $entryDate, $shiftId, $lineName)
 {
 	$sql = "SELECT * FROM skillmatrix_hdr 
 			WHERE 
 				STATUS <> 'inactive' AND entry_date = '".$entryDate."' AND 
-				shifttime = '".$shiftTime."' AND linename = '".$lineName."'";
+				shiftid = '".$shiftId."' AND linename = '".$lineName."'";
 	if($skillMatrixId > 0)
 	{
 		$sql .= " AND id <> $skillMatrixId";

@@ -1223,7 +1223,7 @@ public function skillmatrix($skillMatrixId = '')
 	
 	$data["entryDate"] = "";
 	$data["lineName"] = "";
-	$data["shiftName"] = "";
+	$data["shiftId"] = "";
 	$data["dtlArr"] = array();
 	
 	if($skillMatrixId > 0)
@@ -1232,7 +1232,7 @@ public function skillmatrix($skillMatrixId = '')
 		{
 			$data["entryDate"] = $row->entrydate;
 			$data["lineName"] = $row->linename;
-			$data["shiftName"] = $row->shifttime;
+			$data["shiftId"] = $row->shiftid;
 			$data["dtlArr"] = $this->adminmodel->getSkillMatrix_EmpDetails($skillMatrixId);
 		}
 	}
