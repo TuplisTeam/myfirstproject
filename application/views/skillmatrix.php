@@ -161,6 +161,10 @@
 																foreach($empDtls as $res)
 																{
 																	echo '<option value="'.$res->id.'"';
+																	if($res->id == $row->empid)
+																	{
+																		echo ' selected="selected"';
+																	}
 																	echo '>'.$res->empname.'</option>';
 																}
 																?>
@@ -173,6 +177,10 @@
 																foreach($operationDtls as $res)
 																{
 																	echo '<option value="'.$res->id.'"';
+																	if($res->id == $row->operationid)
+																	{
+																		echo ' selected="selected"';
+																	}
 																	echo '>'.$res->operationname.'</option>';
 																}
 																?>
@@ -266,20 +274,6 @@
 		if(skillMatrixId == "")
 		{
 			addNewRow();
-		}
-		else
-		{
-			var myDtlArr = '<?php echo json_encode($dtlArr); ?>';
-			myDtlArr = JSON.parse(myDtlArr);
-			
-			if(myDtlArr.length > 0)
-			{
-				for(var k=0; k<myDtlArr.length; k++)
-				{
-					$(".empId_"+(k+1)).select2('val',myDtlArr[k].empid);
-					$(".operationId_"+(k+1)).select2('val',myDtlArr[k].operationid);
-				}
-			}
 		}
 	});
 	
