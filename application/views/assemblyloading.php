@@ -448,6 +448,11 @@
 							parseFloat(otHour ? otHour : 0);
 				$("#totalPieces").val(parseInt(totalPieces ? totalPieces : 0));
 			}
+			else
+			{
+				alert('No Log Details Found.');
+				return;
+			}
 		}
 	}
 	

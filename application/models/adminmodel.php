@@ -1059,9 +1059,12 @@ public function getPieceLogsDetailsByDateLine($entryDate, $lineName, $shiftId)
 		$shiftFromTiming = $entryDate.' '.$row->fromtime;
 		$shiftToTiming = $entryDate.' '.$row->totime;
 	}
-	
-	$res = $this->callPieceLogDetails_Procedure($pieceLogId, $shiftFromTiming, $shiftToTiming);
-	return $res;
+	$resArr = array();
+	if($pieceLogId > 0 && $shiftFromTiming != "" && $shiftToTiming != "")
+	{
+		$resArr = $this->callPieceLogDetails_Procedure($pieceLogId, $shiftFromTiming, $shiftToTiming);
+	}
+	return $resArr;
 }
 
 public function callPieceLogDetails_Procedure($pieceLogId, $shiftFromTiming, $shiftToTiming)
