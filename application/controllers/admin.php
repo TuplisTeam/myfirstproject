@@ -1564,11 +1564,12 @@ public function hourlyproduction_linewise($lineId = '')
 	$data["lineId"] = $lineId;
 	
 	$data["operationDtls"] = $this->adminmodel->getOperationDetails();
+	$data["shiftTimingDtls"] = $this->adminmodel->getShiftTimings();
 	$res = $this->adminmodel->getHourlyProductionLineWiseDetails($lineId);
 	
 	$data["entryDate"] = "";
 	$data["lineName"] = "";
-	$data["shiftName"] = "";
+	$data["shiftId"] = "";
 	$data["operationId"] = "";
 	$data["noOfWorkers"] = "";
 	$data["daysTarget"] = "";
@@ -1590,7 +1591,7 @@ public function hourlyproduction_linewise($lineId = '')
 		{
 			$data["entryDate"] = $row->entrydt;
 			$data["lineName"] = $row->linename;
-			$data["shiftName"] = $row->shift;
+			$data["shiftId"] = $row->shiftid;
 			$data["operationId"] = $row->operationid;
 			$data["noOfWorkers"] = $row->no_of_workers;
 			$data["daysTarget"] = $row->days_target;
@@ -1623,7 +1624,7 @@ public function saveHourlyProduction_LineWise()
 	$lineId = $this->input->post('lineId');
 	$entryDate = $this->input->post('entryDate');
 	$lineName = $this->input->post('lineName');
-	$shiftName = $this->input->post('shift');
+	$shiftId = $this->input->post('shiftId');
 	$operationId = $this->input->post('operationId');
 	$noOfWorkers = $this->input->post('noOfWorkers');
 	$daysTarget = $this->input->post('daysTarget');
@@ -1651,9 +1652,9 @@ public function saveHourlyProduction_LineWise()
 		return;
 	}
 	
-	if($entryDate != "" && $lineName != "" && $shiftName != "" && $operationId > 0 && $noOfWorkers > 0 && $daysTarget > 0 && $targetPerHour > 0 && $noOfOperators > 0 && $availMinutes > 0 && $currentTarget > 0)
+	if($entryDate != "" && $lineName != "" && $shiftId > 0 && $operationId > 0 && $noOfWorkers > 0 && $daysTarget > 0 && $targetPerHour > 0 && $noOfOperators > 0 && $availMinutes > 0 && $currentTarget > 0)
 	{
-		$availRes = $this->adminmodel->checkDateLineNameAvailability_HourlyProduction_Linewise($lineId, $entryDate, $lineName, $shiftName);
+		$availRes = $this->adminmodel->checkDateLineNameAvailability_HourlyProduction_Linewise($lineId, $entryDate, $lineName, $shiftId);
 		if($availRes > 0)
 		{
 			$data["isError"] = TRUE;
@@ -1661,7 +1662,7 @@ public function saveHourlyProduction_LineWise()
 		}
 		else
 		{
-			$this->adminmodel->saveHourlyProduction_LineWise($lineId, $entryDate, $lineName, $shiftName, $operationId, $noOfWorkers, $daysTarget, $targetPerHour, $noOfOperators, $availMinutes, $currentTarget, $issues, $wip, $idleTime, $breakDownTime, $reworkTime, $noWorkTime, $lineEfficiency);
+			$this->adminmodel->saveHourlyProduction_LineWise($lineId, $entryDate, $lineName, $shiftId, $operationId, $noOfWorkers, $daysTarget, $targetPerHour, $noOfOperators, $availMinutes, $currentTarget, $issues, $wip, $idleTime, $breakDownTime, $reworkTime, $noWorkTime, $lineEfficiency);
 		
 			$data["isError"] = FALSE;
 			if($lineId > 0)
@@ -1686,11 +1687,11 @@ public function getLineDetails()
 {
 	$entryDate = $this->input->post('entryDate');
 	$lineName = $this->input->post('lineName');
-	$shift = $this->input->post('shift');
+	$shiftId = $this->input->post('shiftId');
 	$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
-	if($entryDate != "" && $lineName != "" && $shift != "")
+	if($entryDate != "" && $lineName != "" && $shiftId > 0)
 	{
-		$res = $this->adminmodel->getLineDetails($entryDate, $lineName, $shift);
+		$res = $this->adminmodel->getLineDetails($entryDate, $lineName, $shiftId);
 		
 		$data["res"] = $res;
 		$data["isError"] = FALSE;
@@ -2582,7 +2583,7 @@ public function getPriceRateIncentiveReport()
 			{
 			   	$i++;
 				
-				$str .= $i.',"'.$row->entrydt.'","'.$row->linename.'","'.$row->shift.'","'.$row->empno.'","'.$row->empname.'","'.$row->target.'","'.$row->sewing.'","'.$row->incentive.'","'.$row->amount.'"'."\n";
+				$str .= $i.',"'.$row->entrydt.'","'.$row->linename.'","'.$row->shiftname.'","'.$row->empno.'","'.$row->empname.'","'.$row->target.'","'.$row->sewing.'","'.$row->incentive.'","'.$row->amount.'"'."\n";
 		  	}
 		}
 		else
@@ -2643,7 +2644,7 @@ public function getHourlyProductionReport()
 			{
 			   	$i++;
 				
-				$str .= $i.',"'.$row->entrydt.'","'.$row->linename.'","'.$row->shift.'","'.$row->empno.'","'.$row->empname.'","'.$row->hour1.'","'.$row->hour2.'","'.$row->hour3.'","'.$row->hour4.'","'.$row->hour5.'","'.$row->hour6.'","'.$row->hour7.'","'.$row->hour8.'","'.$row->othour.'","'.$row->totalpieces.'"'."\n";
+				$str .= $i.',"'.$row->entrydt.'","'.$row->linename.'","'.$row->shiftname.'","'.$row->empno.'","'.$row->empname.'","'.$row->hour1.'","'.$row->hour2.'","'.$row->hour3.'","'.$row->hour4.'","'.$row->hour5.'","'.$row->hour6.'","'.$row->hour7.'","'.$row->hour8.'","'.$row->othour.'","'.$row->totalpieces.'"'."\n";
 		  	}
 		}
 		else
@@ -2701,7 +2702,7 @@ public function getHourlyProductionLineWiseReport()
 			{
 			   	$i++;
 				
-				$str .= $i.',"'.$row->entrydt.'","'.$row->linename.'","'.$row->shift.'","'.$row->operationname.'","'.$row->no_of_workers.'","'.$row->days_target.'","'.$row->target_per_hr.'","'.$row->no_of_operators.'","'.$row->avail_min.'","'.$row->current_target.'","'.$row->issues.'","'.$row->hour1.'","'.$row->hour2.'","'.$row->hour3.'","'.$row->hour4.'","'.$row->hour5.'","'.$row->hour6.'","'.$row->hour7.'","'.$row->hour8.'","'.$row->othour.'","'.$row->totalpieces.'","'.$row->wip.'","'.$row->idletime.'","'.$row->breakdown_time.'","'.$row->rework_time.'","'.$row->nowork_time.'","'.$row->line_efficiency.'"'."\n";
+				$str .= $i.',"'.$row->entrydt.'","'.$row->linename.'","'.$row->shiftname.'","'.$row->operationname.'","'.$row->no_of_workers.'","'.$row->days_target.'","'.$row->target_per_hr.'","'.$row->no_of_operators.'","'.$row->avail_min.'","'.$row->current_target.'","'.$row->issues.'","'.$row->hour1.'","'.$row->hour2.'","'.$row->hour3.'","'.$row->hour4.'","'.$row->hour5.'","'.$row->hour6.'","'.$row->hour7.'","'.$row->hour8.'","'.$row->othour.'","'.$row->totalpieces.'","'.$row->wip.'","'.$row->idletime.'","'.$row->breakdown_time.'","'.$row->rework_time.'","'.$row->nowork_time.'","'.$row->line_efficiency.'"'."\n";
 		  	}
 		}
 		else
@@ -2762,7 +2763,7 @@ public function getAssemblyLoadingReport()
 			{
 			   	$i++;
 				
-				$str .= $i.',"'.$row->entrydt.'","'.$row->linename.'","'.$row->shift.'","'.$row->empno.'","'.$row->empname.'","'.$row->hour1.'","'.$row->hour2.'","'.$row->hour3.'","'.$row->hour4.'","'.$row->hour5.'","'.$row->hour6.'","'.$row->hour7.'","'.$row->hour8.'","'.$row->othour.'","'.$row->totalpieces.'"'."\n";
+				$str .= $i.',"'.$row->entrydt.'","'.$row->linename.'","'.$row->shiftname.'","'.$row->empno.'","'.$row->empname.'","'.$row->hour1.'","'.$row->hour2.'","'.$row->hour3.'","'.$row->hour4.'","'.$row->hour5.'","'.$row->hour6.'","'.$row->hour7.'","'.$row->hour8.'","'.$row->othour.'","'.$row->totalpieces.'"'."\n";
 		  	}
 		}
 		else
