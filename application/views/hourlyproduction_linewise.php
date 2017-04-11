@@ -12,7 +12,7 @@
 		$displayblock = "style='display:none;'";
 		$displaynone = "style='display:block;'";
 		
-		if($lineId != "")
+		if($entryId != "")
 		{
 			$displayblock = "style='display:block;'";
 			$displaynone = "style='display:none;'";
@@ -127,15 +127,18 @@
 											Operation&nbsp;<span style="color: red;">*</span>
 										</label>
 			                            <div class="col-sm-8">
-			                                <select class="form-control" style="width: 100%;" data-placeholder="Select" id="operationId" name="operationId" required="">
+			                                <select class="form-control" style="width: 100%;" data-placeholder="Select" id="operationId" name="operationId[]" multiple="" required="">
 												<option value=""></option>
 												<?php
 												foreach($operationDtls as $res)
 												{
 													echo '<option value="'.$res->id.'"';
-													if($operationId == $res->id)
+													foreach($operationIdArr as $row)
 													{
-														echo ' selected="selected"';
+														if($row->operationid == $res->id)
+														{
+															echo ' selected="selected"';
+														}
 													}
 													echo '>'.$res->operationname.'</option>';
 												}
@@ -294,7 +297,7 @@
 		                            <div class="col-sm-offset-2 col-sm-10">
 		                                <button type="submit" class="btn btn-success">
 											<?php
-											if($lineId > 0)
+											if($entryId > 0)
 											{
 												echo 'Update';
 											}
@@ -379,9 +382,9 @@
 			var res = data.res;
 			if(res.length > 0)
 			{
-				$("#noOfWorkers").val(res[0].totalworkers);
-				$("#daysTarget").val(res[0].totaltarget);
-				$("#targetPerHour").val(parseFloat(res[0].totaltarget/8));
+				$("#noOfWorkers").val(res[0].noofworkers);
+				$("#daysTarget").val(res[0].target);
+				$("#targetPerHour").val(parseFloat(res[0].target/8));
 			}
 			else
 			{
@@ -396,7 +399,7 @@
 	{
 		e.preventDefault();
 		
-		var lineId = '<?php echo $lineId; ?>';
+		var entryId = '<?php echo $entryId; ?>';
 		
 		var entryDate = $("#entryDate").val();
 		var lineName = $("#lineName").val();
@@ -416,7 +419,7 @@
 		var noWorkTime = $("#noWorkTime").val();
 		var lineEfficiency = $("#lineEfficiency").val();
 		
-		if(entryDate != "" && lineName != "" && shiftId > 0 && operationId > 0 && noOfWorkers > 0 && daysTarget > 0 && noOfOperators > 0 && availMinutes > 0 && currentTarget > 0 && issues != "")
+		if(entryDate != "" && lineName != "" && shiftId > 0 && operationId != "" && noOfWorkers > 0 && daysTarget > 0 && noOfOperators > 0 && availMinutes > 0 && currentTarget > 0 && issues != "")
 		{
 			$("#responseMsg").html('');
 			
@@ -424,7 +427,7 @@
 			req.data = 
 			{
 				"menuId" : '<?php echo $menuId; ?>', 
-				"lineId" : lineId,
+				"entryId" : entryId,
 				"entryDate" : entryDate, 
 				"lineName" : lineName, 
 				"shiftId" : shiftId, 

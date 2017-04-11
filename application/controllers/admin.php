@@ -1557,20 +1557,20 @@ public function saveAssemblyLoading()
 	echo json_encode($data);
 }
 
-public function hourlyproduction_linewise($lineId = '')
+public function hourlyproduction_linewise($entryId = '')
 {
 	$data["menuId"] = 26;
 	
-	$data["lineId"] = $lineId;
+	$data["entryId"] = $entryId;
 	
 	$data["operationDtls"] = $this->adminmodel->getOperationDetails();
 	$data["shiftTimingDtls"] = $this->adminmodel->getShiftTimings();
-	$res = $this->adminmodel->getHourlyProductionLineWiseDetails($lineId);
+	$res = $this->adminmodel->getHourlyProductionLineWiseDetails($entryId);
 	
 	$data["entryDate"] = "";
 	$data["lineName"] = "";
 	$data["shiftId"] = "";
-	$data["operationId"] = "";
+	$data["operationIdArr"] = "";
 	$data["noOfWorkers"] = "";
 	$data["daysTarget"] = "";
 	$data["targetPerHour"] = "";
@@ -1585,14 +1585,13 @@ public function hourlyproduction_linewise($lineId = '')
 	$data["noWorkTime"] = "";
 	$data["lineEfficiency"] = "";
 	
-	if($lineId > 0)
+	if($entryId > 0)
 	{
 		foreach($res as $row)
 		{
 			$data["entryDate"] = $row->entrydt;
 			$data["lineName"] = $row->linename;
 			$data["shiftId"] = $row->shiftid;
-			$data["operationId"] = $row->operationid;
 			$data["noOfWorkers"] = $row->no_of_workers;
 			$data["daysTarget"] = $row->days_target;
 			$data["targetPerHour"] = floatval($row->days_target)/8;
@@ -1606,6 +1605,8 @@ public function hourlyproduction_linewise($lineId = '')
 			$data["reworkTime"] = $row->rework_time;
 			$data["noWorkTime"] = $row->nowork_time;
 			$data["lineEfficiency"] = $row->line_efficiency;
+			
+			$data["operationIdArr"] = $this->adminmodel->getHourlyProductionLineWise_OperationDetails($entryId);
 		}
 	}
 	else
@@ -1621,7 +1622,7 @@ public function hourlyproduction_linewise($lineId = '')
 public function saveHourlyProduction_LineWise()
 {
 	$menuId = $this->input->post('menuId');
-	$lineId = $this->input->post('lineId');
+	$entryId = $this->input->post('entryId');
 	$entryDate = $this->input->post('entryDate');
 	$lineName = $this->input->post('lineName');
 	$shiftId = $this->input->post('shiftId');
@@ -1642,7 +1643,7 @@ public function saveHourlyProduction_LineWise()
 	
 	$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
 	
-	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $lineId);
+	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $entryId);
 	
 	if($permissions["isError"])
 	{
@@ -1652,9 +1653,9 @@ public function saveHourlyProduction_LineWise()
 		return;
 	}
 	
-	if($entryDate != "" && $lineName != "" && $shiftId > 0 && $operationId > 0 && $noOfWorkers > 0 && $daysTarget > 0 && $targetPerHour > 0 && $noOfOperators > 0 && $availMinutes > 0 && $currentTarget > 0)
+	if($entryDate != "" && $lineName != "" && $shiftId > 0 && $operationId != "" && $noOfWorkers > 0 && $daysTarget > 0 && $targetPerHour > 0 && $noOfOperators > 0 && $availMinutes > 0 && $currentTarget > 0)
 	{
-		$availRes = $this->adminmodel->checkDateLineNameAvailability_HourlyProduction_Linewise($lineId, $entryDate, $lineName, $shiftId);
+		$availRes = $this->adminmodel->checkDateLineNameAvailability_HourlyProduction_Linewise($entryId, $entryDate, $lineName, $shiftId);
 		if($availRes > 0)
 		{
 			$data["isError"] = TRUE;
@@ -1662,10 +1663,10 @@ public function saveHourlyProduction_LineWise()
 		}
 		else
 		{
-			$this->adminmodel->saveHourlyProduction_LineWise($lineId, $entryDate, $lineName, $shiftId, $operationId, $noOfWorkers, $daysTarget, $targetPerHour, $noOfOperators, $availMinutes, $currentTarget, $issues, $wip, $idleTime, $breakDownTime, $reworkTime, $noWorkTime, $lineEfficiency);
+			$this->adminmodel->saveHourlyProduction_LineWise($entryId, $entryDate, $lineName, $shiftId, $operationId, $noOfWorkers, $daysTarget, $targetPerHour, $noOfOperators, $availMinutes, $currentTarget, $issues, $wip, $idleTime, $breakDownTime, $reworkTime, $noWorkTime, $lineEfficiency);
 		
 			$data["isError"] = FALSE;
-			if($lineId > 0)
+			if($entryId > 0)
 			{
 				$data["msg"] = "Line Details Updated Successfully.";
 			}
