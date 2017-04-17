@@ -1,5 +1,5 @@
 <div class="page-inner">
-    <div class="page-title">
+    <div class="page-title"> 
         <h3>
 			<a href="<?php echo base_url(); ?>admin/assemblyloading" style="text-decoration: none;">
 				Assembly Loading
