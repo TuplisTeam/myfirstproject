@@ -2403,6 +2403,216 @@ public function saveTable()
 	echo json_encode($data);
 }
 
+public function nowork($entryId = '')
+{
+	$data["menuId"] = 35;
+	$data["entryId"] = $entryId;
+	
+	$data["noworkSlNo"] = '';
+	$data["noworkName"] = '';
+	
+	$res = $this->adminmodel->getNoWorkDetails($entryId);
+	
+	if($entryId > 0)
+	{
+		if(count($res) > 0)
+		{
+			foreach($res as $row)
+			{
+				$data["noworkSlNo"] = $row->nowork_slno;
+				$data["noworkName"] = $row->nowork_name;
+			}
+		}
+	}
+	else
+	{
+		$data["allEntries"] = $res;
+	}
+	
+	$this->load->view('header');
+	$this->load->view('nowork', $data);
+	$this->load->view('footer');
+}
+
+public function saveNoWork()
+{
+	$menuId = $this->input->post('menuId');
+	$entryId = $this->input->post('entryId');
+	$noworkSlNo = $this->input->post('noworkSlNo');
+	$noworkName = $this->input->post('noworkName');
+	
+	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $entryId);
+	
+	if($permissions["isError"])
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = $permissions["msg"];
+		echo json_encode($data);
+		return;
+	}
+	
+	if($noworkSlNo != "" && $noworkName != "")
+	{
+		$this->adminmodel->saveNoWork($entryId, $noworkSlNo, $noworkName);
+		
+		$data["isError"] = FALSE;
+		if($entryId > 0)
+		{
+			$data["msg"] = "Nowork Details Updated Successfully.";
+		}
+		else
+		{
+			$data["msg"] = "Nowork Details Saved Successfully.";
+		}
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
+}
+
+public function rework($entryId = '')
+{
+	$data["menuId"] = 36;
+	$data["entryId"] = $entryId;
+	
+	$data["reworkSlNo"] = '';
+	$data["reworkName"] = '';
+	
+	$res = $this->adminmodel->getReworkDetails($entryId);
+	
+	if($entryId > 0)
+	{
+		if(count($res) > 0)
+		{
+			foreach($res as $row)
+			{
+				$data["reworkSlNo"] = $row->rework_slno;
+				$data["reworkName"] = $row->rework_name;
+			}
+		}
+	}
+	else
+	{
+		$data["allEntries"] = $res;
+	}
+	
+	$this->load->view('header');
+	$this->load->view('rework', $data);
+	$this->load->view('footer');
+}
+
+public function saveRework()
+{
+	$menuId = $this->input->post('menuId');
+	$entryId = $this->input->post('entryId');
+	$reworkSlNo = $this->input->post('reworkSlNo');
+	$reworkName = $this->input->post('reworkName');
+	
+	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $entryId);
+	
+	if($permissions["isError"])
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = $permissions["msg"];
+		echo json_encode($data);
+		return;
+	}
+	
+	if($reworkSlNo != "" && $reworkName != "")
+	{
+		$this->adminmodel->saveRework($entryId, $reworkSlNo, $reworkName);
+		
+		$data["isError"] = FALSE;
+		if($entryId > 0)
+		{
+			$data["msg"] = "Rework Details Updated Successfully.";
+		}
+		else
+		{
+			$data["msg"] = "Rework Details Saved Successfully.";
+		}
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
+}
+
+public function breakdown($entryId = '')
+{
+	$data["menuId"] = 37;
+	$data["entryId"] = $entryId;
+	
+	$data["breakdownSlNo"] = '';
+	$data["breakdownName"] = '';
+	
+	$res = $this->adminmodel->getBreakdownDetails($entryId);
+	
+	if($entryId > 0)
+	{
+		if(count($res) > 0)
+		{
+			foreach($res as $row)
+			{
+				$data["breakdownSlNo"] = $row->breakdown_slno;
+				$data["breakdownName"] = $row->breakdown_name;
+			}
+		}
+	}
+	else
+	{
+		$data["allEntries"] = $res;
+	}
+	
+	$this->load->view('header');
+	$this->load->view('breakdown', $data);
+	$this->load->view('footer');
+}
+
+public function saveBreakdown()
+{
+	$menuId = $this->input->post('menuId');
+	$entryId = $this->input->post('entryId');
+	$breakdownSlNo = $this->input->post('breakdownSlNo');
+	$breakdownName = $this->input->post('breakdownName');
+	
+	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $entryId);
+	
+	if($permissions["isError"])
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = $permissions["msg"];
+		echo json_encode($data);
+		return;
+	}
+	
+	if($breakdownSlNo != "" && $breakdownName != "")
+	{
+		$this->adminmodel->saveBreakdown($entryId, $breakdownSlNo, $breakdownName);
+		
+		$data["isError"] = FALSE;
+		if($entryId > 0)
+		{
+			$data["msg"] = "Breakdown Details Updated Successfully.";
+		}
+		else
+		{
+			$data["msg"] = "Breakdown Details Saved Successfully.";
+		}
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
+}
+
 /*Report Starts*/
 
 public function skillmatrixreport()
@@ -2779,6 +2989,125 @@ public function getAssemblyLoadingReport()
 	
 	$this->load->view('reports/header');
 	$this->load->view('reports/assemblyloading_reportprint',$data);
+	$this->load->view('reports/footer');
+}
+
+public function piecelogreport()
+{
+	$this->load->view('header');
+	$this->load->view('reports/piecelog');
+	$this->load->view('footer');
+}
+
+public function getPiecelogReport()
+{
+	$fromDate = $this->input->post('fromDate');
+	$toDate = $this->input->post('toDate');
+	$lineName = $this->input->post('lineName');
+	
+	if($fromDate != "")
+	{
+		$fromDate = substr($fromDate,6,4).'-'.substr($fromDate,3,2).'-'.substr($fromDate,0,2);
+	}
+	if($toDate != "")
+	{
+		$toDate = substr($toDate,6,4).'-'.substr($toDate,3,2).'-'.substr($toDate,0,2);
+	}
+	
+	$exportAsCSV = $this->input->post('checkValue');
+	
+	$data["title"] = "PIECELOG REPORT";
+	$data["subtitle"] = "Piecelog Report";
+	
+	$res = $this->adminmodel->getPiecelogReport($fromDate, $toDate, $lineName);
+	
+	$data["datas"] = $res;
+	
+	if($exportAsCSV == 1)
+	{
+		$str = "Sl No.,Entry Date,Line Name,Style No.,Style Desc,Table Name,Hanger Name,In Time,Out Time,Time Taken,Time Taken For Moving\n";
+	  	$i=0;
+	  	if(count($res) > 0)
+		{
+		  	foreach($res as $row)
+			{
+			   	$i++;
+				
+				$str .= $i.',"'.$row->createddt.'","'.$row->lineid.'","'.$row->styleno.'","'.$row->styledesc.'","'.$row->table_name.'","'.$row->hanger_name.'","'.$row->in_time.'","'.$row->out_time.'","'.$row->timetaken.'","'.$row->timetakenformoving.'"'."\n";
+		  	}
+		}
+		else
+		{
+			$str .= "No Data\'s Found...";
+		}
+	  	header('Content-Type: application/csv');
+	  	header('Content-Disposition: attachement; filename="PiecelogReport.csv"');
+	  	echo $str;
+		return;
+	}
+	
+	$this->load->view('reports/header');
+	$this->load->view('reports/piecelog_reportprint',$data);
+	$this->load->view('reports/footer');
+}
+
+public function issuesreport()
+{
+	$this->load->view('header');
+	$this->load->view('reports/issues');
+	$this->load->view('footer');
+}
+
+public function getIssuesReport()
+{
+	$fromDate = $this->input->post('fromDate');
+	$toDate = $this->input->post('toDate');
+	$lineName = $this->input->post('lineName');
+	$issueType = $this->input->post('issueType');
+	
+	if($fromDate != "")
+	{
+		$fromDate = substr($fromDate,6,4).'-'.substr($fromDate,3,2).'-'.substr($fromDate,0,2);
+	}
+	if($toDate != "")
+	{
+		$toDate = substr($toDate,6,4).'-'.substr($toDate,3,2).'-'.substr($toDate,0,2);
+	}
+	
+	$exportAsCSV = $this->input->post('checkValue');
+	
+	$data["title"] = "ISSUES REPORT";
+	$data["subtitle"] = "Issues Report";
+	
+	$res = $this->adminmodel->getIssuesReport($fromDate, $toDate, $lineName, $issueType);
+	
+	$data["datas"] = $res;
+	
+	if($exportAsCSV == 1)
+	{
+		$str = "Sl No.,Entry Date,Line Name,Table Name,Issue Type,In Time,Out Time,Time Taken\n";
+	  	$i=0;
+	  	if(count($res) > 0)
+		{
+		  	foreach($res as $row)
+			{
+			   	$i++;
+				
+				$str .= $i.',"'.$row->createddt.'","'.$row->lineid.'","'.$row->table_name.'","'.ucwords($row->issuetype).'","'.$row->in_time.'","'.$row->out_time.'","'.$row->timetaken.'"'."\n";
+		  	}
+		}
+		else
+		{
+			$str .= "No Data\'s Found...";
+		}
+	  	header('Content-Type: application/csv');
+	  	header('Content-Disposition: attachement; filename="IssuesReport.csv"');
+	  	echo $str;
+		return;
+	}
+	
+	$this->load->view('reports/header');
+	$this->load->view('reports/issues_reportprint',$data);
 	$this->load->view('reports/footer');
 }
 

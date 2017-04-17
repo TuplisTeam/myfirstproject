@@ -1569,7 +1569,7 @@ public function saveShiftTiming($entryId, $shiftName, $fromTime, $toTime)
 
 public function getTableDetails($entryId = '')
 {
-	$sql = "SELECT * FROM tables WHERE status <> 'inactive'";
+	$sql = "SELECT * FROM tablenames WHERE status <> 'inactive'";
 	if($entryId > 0)
 	{
 		$sql .= " AND id = $entryId";	
@@ -1582,7 +1582,7 @@ public function saveTable($entryId, $tableSlNo, $tableName)
 {
 	if($entryId > 0)
 	{
-		$sql = "UPDATE tables SET 
+		$sql = "UPDATE tablenames SET 
 					table_slno = '".$tableSlNo."', 
 					table_name = '".$tableName."',
 					modified_on = NOW(), 
@@ -1591,9 +1591,108 @@ public function saveTable($entryId, $tableSlNo, $tableName)
 	}
 	else
 	{
-		$sql = "INSERT INTO tables SET 
+		$sql = "INSERT INTO tablenames SET 
 					table_slno = '".$tableSlNo."', 
 					table_name = '".$tableName."',
+					created_on = NOW(), 
+					created_by = '".$this->session->userdata('userid')."'";
+	}
+	$this->db->query($sql);
+}
+
+public function getNoWorkDetails($entryId = '')
+{
+	$sql = "SELECT * FROM nowork WHERE status <> 'inactive'";
+	if($entryId > 0)
+	{
+		$sql .= " AND id = $entryId";	
+	}
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function saveNoWork($entryId, $noworkSlNo, $noworkName)
+{
+	if($entryId > 0)
+	{
+		$sql = "UPDATE nowork SET 
+					nowork_slno = '".$noworkSlNo."', 
+					nowork_name = '".$noworkName."',
+					modified_on = NOW(), 
+					modified_by = '".$this->session->userdata('userid')."'
+				WHERE id = $entryId";
+	}
+	else
+	{
+		$sql = "INSERT INTO nowork SET 
+					nowork_slno = '".$noworkSlNo."', 
+					nowork_name = '".$noworkName."',
+					created_on = NOW(), 
+					created_by = '".$this->session->userdata('userid')."'";
+	}
+	$this->db->query($sql);
+}
+
+public function getReworkDetails($entryId = '')
+{
+	$sql = "SELECT * FROM rework WHERE status <> 'inactive'";
+	if($entryId > 0)
+	{
+		$sql .= " AND id = $entryId";	
+	}
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function saveRework($entryId, $reworkSlNo, $reworkName)
+{
+	if($entryId > 0)
+	{
+		$sql = "UPDATE rework SET 
+					rework_slno = '".$reworkSlNo."', 
+					rework_name = '".$reworkName."',
+					modified_on = NOW(), 
+					modified_by = '".$this->session->userdata('userid')."'
+				WHERE id = $entryId";
+	}
+	else
+	{
+		$sql = "INSERT INTO rework SET 
+					rework_slno = '".$reworkSlNo."', 
+					rework_name = '".$reworkName."',
+					created_on = NOW(), 
+					created_by = '".$this->session->userdata('userid')."'";
+	}
+	$this->db->query($sql);
+}
+
+public function getBreakdownDetails($entryId = '')
+{
+	$sql = "SELECT * FROM breakdown WHERE status <> 'inactive'";
+	if($entryId > 0)
+	{
+		$sql .= " AND id = $entryId";	
+	}
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function saveBreakdown($entryId, $breakdownSlNo, $breakdownName)
+{
+	if($entryId > 0)
+	{
+		$sql = "UPDATE breakdown SET 
+					breakdown_slno = '".$breakdownSlNo."', 
+					breakdown_name = '".$breakdownName."',
+					modified_on = NOW(), 
+					modified_by = '".$this->session->userdata('userid')."'
+				WHERE id = $entryId";
+	}
+	else
+	{
+		$sql = "INSERT INTO breakdown SET 
+					breakdown_slno = '".$breakdownSlNo."', 
+					breakdown_name = '".$breakdownName."',
 					created_on = NOW(), 
 					created_by = '".$this->session->userdata('userid')."'";
 	}
@@ -1840,6 +1939,79 @@ public function getAssemblyLoadingReport($fromDate, $toDate, $employeeId)
 	return $res->result();
 }
 
+public function getPiecelogReport($fromDate, $toDate, $lineName)
+{
+	$whrStr = '';
+	if($fromDate != "")
+	{
+		$whrStr .= " AND h.created_dt >= '".$fromDate."'";
+	}
+	if($toDate != "")
+	{
+		$whrStr .= " AND h.created_dt <= '".$toDate."'";
+	}
+	if($lineName != "")
+	{
+		$whrStr .= " AND h.lineid = '".$lineName."'";
+	}
+	
+	$sql = "SELECT 
+				h.id, h.lineid, h.styleid, IFNULL(s.styleno,'') AS styleno, 
+				DATE_FORMAT(h.created_dt,'%d-%m-%Y') AS createddt, 
+				IFNULL(s.styledesc,'') AS styledesc, d.linename, d.tablename AS tableslno, 
+				t.table_name AS table_name, 
+				d.hanger_id, d.hanger_name, d.in_time, d.out_time, d.timetaken, 
+				IFNULL(tt.timetaken,'') AS timetakenformoving
+			FROM 
+				piecelogs_hdr h 
+				INNER JOIN piecelogs_dtl d ON h.id = d.piecelog_id
+				INNER JOIN tablenames t ON d.tablename = t.table_slno
+				LEFT OUTER JOIN 
+					(SELECT id, styleno, styledesc FROM style_hdr WHERE STATUS <> 'inactive') s 
+					ON h.styleid = s.id
+				LEFT OUTER JOIN 
+				(SELECT 
+					t1.id, t1.piecelog_id, t1.tablename, t1.hanger_name, 
+					IF(t1.piecelog_id = t2.piecelog_id, 
+					IFNULL(TIMEDIFF(t1.in_time, t2.out_time),''), '') AS timetaken
+				FROM piecelogs_dtl t1
+				LEFT JOIN piecelogs_dtl AS t2 ON t2.id = t1.id - 1
+				WHERE 1=1) tt ON h.id = tt.piecelog_id AND d.id = tt.id
+			WHERE h.status <> 'inactive' AND t.status <> 'inactive' $whrStr";
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function getIssuesReport($fromDate, $toDate, $lineName, $issueType)
+{
+	$whrStr = '';
+	if($fromDate != "")
+	{
+		$whrStr .= " AND h.created_dt >= '".$fromDate."'";
+	}
+	if($toDate != "")
+	{
+		$whrStr .= " AND h.created_dt <= '".$toDate."'";
+	}
+	if($lineName != "")
+	{
+		$whrStr .= " AND h.lineid = '".$lineName."'";
+	}
+	if($issueType != "")
+	{
+		$whrStr .= " AND h.issuetype = '".$issueType."'";
+	}
+	$sql = "SELECT 
+				h.lineid, DATE_FORMAT(h.created_dt,'%d-%m-%Y') AS createddt, 
+				h.tablename AS tableslno, t.table_name, h.in_time, h.out_time, 
+				TIMEDIFF(h.out_time,h.in_time) AS timetaken, h.issuetype
+			FROM 
+				nowork_breaddown_issues h 
+				INNER JOIN tablenames t ON h.tablename = t.table_slno
+			WHERE t.status <> 'inactive' $whrStr";
+	$res = $this->db->query($sql);
+	return $res->result();
+}
 /*Report Ends*/
 
 /*Common Function Starts*/
