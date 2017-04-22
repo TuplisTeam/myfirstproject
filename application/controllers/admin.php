@@ -23,7 +23,8 @@ public function __construct()
 
 public function index()
 {
-	$this->load->view('header');
+	$data["pieceLogsMovements"] = $this->adminmodel->getPieceLogsMovements();
+	$this->load->view('header', $data);
 	$this->load->view('dashboard');
 	$this->load->view('footer');
 }

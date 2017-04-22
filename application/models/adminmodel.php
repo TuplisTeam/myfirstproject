@@ -1699,6 +1699,19 @@ public function saveBreakdown($entryId, $breakdownSlNo, $breakdownName)
 	$this->db->query($sql);
 }
 
+public function getPieceLogsMovements()
+{
+	$sql = "SELECT h.id, h.lineid, d.tablename, h.created_dt, SUM(1) AS cnt
+			FROM 
+				piecelogs_hdr h 
+				INNER JOIN piecelogs_dtl d ON h.id = d.piecelog_id
+			WHERE h.status <> 'inactive' AND h.created_dt = CURDATE()
+			GROUP BY h.lineid, d.tablename, h.created_dt
+			ORDER BY h.id, h.lineid, d.tablename, h.created_dt";
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
 /*Report Starts*/
 
 public function getSkillMatrixReport($fromDate, $toDate, $employeeId, $filterBy)

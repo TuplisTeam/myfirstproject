@@ -1,3 +1,11 @@
+<!--<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts-3d.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>-->
+
+<script src="<?php echo base_url(); ?>assets/highcharts/highcharts.js"></script>
+<script src="<?php echo base_url(); ?>assets/highcharts/highcharts-3d.js"></script>
+<script src="<?php echo base_url(); ?>assets/highcharts/modules/exporting.js"></script>
+
 <style>
 	.myBoxes .col-md-3 .panel
 	{
@@ -415,12 +423,121 @@
 				<?php
 				}
 			}
+			else
+			{
+			?>
+			<div class="col-md-12">
+				<div id="pieceLogsMovementsContainer" style="height: 400px;"></div>
+			</div>
+			<?php
+			}
 			?>
 		</div>
     </div>
 </div>
 
+<div id="pieceLogsMovementsDiv" style="display: none;"><?php echo json_encode($pieceLogsMovements); ?></div>
+
 <script>
+
+var pieceLogsMovements = $("#pieceLogsMovementsDiv").html();
+pieceLogsMovements = JSON.parse(pieceLogsMovements);
+
+$(document).ready(function()
+{
+	var xAxisArr = [];
+	var yAxisArr = [];
+	var colorArr = getRandomColor(pieceLogsMovements.length);
+	
+	for(var n=0; n<pieceLogsMovements.length; n++)
+	{
+		xAxisArr.push(pieceLogsMovements[n].lineid + ' - ' + pieceLogsMovements[n].tablename);
+		yAxisArr.push(parseFloat(pieceLogsMovements[n].cnt));
+	}
+	
+	$('#pieceLogsMovementsContainer').highcharts(
+	{
+        chart: 
+		{
+            type: 'column',
+			height: 350,
+            margin: 75,
+            options3d:
+            {
+                enabled: true,
+                alpha: 10,
+                beta: 25,
+                depth: 70
+            }
+        },
+        title: 
+		{
+            text: 'Piecelog Table Hanger Moved Counts'
+        },
+        subtitle: 
+		{
+            text: ''
+        },
+        plotOptions: 
+		{
+            column: 
+			{
+                depth: 25
+            }
+        },
+		credits: 
+		{
+	      enabled: false
+	  	},
+        xAxis: 
+		{
+            categories: xAxisArr,
+			labels: 
+			{
+				useHTML: true, 
+				formatter: function()
+				{
+					return '<div title="'+this.value+'" style="width: 60px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">'+this.value+'</div>'; 
+				}
+			}
+        },
+        yAxis: 
+		{
+            title: 
+			{
+                text: null
+            }
+        },
+		legend:
+		{
+			enabled: false
+		},
+	    series: 
+	    [{
+	        type: 'column',
+	        name: 'Pieces Moved',
+	        colorByPoint: true,
+			colors: colorArr,
+	        data: yAxisArr
+	    }]
+    });
+});
+
+function getRandomColor(cnt = 2)
+{
+	var colorArr = [];
+	for(var n=0; n<cnt; n++)
+	{
+		var letters = '0123456789ABCDEF';
+	    var color = '#';
+	    for (var i = 0; i < 6; i++ )
+	    {
+	        color += letters[Math.floor(Math.random() * 16)];
+	    }
+	    colorArr.push(color);
+	}
+    return colorArr;
+}
 
 $(".myMenu").click(function()
 {
