@@ -423,7 +423,8 @@
 					hour7 = pieceLogDtls[6].Nos, 
 					hour8 = pieceLogDtls[7].Nos,  
 					otHour = 0;
-				if(pieceLogDtls.length = 9)
+					
+				if(pieceLogDtls.length == 9)
 				{
 					otHour = pieceLogDtls[8].Nos;
 				}
