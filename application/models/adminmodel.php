@@ -1230,6 +1230,35 @@ public function getLineDetails($entryDate, $lineName, $shiftId)
 	return $res->result();
 }
 
+public function getCurrentTargetAchieved($entryDate, $lineName, $shiftId)
+{
+	$shiftTimings = $this->getShiftTimings($shiftId);
+	$shiftFromTiming = '';
+	$shiftToTiming = '';
+	foreach($shiftTimings as $row)
+	{
+		$shiftFromTiming = $entryDate.' '.$row->fromtime;
+		$shiftToTiming = $entryDate.' '.$row->totime;
+	}
+	
+	$sql = "SELECT h.lineid, SUM(1) AS curtarget
+			FROM 
+				piecelogs_hdr h 
+				INNER JOIN piecelogs_dtl d ON h.id = d.piecelog_id
+			WHERE 
+				h.status <> 'inactive' AND 
+				d.in_time >= '".$shiftFromTiming."' AND 
+				d.out_time <= '".$shiftToTiming."'
+			GROUP BY h.id";
+	$res = $this->db->query($sql);
+	$curTarget = 0;
+	foreach($res->result() as $row)
+	{
+		$curTarget = $row->curtarget;
+	}
+	return $curTarget;
+}
+
 public function getStyleHeaderDetails($styleId = '')
 {
 	$sql = "SELECT * FROM style_hdr WHERE status <> 'inactive'";

@@ -209,7 +209,7 @@
 											Current Target&nbsp;<span style="color: red;">*</span>
 										</label>
 			                            <div class="col-sm-8">
-			                                <input type="text" class="form-control numeric" id="currentTarget" name="currentTarget" placeholder="Current Target" value="<?php echo $currentTarget; ?>" required="">
+			                                <input type="text" class="form-control numeric" id="currentTarget" name="currentTarget" placeholder="Current Target" value="<?php echo $currentTarget; ?>" required="" disabled="">
 			                            </div>
 			                        </div>
 								</div>
@@ -379,18 +379,22 @@
 		}
 		else
 		{
-			var res = data.res;
-			if(res.length > 0)
+			var lineDtls = data.lineDtls;
+			if(lineDtls.length > 0)
 			{
-				$("#noOfWorkers").val(res[0].noofworkers);
-				$("#daysTarget").val(res[0].target);
-				$("#targetPerHour").val(parseFloat(res[0].target/8));
+				var curTarget = data.curTarget;
+				
+				$("#noOfWorkers").val(lineDtls[0].noofworkers);
+				$("#daysTarget").val(lineDtls[0].target);
+				$("#targetPerHour").val(parseFloat(lineDtls[0].target/8));
+				$("#currentTarget").val(parseFloat(curTarget ? curTarget : 0));
 			}
 			else
 			{
 				$("#noOfWorkers").val('');
 				$("#daysTarget").val('');
 				$("#targetPerHour").val('');
+				$("#currentTarget").val('');
 			}
 		}
 	}

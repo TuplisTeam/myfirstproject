@@ -1693,9 +1693,11 @@ public function getLineDetails()
 	$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
 	if($entryDate != "" && $lineName != "" && $shiftId > 0)
 	{
-		$res = $this->adminmodel->getLineDetails($entryDate, $lineName, $shiftId);
+		$lineDtls = $this->adminmodel->getLineDetails($entryDate, $lineName, $shiftId);
+		$curTarget = $this->adminmodel->getCurrentTargetAchieved($entryDate, $lineName, $shiftId);
 		
-		$data["res"] = $res;
+		$data["lineDtls"] = $lineDtls;
+		$data["curTarget"] = $curTarget;
 		$data["isError"] = FALSE;
 		$data["msg"] = "Skill Matrix Removed Successfully.";
 	}
