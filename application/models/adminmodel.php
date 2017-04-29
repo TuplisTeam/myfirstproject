@@ -1741,6 +1741,19 @@ public function getPieceLogsMovements()
 	return $res->result();
 }
 
+public function getLineWiseDetails()
+{
+	$sql = "SELECT h.linename, s.shiftname, h.line_efficiency
+			FROM 
+				hourlyproduction_linewise h 
+				INNER JOIN shifttiming s ON h.shiftid = s.id
+			WHERE 
+				h.status <> 'inactive' AND s.status <> 'inactive' AND 
+				h.entry_date = CURDATE()";
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
 /*Report Starts*/
 
 public function getSkillMatrixReport($fromDate, $toDate, $employeeId, $filterBy)

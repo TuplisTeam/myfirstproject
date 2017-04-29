@@ -24,6 +24,8 @@ public function __construct()
 public function index()
 {
 	$data["pieceLogsMovements"] = $this->adminmodel->getPieceLogsMovements();
+	$data["lineWiseEfficiency"] = $this->adminmodel->getLineWiseDetails();
+	
 	$this->load->view('header', $data);
 	$this->load->view('dashboard');
 	$this->load->view('footer');

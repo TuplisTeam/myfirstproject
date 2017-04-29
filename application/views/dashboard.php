@@ -426,8 +426,16 @@
 			else
 			{
 			?>
-			<div class="col-md-12">
+			<div class="col-md-12" id="pieceLogChartDiv" style="display: none;">
 				<div id="pieceLogsMovementsContainer" style="height: 400px;"></div>
+			</div>
+			<div class="col-md-12" id="lineEfficiencyChartDiv" style="display: none;">
+				<div id="lineWiseEfficiencyContainer" style="height: 400px;"></div>
+			</div>
+			<div class="col-md-12" id="noProgressDiv" style="display: none;">
+				<div role="alert" class="alert alert-danger">
+					OOPS! No Progress In Work Today.
+				</div>
 			</div>
 			<?php
 			}
@@ -437,91 +445,202 @@
 </div>
 
 <div id="pieceLogsMovementsDiv" style="display: none;"><?php echo json_encode($pieceLogsMovements); ?></div>
+<div id="lineWiseEfficiencyDiv" style="display: none;"><?php echo json_encode($lineWiseEfficiency); ?></div>
 
 <script>
 
-var pieceLogsMovements = $("#pieceLogsMovementsDiv").html();
-pieceLogsMovements = JSON.parse(pieceLogsMovements);
-
 $(document).ready(function()
 {
-	var xAxisArr = [];
-	var yAxisArr = [];
-	var colorArr = getRandomColor(pieceLogsMovements.length);
-	
-	for(var n=0; n<pieceLogsMovements.length; n++)
+	var userType = "<?php echo $this->session->userdata('usertype'); ?>";
+	if(userType == "admin")
 	{
-		xAxisArr.push(pieceLogsMovements[n].lineid + ' - ' + pieceLogsMovements[n].tablename);
-		yAxisArr.push(parseFloat(pieceLogsMovements[n].cnt));
+		var pieceLogsMovements = $("#pieceLogsMovementsDiv").html();
+		pieceLogsMovements = JSON.parse(pieceLogsMovements);
+		
+		var lineWiseEfficiency = $("#lineWiseEfficiencyDiv").html();
+		lineWiseEfficiency = JSON.parse(lineWiseEfficiency);
+		
+		if(pieceLogsMovements.length > 0 || lineWiseEfficiency.length > 0)
+		{
+			renderPieceLogsMovementsChart(pieceLogsMovements);
+			renderLineWiseEfficiencyChart(lineWiseEfficiency);
+		}
+		else
+		{
+			$("#noProgressDiv").css('display','block');
+		}
 	}
-	
-	$('#pieceLogsMovementsContainer').highcharts(
-	{
-        chart: 
-		{
-            type: 'column',
-			height: 350,
-            margin: 75,
-            options3d:
-            {
-                enabled: true,
-                alpha: 10,
-                beta: 25,
-                depth: 70
-            }
-        },
-        title: 
-		{
-            text: 'Piecelog Table Hanger Moved Counts'
-        },
-        subtitle: 
-		{
-            text: ''
-        },
-        plotOptions: 
-		{
-            column: 
-			{
-                depth: 25
-            }
-        },
-		credits: 
-		{
-	      enabled: false
-	  	},
-        xAxis: 
-		{
-            categories: xAxisArr,
-			labels: 
-			{
-				useHTML: true, 
-				formatter: function()
-				{
-					return '<div title="'+this.value+'" style="width: 60px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">'+this.value+'</div>'; 
-				}
-			}
-        },
-        yAxis: 
-		{
-            title: 
-			{
-                text: null
-            }
-        },
-		legend:
-		{
-			enabled: false
-		},
-	    series: 
-	    [{
-	        type: 'column',
-	        name: 'Pieces Moved',
-	        colorByPoint: true,
-			colors: colorArr,
-	        data: yAxisArr
-	    }]
-    });
 });
+
+function renderPieceLogsMovementsChart(pieceLogsMovements)
+{
+	if(pieceLogsMovements.length > 0)
+	{
+		$("#pieceLogChartDiv").css('display','block');
+		
+		var xAxisArr = [];
+		var yAxisArr = [];
+		var colorArr = getRandomColor(pieceLogsMovements.length);
+		
+		for(var n=0; n<pieceLogsMovements.length; n++)
+		{
+			xAxisArr.push(pieceLogsMovements[n].lineid + ' - ' + pieceLogsMovements[n].tablename);
+			yAxisArr.push(parseFloat(pieceLogsMovements[n].cnt));
+		}
+		
+		$('#pieceLogsMovementsContainer').highcharts(
+		{
+	        chart: 
+			{
+	            type: 'column',
+				height: 350,
+	            margin: 75,
+	            options3d:
+	            {
+	                enabled: true,
+	                alpha: 10,
+	                beta: 25,
+	                depth: 70
+	            }
+	        },
+	        title: 
+			{
+	            text: 'Piecelog Table Hanger Moved Counts'
+	        },
+	        subtitle: 
+			{
+	            text: ''
+	        },
+	        plotOptions: 
+			{
+	            column: 
+				{
+	                depth: 25
+	            }
+	        },
+			credits: 
+			{
+		      enabled: false
+		  	},
+	        xAxis: 
+			{
+	            categories: xAxisArr,
+				labels: 
+				{
+					useHTML: true, 
+					formatter: function()
+					{
+						return '<div title="'+this.value+'" style="width: 60px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">'+this.value+'</div>'; 
+					}
+				}
+	        },
+	        yAxis: 
+			{
+	            title: 
+				{
+	                text: null
+	            }
+	        },
+			legend:
+			{
+				enabled: false
+			},
+		    series: 
+		    [{
+		        type: 'column',
+		        name: 'Pieces Moved',
+		        colorByPoint: true,
+				colors: colorArr,
+		        data: yAxisArr
+		    }]
+	    });
+	}
+}
+
+function renderLineWiseEfficiencyChart(lineWiseEfficiency)
+{
+	if(lineWiseEfficiency.length > 0)
+	{
+		$("#lineEfficiencyChartDiv").css('display','block');
+		
+		var xAxisArr = [];
+		var yAxisArr = [];
+		var colorArr = getRandomColor(lineWiseEfficiency.length);
+		
+		for(var n=0; n<lineWiseEfficiency.length; n++)
+		{
+			xAxisArr.push(lineWiseEfficiency[n].linename + ' - ' + lineWiseEfficiency[n].shiftname);
+			yAxisArr.push(parseFloat(lineWiseEfficiency[n].line_efficiency));
+		}
+		
+		$('#lineWiseEfficiencyContainer').highcharts(
+		{
+	        chart: 
+			{
+	            type: 'column',
+				height: 350,
+	            margin: 75,
+	            options3d:
+	            {
+	                enabled: true,
+	                alpha: 10,
+	                beta: 25,
+	                depth: 70
+	            }
+	        },
+	        title: 
+			{
+	            text: 'Line Wise Efficiency'
+	        },
+	        subtitle: 
+			{
+	            text: ''
+	        },
+	        plotOptions: 
+			{
+	            column: 
+				{
+	                depth: 25
+	            }
+	        },
+			credits: 
+			{
+		      enabled: false
+		  	},
+	        xAxis: 
+			{
+	            categories: xAxisArr,
+				labels: 
+				{
+					useHTML: true, 
+					formatter: function()
+					{
+						return '<div title="'+this.value+'" style="width: 60px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">'+this.value+'</div>'; 
+					}
+				}
+	        },
+	        yAxis: 
+			{
+	            title: 
+				{
+	                text: null
+	            }
+	        },
+			legend:
+			{
+				enabled: false
+			},
+		    series: 
+		    [{
+		        type: 'column',
+		        name: 'Line Efficiency',
+		        colorByPoint: true,
+				colors: colorArr,
+		        data: yAxisArr
+		    }]
+	    });
+	}
+}
 
 function getRandomColor(cnt = 2)
 {
