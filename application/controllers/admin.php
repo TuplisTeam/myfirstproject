@@ -1112,19 +1112,24 @@ public function employee_vs_operation($entryId = '')
 	$data["menuId"] = 31;
 	$data["entryId"] = $entryId;
 	
-	$data["entryDate"] = '';
+	$data["entryDate"] = date('d/m/Y');
 	$data["employeeId"] = '';
-	$data["lineName"] = '';
+	$data["lineId"] = '';
 	$data["shiftId"] = '';
+	$data["styleId"] = '';
 	$data["tableName"] = '';
 	$data["operationId"] = '';
 	$data["machinaryId"] = '';
 	$data["smv"] = '';
+	$data["targetMinutes"] = '';
+	$data["otHours"] = '';
 	
 	$data["empDtls"] = $this->adminmodel->getEmployeeDetails();
 	$data["machinaryDtls"] = $this->adminmodel->getMachineryDetails();
 	$data["operationDtls"] = $this->adminmodel->getOperationDetails();
 	$data["shiftTimingDtls"] = $this->adminmodel->getShiftTimings();
+	$data["lineVsStyleDtls"] = $this->adminmodel->getLineVsStyleDetails();
+	$data["styleDtls"] = $this->adminmodel->getStyleHeaderDetails();
 	
 	$res = $this->adminmodel->getEmployeeVsOperationDetails($entryId);
 	
@@ -1136,12 +1141,15 @@ public function employee_vs_operation($entryId = '')
 			{
 				$data["entryDate"] = $row->entrydate;
 				$data["employeeId"] = $row->empid;
-				$data["lineName"] = $row->linename;
+				$data["lineId"] = $row->lineid;
 				$data["shiftId"] = $row->shiftid;
+				$data["styleId"] = $row->styleid;
 				$data["tableName"] = $row->tablename;
 				$data["operationId"] = $row->operationid;
 				$data["machinaryId"] = $row->machinaryid;
 				$data["smv"] = $row->smv;
+				$data["targetMinutes"] = $row->targetminutes;
+				$data["otHours"] = $row->ot_hours;
 			}
 		}
 	}
@@ -1155,18 +1163,43 @@ public function employee_vs_operation($entryId = '')
 	$this->load->view('footer');
 }
 
+public function getSMVFromOBSheet()
+{
+	$styleId = $this->input->post('styleId');
+	$operationId = $this->input->post('operationId');
+	$machinaryId = $this->input->post('machinaryId');
+	
+	if($styleId > 0 && $operationId > 0 && $machinaryId > 0)
+	{
+		$smv = $this->adminmodel->getSMVFromOBSheet($styleId, $operationId, $machinaryId);
+			
+		$data["isError"] = FALSE;
+		$data["msg"] = "";
+		$data["smv"] = $smv;
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Details.";
+	}
+	echo json_encode($data);
+}
+
 public function saveEmployeeVsOperation()
 {
 	$menuId = $this->input->post('menuId');
 	$entryId = $this->input->post('entryId');
 	$entryDate = $this->input->post('entryDate');
 	$employeeId = $this->input->post('employeeId');
-	$lineName = $this->input->post('lineName');
+	$lineId = $this->input->post('lineId');
 	$shiftId = $this->input->post('shiftId');
+	$styleId = $this->input->post('styleId');
 	$tableName = $this->input->post('tableName');
 	$operationId = $this->input->post('operationId');
 	$machinaryId = $this->input->post('machinaryId');
 	$smv = $this->input->post('smv');
+	$targetMinutes = $this->input->post('targetMinutes');
+	$otHours = $this->input->post('otHours');
 	
 	$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
 	
@@ -1182,7 +1215,7 @@ public function saveEmployeeVsOperation()
 	
 	if($entryDate != "" && $employeeId > 0 && $operationId > 0 && $machinaryId > 0 && $smv != "")
 	{
-		$res = $this->adminmodel->checkEmployeeVsOperationavailability($entryId, $entryDate, $employeeId, $lineName, $shiftId, $tableName);
+		$res = $this->adminmodel->checkEmployeeVsOperationavailability($entryId, $entryDate, $employeeId, $lineId, $shiftId, $tableName);
 		if($res > 0)
 		{
 			$data["isError"] = TRUE;
@@ -1190,7 +1223,7 @@ public function saveEmployeeVsOperation()
 		}
 		else
 		{
-			$this->adminmodel->saveEmployeeVsOperation($entryId, $entryDate, $employeeId, $lineName, $shiftId, $tableName, $operationId, $machinaryId, $smv);
+			$this->adminmodel->saveEmployeeVsOperation($entryId, $entryDate, $employeeId, $lineId, $shiftId, $styleId, $tableName, $operationId, $machinaryId, $smv, $targetMinutes, $otHours);
 			
 			$data["isError"] = FALSE;
 			if($empId > 0)
@@ -1423,10 +1456,12 @@ public function assemblyloading($assemblyLoadingId = '')
 	
 	$data["empDtls"] = $this->adminmodel->getEmployeeDetails();
 	$data["shiftTimingDtls"] = $this->adminmodel->getShiftTimings();
+	$data["lineVsStyleDtls"] = $this->adminmodel->getLineVsStyleDetails();
+	
 	$res = $this->adminmodel->getAssemblyLoadingDetails($assemblyLoadingId);
 	
-	$data["entryDate"] = "";
-	$data["lineName"] = "";
+	$data["entryDate"] = date('d/m/Y');
+	$data["lineId"] = "";
 	$data["shiftId"] = "";
 	$data["lineIncharge"] = "";
 	$data["target"] = "";
@@ -1447,7 +1482,7 @@ public function assemblyloading($assemblyLoadingId = '')
 		foreach($res as $row)
 		{
 			$data["entryDate"] = $row->entrydate;
-			$data["lineName"] = $row->linename;
+			$data["lineId"] = $row->lineid;
 			$data["shiftId"] = $row->shiftid;
 			$data["lineIncharge"] = $row->lineincharge;
 			$data["target"] = $row->target;
@@ -1477,17 +1512,26 @@ public function assemblyloading($assemblyLoadingId = '')
 public function getPieceLogsDetailsByDateLine()
 {
 	$entryDate = $this->input->post('entryDate');
-	$lineName = $this->input->post('lineName');
+	$lineId = $this->input->post('lineId');
 	$shiftId = $this->input->post('shiftId');
 	
 	$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
 	
-	if($entryDate != "" && $lineName != "" && $shiftId > 0)
+	if($entryDate != "" && $lineId > 0 && $shiftId > 0)
 	{
 		$data["isError"] = FALSE;
 		$data["msg"] = "";
-		$data["lineInchargeDtls"] = $this->adminmodel->getEmployeeVsOperationDetails('', $entryDate, $lineName);
-		$data["pieceLogDtls"] = $this->adminmodel->getPieceLogsDetailsByDateLine($entryDate, $lineName, $shiftId);
+		$data["lineInchargeDtls"] = $this->adminmodel->getEmployeeVsOperationDetails('', $entryDate, $lineId);
+		$res = $this->adminmodel->getLineVsStyleDetails($lineId);
+		$lineName = '';
+		$lineLocation = '';
+		foreach($res as $row)
+		{
+			$lineName = $row->line_name;
+			$lineLocation = $row->line_location;
+		}
+		
+		$data["pieceLogDtls"] = $this->adminmodel->getPieceLogsDetailsByDateLine($entryDate, $lineName, $lineLocation, $shiftId);
 	}
 	else
 	{
@@ -1502,7 +1546,7 @@ public function saveAssemblyLoading()
 	$menuId = $this->input->post('menuId');
 	$assemblyLoadingId = $this->input->post('assemblyLoadingId');
 	$entryDate = $this->input->post('entryDate');
-	$lineName = $this->input->post('lineName');
+	$lineId = $this->input->post('lineId');
 	$shiftId = $this->input->post('shiftId');
 	$lineIncharge = $this->input->post('lineIncharge');
 	$hour1 = $this->input->post('hour1');
@@ -1529,9 +1573,9 @@ public function saveAssemblyLoading()
 		return;
 	}
 	
-	if($entryDate != "" && $lineName != "" && $shiftId > 0 && $lineIncharge > 0 && $totalPieces > 0 && $target > 0)
+	if($entryDate != "" && $lineId > 0 && $shiftId > 0 && $lineIncharge > 0 && $totalPieces > 0 && $target > 0)
 	{
-		$availRes = $this->adminmodel->checkDateLineNameAvailability_AssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $shiftId);
+		$availRes = $this->adminmodel->checkDateLineNameAvailability_AssemblyLoading($assemblyLoadingId, $entryDate, $lineId, $shiftId);
 		if($availRes > 0)
 		{
 			$data["isError"] = TRUE;
@@ -1539,7 +1583,7 @@ public function saveAssemblyLoading()
 		}
 		else
 		{
-			$this->adminmodel->saveAssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $shiftId, $lineIncharge, $hour1, $hour2, $hour3, $hour4, $hour5, $hour6, $hour7, $hour8, $otHour, $totalPieces, $target, $isTargetAchieved);
+			$this->adminmodel->saveAssemblyLoading($assemblyLoadingId, $entryDate, $lineId, $shiftId, $lineIncharge, $hour1, $hour2, $hour3, $hour4, $hour5, $hour6, $hour7, $hour8, $otHour, $totalPieces, $target, $isTargetAchieved);
 		
 			$data["isError"] = FALSE;
 			if($assemblyLoadingId > 0)
@@ -2132,8 +2176,11 @@ public function line_vs_style($entryId = '')
 	$data["menuId"] = 33;
 	$data["entryId"] = $entryId;
 	
-	$data["entryDate"] = '';
+	$data["entryDate"] = date('d/m/Y');
 	$data["lineName"] = '';
+	$data["lineLocation"] = '';
+	$data["inTable"] = '';
+	$data["outTable"] = '';
 	$data["styleId"] = '';
 	
 	$res = $this->adminmodel->getLineVsStyleDetails($entryId);
@@ -2146,6 +2193,9 @@ public function line_vs_style($entryId = '')
 			{
 				$data["entryDate"] = $row->entrydt;
 				$data["lineName"] = $row->line_name;
+				$data["lineLocation"] = $row->line_location;
+				$data["inTable"] = $row->intable;
+				$data["outTable"] = $row->outtable;
 				$data["styleId"] = $row->styleid;
 			}
 		}
@@ -2167,6 +2217,9 @@ public function saveLineVsStyle()
 	$entryId = $this->input->post('entryId');
 	$entryDate = $this->input->post('entryDate');
 	$lineName = $this->input->post('lineName');
+	$linelocation = $this->input->post('linelocation');
+	$inTable = $this->input->post('inTable');
+	$outTable = $this->input->post('outTable');
 	$styleId = $this->input->post('styleId');
 	
 	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $entryId);
@@ -2179,9 +2232,9 @@ public function saveLineVsStyle()
 		return;
 	}
 	
-	if($entryDate != "" && $lineName != "" && $styleId > 0)
+	if($entryDate != "" && $lineName != "" && $linelocation != "" && $inTable != "" && $outTable != "" && $styleId > 0)
 	{
-		$this->adminmodel->saveLineVsStyle($entryId, $entryDate, $lineName, $styleId);
+		$this->adminmodel->saveLineVsStyle($entryId, $entryDate, $lineName, $linelocation, $inTable, $outTable, $styleId);
 		
 		$data["isError"] = FALSE;
 		if($entryId > 0)
@@ -2634,7 +2687,7 @@ public function getSkillMatrixReport()
 	$fromDate = $this->input->post('fromDate');
 	$toDate = $this->input->post('toDate');
 	$employeeId = $this->input->post('employeeId');
-	$filterBy = $this->input->post('filterBy');
+	//$filterBy = $this->input->post('filterBy');
 	
 	if($fromDate != "")
 	{
@@ -2649,15 +2702,15 @@ public function getSkillMatrixReport()
 	
 	$data["title"] = "SKILL MATRIX REPORT";
 	$data["subtitle"] = "Skill Matrix Report";
-	$data["filterBy"] = $filterBy;
+	//$data["filterBy"] = $filterBy;
 	
-	$res = $this->adminmodel->getSkillMatrixReport($fromDate, $toDate, $employeeId, $filterBy);
+	$res = $this->adminmodel->getSkillMatrixReport($fromDate, $toDate, $employeeId);
 	
 	$data["datas"] = $res;
 	
 	if($exportAsCSV == 1)
 	{
-		$str = "Sl No.,Entry Date,Line Name";
+		/*$str = "Sl No.,Entry Date,Line Name";
 		if($filterBy == "EmployeeWise")
 		{
 			$str .= ",Employee No.,Employee Name";
@@ -2679,6 +2732,25 @@ public function getSkillMatrixReport()
 					$str .= $i.',"'.$row->entrydt.'","'.$row->linename.'","'.$row->operationname.'","'.$row->producedmin.'","'.$row->pieces.'","'.$row->sam.'","'.$row->shifthrs.'","'.$row->othours.'","'.$row->efficiency.'"'."\n";
 				}
 		  	}
+		}
+		else
+		{
+			$str .= "No Data\'s Found...";
+		}*/
+		$str = "Sl No.,Entry Date,Line Name,Shift Name,Employee No.,Style Name,Table Name,Operation Name,Machinary Name,SMV,Target Minutes,OT Hours,Input Pieces,Output Pieces,Efficiency\n";
+		$i=0;
+	  	if(count($res) > 0)
+		{
+		  	foreach($res as $row)
+			{
+			   	$i++;
+				
+				$lineName = $row->line_name.' - '.$row->line_location;
+				$empName = $row->empno.' - '.$row->empname;
+				$efficiency = number_format(($row->op_pieces/$row->ip_pieces),2);
+				
+				$str .= $i.',"'.$row->entrydt.'","'.$lineName.'","'.$row->shiftname.'","'.$empName.'","'.$row->styleno.'","'.$row->tablename.'","'.$row->operationname.'","'.$row->machineryname.'","'.$row->smv.'","'.$row->targetminutes.'","'.$row->ot_hours.'","'.$row->ip_pieces.'","'.$row->op_pieces.'","'.$efficiency.'"'."\n";
+			}
 		}
 		else
 		{
@@ -2798,8 +2870,8 @@ public function getPriceRateIncentiveReport()
 		  	foreach($res as $row)
 			{
 			   	$i++;
-				
-				$str .= $i.',"'.$row->entrydt.'","'.$row->linename.'","'.$row->shiftname.'","'.$row->empno.'","'.$row->empname.'","'.$row->target.'","'.$row->sewing.'","'.$row->incentive.'","'.$row->amount.'"'."\n";
+				$lineName = $row->line_name.' - '.$row->line_location;
+				$str .= $i.',"'.$row->entrydt.'","'.$lineName.'","'.$row->shiftname.'","'.$row->empno.'","'.$row->empname.'","'.$row->target.'","'.$row->sewing.'","'.$row->incentive.'","'.$row->amount.'"'."\n";
 		  	}
 		}
 		else
@@ -2859,8 +2931,8 @@ public function getHourlyProductionReport()
 		  	foreach($res as $row)
 			{
 			   	$i++;
-				
-				$str .= $i.',"'.$row->entrydt.'","'.$row->linename.'","'.$row->shiftname.'","'.$row->empno.'","'.$row->empname.'","'.$row->hour1.'","'.$row->hour2.'","'.$row->hour3.'","'.$row->hour4.'","'.$row->hour5.'","'.$row->hour6.'","'.$row->hour7.'","'.$row->hour8.'","'.$row->othour.'","'.$row->totalpieces.'"'."\n";
+				$lineName = $row->line_name.' - '.$row->line_location;
+				$str .= $i.',"'.$row->entrydt.'","'.$lineName.'","'.$row->shiftname.'","'.$row->empno.'","'.$row->empname.'","'.$row->hour1.'","'.$row->hour2.'","'.$row->hour3.'","'.$row->hour4.'","'.$row->hour5.'","'.$row->hour6.'","'.$row->hour7.'","'.$row->hour8.'","'.$row->othour.'","'.$row->totalpieces.'"'."\n";
 		  	}
 		}
 		else
@@ -2910,7 +2982,7 @@ public function getHourlyProductionLineWiseReport()
 	
 	if($exportAsCSV == 1)
 	{
-		$str = "Sl No.,Entry Date,Line Name,Shift,Operation,No. Of Workers,Day's Target,Target Per Hour,No. Of Operators,Avail Minutes,Current Target,Issues,Hour 1,Hour 2,Hour 3,Hour 4,Hour 5,Hour 6,Hour 7,Hour 8,OT Pieces,Total Output,WIP,Idle Time,Breakdown Time,Rework Time,No Work Time,Line Efficiency\n";
+		/*$str = "Sl No.,Entry Date,Line Name,Shift,Operation,No. Of Workers,Day's Target,Target Per Hour,No. Of Operators,Avail Minutes,Current Target,Issues,Hour 1,Hour 2,Hour 3,Hour 4,Hour 5,Hour 6,Hour 7,Hour 8,OT Pieces,Total Output,WIP,Idle Time,Breakdown Time,Rework Time,No Work Time,Line Efficiency\n";
 	  	$i=0;
 	  	if(count($res) > 0)
 		{
@@ -2924,7 +2996,24 @@ public function getHourlyProductionLineWiseReport()
 		else
 		{
 			$str .= "No Data\'s Found...";
+		}*/
+		
+		$str = "Sl. No.,Entry Date,Line Name,Line Location,Style No.,No. Of Workers,Input Pieces,Output Pieces,WIP,Breakdown Timings,Issue Type\n";
+		$i=0;
+	  	if(count($res) > 0)
+		{
+		  	foreach($res as $row)
+			{
+			   	$i++;
+				
+				$str .= $i.',"'.$row->createddt.'","'.$row->lineid.'","'.$row->linelocation.'","'.$row->styleno.'","'.$row->noofworkers.'","'.$row->input_cnt.'","'.$row->output_cnt.'","'.$row->wip.'","'.$row->timings.'","'.$row->issuetype.'"'."\n";
+		  	}
 		}
+		else
+		{
+			$str .= "No Data\'s Found...";
+		}
+		
 	  	header('Content-Type: application/csv');
 	  	header('Content-Disposition: attachement; filename="HourlyProductionLineWiseReport.csv"');
 	  	echo $str; 
@@ -2978,8 +3067,8 @@ public function getAssemblyLoadingReport()
 		  	foreach($res as $row)
 			{
 			   	$i++;
-				
-				$str .= $i.',"'.$row->entrydt.'","'.$row->linename.'","'.$row->shiftname.'","'.$row->empno.'","'.$row->empname.'","'.$row->hour1.'","'.$row->hour2.'","'.$row->hour3.'","'.$row->hour4.'","'.$row->hour5.'","'.$row->hour6.'","'.$row->hour7.'","'.$row->hour8.'","'.$row->othour.'","'.$row->totalpieces.'"'."\n";
+				$lineName = $row->line_name.' - '.$row->line_location;
+				$str .= $i.',"'.$row->entrydt.'","'.$lineName.'","'.$row->shiftname.'","'.$row->empno.'","'.$row->empname.'","'.$row->hour1.'","'.$row->hour2.'","'.$row->hour3.'","'.$row->hour4.'","'.$row->hour5.'","'.$row->hour6.'","'.$row->hour7.'","'.$row->hour8.'","'.$row->othour.'","'.$row->totalpieces.'"'."\n";
 		  	}
 		}
 		else

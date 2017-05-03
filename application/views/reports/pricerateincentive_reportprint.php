@@ -39,7 +39,7 @@
 									<tr>
 										<td><?php echo $i; ?></td>
 										<td><?php echo $row->entrydt; ?></td>
-										<td><?php echo $row->linename; ?></td>
+										<td><?php echo $row->line_name.' - '.$row->line_location; ?></td>
 										<td><?php echo $row->shiftname; ?></td>
 										<td><?php echo $row->empno; ?></td>
 										<td><?php echo $row->empname; ?></td>

@@ -429,9 +429,9 @@
 			<div class="col-md-12" id="pieceLogChartDiv" style="display: none;">
 				<div id="pieceLogsMovementsContainer" style="height: 400px;"></div>
 			</div>
-			<div class="col-md-12" id="lineEfficiencyChartDiv" style="display: none;">
+			<!--<div class="col-md-12" id="lineEfficiencyChartDiv" style="display: none;">
 				<div id="lineWiseEfficiencyContainer" style="height: 400px;"></div>
-			</div>
+			</div>-->
 			<div class="col-md-12" id="noProgressDiv" style="display: none;">
 				<div role="alert" class="alert alert-danger">
 					OOPS! No Progress In Work Today.
@@ -445,7 +445,7 @@
 </div>
 
 <div id="pieceLogsMovementsDiv" style="display: none;"><?php echo json_encode($pieceLogsMovements); ?></div>
-<div id="lineWiseEfficiencyDiv" style="display: none;"><?php echo json_encode($lineWiseEfficiency); ?></div>
+<!--<div id="lineWiseEfficiencyDiv" style="display: none;"><?php echo json_encode($lineWiseEfficiency); ?></div>-->
 
 <script>
 
@@ -457,13 +457,13 @@ $(document).ready(function()
 		var pieceLogsMovements = $("#pieceLogsMovementsDiv").html();
 		pieceLogsMovements = JSON.parse(pieceLogsMovements);
 		
-		var lineWiseEfficiency = $("#lineWiseEfficiencyDiv").html();
-		lineWiseEfficiency = JSON.parse(lineWiseEfficiency);
+		/*var lineWiseEfficiency = $("#lineWiseEfficiencyDiv").html();
+		lineWiseEfficiency = JSON.parse(lineWiseEfficiency);*/
 		
-		if(pieceLogsMovements.length > 0 || lineWiseEfficiency.length > 0)
+		if(pieceLogsMovements.length > 0)
 		{
 			renderPieceLogsMovementsChart(pieceLogsMovements);
-			renderLineWiseEfficiencyChart(lineWiseEfficiency);
+			//renderLineWiseEfficiencyChart(lineWiseEfficiency);
 		}
 		else
 		{

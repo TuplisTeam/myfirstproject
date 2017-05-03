@@ -57,7 +57,7 @@
 			                            </div>
 			                        </div>
 			                    </div>
-			                    <div class="col-md-6">
+			                    <!--<div class="col-md-6">
 									<div class="form-group">
 			                            <label class="col-sm-3 control-label">
 											Filter By&nbsp;<span style="color: red;">*</span>
@@ -69,7 +69,7 @@
 											</select>
 			                            </div>
 			                        </div>
-			                    </div>
+			                    </div>-->
 			                </div>
 	                        <div class="form-group">
 	                            <div class="col-sm-offset-2 col-sm-10">

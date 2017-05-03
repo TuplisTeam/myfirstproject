@@ -13,7 +13,7 @@
                 <div class="panel-body">
 					<div class="table-responsive">
                         <table class="table table-bordered">
-                            <thead>
+                            <!--<thead>
 								<tr>
 									<th>Sl No.</th>
 									<th>Entry Date</th>
@@ -72,6 +72,60 @@
 								else
 								{
 									echo '<tr><td colspan="7">No Data Found.</td></tr>';
+								}
+								?>
+							</tbody>-->
+							<thead>
+								<tr>
+									<th>Sl No.</th>
+									<th>Entry Date</th>
+									<th>Line Name</th>
+									<th>Shift Name</th>
+									<th>Employee No.</th>
+									<th>Style Name</th>
+									<th>Table Name</th>
+									<th>Operation Name</th>
+									<th>Machinary Name</th>
+									<th>SMV</th>
+									<th>Target Minutes</th>
+									<th>OT Hours</th>
+									<th>Input Pieces</th>
+									<th>Output Pieces</th>
+									<th>Efficiency</th>
+								</tr>
+							</thead>
+							<tbody>
+								<?php
+								if(count($datas) > 0)
+								{
+									$i = 0;
+									foreach($datas as $row)
+									{
+									$i++;
+									?>
+									<tr>
+										<td><?php echo $i; ?></td>
+										<td><?php echo $row->entrydt; ?></td>
+										<td><?php echo $row->line_name.' - '.$row->line_location; ?></td>
+										<td><?php echo $row->shiftname; ?></td>
+										<td><?php echo $row->empno.' - '.$row->empname; ?></td>
+										<td><?php echo $row->styleno; ?></td>
+										<td><?php echo $row->tablename; ?></td>
+										<td><?php echo $row->operationname; ?></td>
+										<td><?php echo $row->machineryname; ?></td>
+										<td><?php echo $row->smv; ?></td>
+										<td><?php echo $row->targetminutes; ?></td>
+										<td><?php echo $row->ot_hours; ?></td>
+										<td><?php echo $row->ip_pieces; ?></td>
+										<td><?php echo $row->op_pieces; ?></td>
+										<td><?php echo number_format(($row->op_pieces/$row->ip_pieces),2); ?></td>
+									</tr>
+									<?php
+									}
+								}
+								else
+								{
+									echo '<tr><td colspan="15">No Data Found.</td></tr>';
 								}
 								?>
 							</tbody>

@@ -13,7 +13,7 @@
                 <div class="panel-body">
 					<div class="table-responsive">
                         <table class="table table-bordered">
-                            <thead>
+                            <!--<thead>
 								<tr>
 									<th>Sl No.</th>
 									<th>Entry Date</th>
@@ -90,6 +90,52 @@
 								else
 								{
 									echo '<tr><td colspan="28">No Data Found.</td></tr>';
+								}
+								?>
+							</tbody>-->
+							<thead>
+								<tr>
+									<th>Sl. No.</th>
+									<th>Entry Date</th>
+									<th>Line Name</th>
+									<th>Line Location</th>
+									<th>Style No.</th>
+									<th>No. Of Workers</th>
+									<th>Input Pieces</th>
+									<th>Output Pieces</th>
+									<th>WIP</th>
+									<th>Breakdown Timings</th>
+									<th>Issue Type</th>
+								</tr>
+							</thead>
+							<tbody>
+								<?php
+								if(count($datas) > 0)
+								{
+									$n = 0;
+									foreach($datas as $row)
+									{
+										$n++;
+									?>
+									<tr>
+										<td><?php echo $n; ?></td>
+										<td><?php echo $row->createddt; ?></td>
+										<td><?php echo $row->lineid; ?></td>
+										<td><?php echo $row->linelocation; ?></td>
+										<td><?php echo $row->styleno; ?></td>
+										<td><?php echo $row->noofworkers; ?></td>
+										<td><?php echo $row->input_cnt; ?></td>
+										<td><?php echo $row->output_cnt; ?></td>
+										<td><?php echo $row->wip; ?></td>
+										<td><?php echo $row->timings; ?></td>
+										<td><?php echo $row->issuetype; ?></td>
+									</tr>
+									<?php	
+									}
+								}
+								else
+								{
+									echo '<tr><td colspan="11">No Data Found.</td></tr>';
 								}
 								?>
 							</tbody>

@@ -746,22 +746,28 @@ public function saveManualWork($manualWorkId, $manualWorkName, $manualWorkDesc)
 	$this->db->query($sql);
 }
 
-public function getEmployeeVsOperationDetails($entryId = '', $entryDate = '', $lineName = '')
+public function getEmployeeVsOperationDetails($entryId = '', $entryDate = '', $lineId = '')
 {
 	$sql = "SELECT 
-				h.id, DATE_FORMAT(h.entrydate,'%d/%m/%Y') AS entrydate, h.linename, 
-				h.shiftid, s.shiftname, h.tablename, h.empid, e.empname, 
-				h.operationid, o.operationname, h.smv, h.machinaryid, m.machineryname
+				h.id, DATE_FORMAT(h.entrydate,'%d/%m/%Y') AS entrydate, 
+				h.lineid, lv.line_name, lv.line_location, 
+				h.shiftid, s.shiftname, h.styleid, sh.styleno, sh.styledesc, 
+				h.tablename, h.empid, e.empname, 
+				h.operationid, o.operationname, h.smv, h.targetminutes, h.ot_hours, 
+				h.machinaryid, m.machineryname
 			FROM 
 				employee_vs_operation h
 				INNER JOIN employee e ON h.empid = e.id
+				INNER JOIN line_vs_style lv ON h.lineid = lv.id
 				INNER JOIN shifttiming s ON h.shiftid = s.id
+				INNER JOIN style_hdr sh ON h.styleid = sh.id
 				INNER JOIN operations o ON h.operationid = o.id
 				INNER JOIN machineries m ON h.machinaryid = m.id
 			WHERE 
 				h.status <> 'inactive' AND s.status <> 'inactive' AND 
-				o.status <> 'inactive' AND e.status <> 'inactive' AND 
-				m.status <> 'inactive'";
+				lv.status <> 'inactive' AND o.status <> 'inactive' AND 
+				e.status <> 'inactive' AND m.status <> 'inactive' AND 
+				sh.status <> 'inactive'";
 	if($entryId > 0)
 	{
 		$sql .= " AND h.id = $entryId";	
@@ -770,20 +776,38 @@ public function getEmployeeVsOperationDetails($entryId = '', $entryDate = '', $l
 	{
 		$sql .= " AND h.entrydate = '".$entryDate."'";
 	}
-	if($lineName != "")
+	if($lineId > 0)
 	{
-		$sql .= " AND h.linename = '".$lineName."'";
+		$sql .= " AND h.lineid = '".$lineId."'";
 	}
 	$res = $this->db->query($sql);
 	return $res->result();
 }
 
-public function checkEmployeeVsOperationavailability($entryId, $entryDate, $employeeId, $lineName, $shiftId, $tableName)
+public function getSMVFromOBSheet($styleId, $operationId, $machinaryId)
+{
+	$sql = "SELECT h.id, d.operationid, d.machine, d.smv
+			FROM 
+				operationbulletin_hdr h 
+				INNER JOIN operationbulletin_operation_dtl d ON h.id = d.bulletinid
+			WHERE 
+				h.status <> 'inactive' AND h.styleid = $styleId AND 
+				d.operationid = $operationId AND d.machine = $machinaryId";
+	$res = $this->db->query($sql);
+	$smv = 0;
+	foreach($res->result() as $row)
+	{
+		$smv = $row->smv;
+	}
+	return $smv;
+}
+
+public function checkEmployeeVsOperationavailability($entryId, $entryDate, $employeeId, $lineId, $shiftId, $tableName)
 {
 	$sql = "SELECT * FROM employee_vs_operation 
 			WHERE 
 				status <> 'inactive' AND entrydate = '".$entryDate."' AND 
-				empid = '".$employeeId."' AND linename = '".$lineName."' AND 
+				empid = '".$employeeId."' AND lineid = '".$lineId."' AND 
 				shiftid = '".$shiftId."' AND tablename = '".$tableName."'";
 	if($entryId > 0)
 	{
@@ -793,19 +817,22 @@ public function checkEmployeeVsOperationavailability($entryId, $entryDate, $empl
 	return $res->num_rows();
 }
 
-public function saveEmployeeVsOperation($entryId, $entryDate, $employeeId, $lineName, $shiftId, $tableName, $operationId, $machinaryId, $smv)
+public function saveEmployeeVsOperation($entryId, $entryDate, $employeeId, $lineId, $shiftId, $styleId, $tableName, $operationId, $machinaryId, $smv, $targetMinutes, $otHours)
 {
 	if($entryId > 0)
 	{
 		$sql = "UPDATE employee_vs_operation SET 
 					entrydate = '".$entryDate."', 
 					empid = '".$employeeId."', 
-					linename = '".$lineName."', 
+					lineid = '".$lineId."', 
 					shiftid = '".$shiftId."', 
+					styleid = '".$styleId."', 
 					tablename = '".$tableName."', 
 					operationid = '".$operationId."', 
 					machinaryid = '".$machinaryId."', 
 					smv = '".$smv."', 
+					targetminutes = '".$targetMinutes."', 
+					ot_hours = '".$otHours."', 
 					modified_on = NOW(), 
 					modified_by = '".$this->session->userdata('userid')."'
 				WHERE id = $entryId";
@@ -815,12 +842,15 @@ public function saveEmployeeVsOperation($entryId, $entryDate, $employeeId, $line
 		$sql = "INSERT INTO employee_vs_operation SET 
 					entrydate = '".$entryDate."', 
 					empid = '".$employeeId."', 
-					linename = '".$lineName."', 
+					lineid = '".$lineId."', 
 					shiftid = '".$shiftId."', 
+					styleid = '".$styleId."', 
 					tablename = '".$tableName."', 
 					operationid = '".$operationId."', 
 					machinaryid = '".$machinaryId."', 
 					smv = '".$smv."', 
+					targetminutes = '".$targetMinutes."', 
+					ot_hours = '".$otHours."', 
 					created_on = NOW(), 
 					created_by = '".$this->session->userdata('userid')."'";
 	}
@@ -1008,14 +1038,15 @@ public function getAssemblyLoadingDetails($assemblyLoadingId = '')
 {
 	$sql = "SELECT 
 				h.*, DATE_FORMAT(h.entry_date,'%d/%m/%Y') AS entrydate, s.shiftname, 
-				e.empname AS lineinchargename
+				e.empname AS lineinchargename, lv.line_name, lv.line_location
 			FROM 
 				assemblyloading h 
+				INNER JOIN line_vs_style lv ON h.lineid = lv.id
 				INNER JOIN shifttiming s ON h.shiftid = s.id
 				INNER JOIN employee e ON h.lineincharge = e.id
 			WHERE 
-				h.status <> 'inactive' AND s.status <> 'inactive' AND 
-				e.status <> 'inactive'";
+				h.status <> 'inactive' AND lv.status <> 'inactive' AND 
+				s.status <> 'inactive' AND e.status <> 'inactive'";
 	if($assemblyLoadingId > 0)
 	{
 		$sql .= " AND h.id = $assemblyLoadingId";
@@ -1024,12 +1055,12 @@ public function getAssemblyLoadingDetails($assemblyLoadingId = '')
 	return $res->result();
 }
 
-public function checkDateLineNameAvailability_AssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $shiftId)
+public function checkDateLineNameAvailability_AssemblyLoading($assemblyLoadingId, $entryDate, $lineId, $shiftId)
 {
 	$sql = "SELECT * FROM assemblyloading 
 			WHERE 
 				STATUS <> 'inactive' AND entry_date = '".$entryDate."' AND 
-				linename = '".$lineName."' AND shiftid = '".$shiftId."'";
+				lineid = '".$lineId."' AND shiftid = '".$shiftId."'";
 	if($assemblyLoadingId > 0)
 	{
 		$sql .= " AND id <> $assemblyLoadingId";
@@ -1038,11 +1069,12 @@ public function checkDateLineNameAvailability_AssemblyLoading($assemblyLoadingId
 	return $res->num_rows();
 }
 
-public function getPieceLogsDetailsByDateLine($entryDate, $lineName, $shiftId)
+public function getPieceLogsDetailsByDateLine($entryDate, $lineName, $lineLocation, $shiftId)
 {
 	$sql = "SELECT * FROM piecelogs_hdr 
 			WHERE 
 				STATUS <> 'inactive' AND lineid = '".$lineName."' AND 
+				linelocation = '".$lineLocation."' AND 
 				created_dt = '".$entryDate."'";
 	$res = $this->db->query($sql);
 	$pieceLogId = 0;
@@ -1083,12 +1115,12 @@ public function callPieceLogDetails_Procedure($pieceLogId, $shiftFromTiming, $sh
 	return $result->result();
 }
 
-public function saveAssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $shiftId, $lineIncharge, $hour1, $hour2, $hour3, $hour4, $hour5, $hour6, $hour7, $hour8, $otHour, $totalPieces, $target, $isTargetAchieved)
+public function saveAssemblyLoading($assemblyLoadingId, $entryDate, $lineId, $shiftId, $lineIncharge, $hour1, $hour2, $hour3, $hour4, $hour5, $hour6, $hour7, $hour8, $otHour, $totalPieces, $target, $isTargetAchieved)
 {
 	if($assemblyLoadingId > 0)
 	{
 		$sql = "UPDATE assemblyloading SET 
-					entry_date = '".$entryDate."', linename = '".$lineName."', 
+					entry_date = '".$entryDate."', lineid = '".$lineId."', 
 					shiftid = '".$shiftId."', lineincharge = '".$lineIncharge."', 
 					hour1 = '".$hour1."', hour2 = '".$hour2."', hour3 = '".$hour3."', 
 					hour4 = '".$hour4."', hour5 = '".$hour5."', hour6 = '".$hour6."', 
@@ -1102,7 +1134,7 @@ public function saveAssemblyLoading($assemblyLoadingId, $entryDate, $lineName, $
 	else
 	{
 		$sql = "INSERT INTO assemblyloading SET 
-					entry_date = '".$entryDate."', linename = '".$lineName."', 
+					entry_date = '".$entryDate."', lineid = '".$lineId."', 
 					shiftid = '".$shiftId."', lineincharge = '".$lineIncharge."', 
 					hour1 = '".$hour1."', hour2 = '".$hour2."', hour3 = '".$hour3."', 
 					hour4 = '".$hour4."', hour5 = '".$hour5."', hour6 = '".$hour6."', 
@@ -1507,7 +1539,7 @@ public function getLineVsStyleDetails($entryId = '')
 	return $res->result();
 }
 
-public function saveLineVsStyle($entryId, $entryDate, $lineName, $styleId)
+public function saveLineVsStyle($entryId, $entryDate, $lineName, $linelocation, $inTable, $outTable, $styleId)
 {
 	$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
 	if($entryId > 0)
@@ -1515,6 +1547,9 @@ public function saveLineVsStyle($entryId, $entryDate, $lineName, $styleId)
 		$sql = "UPDATE line_vs_style SET 
 					entrydate = '".$entryDate."', 
 					line_name = '".$lineName."', 
+					line_location = '".$linelocation."', 
+					intable = '".$inTable."', 
+					outtable = '".$outTable."', 
 					styleid = '".$styleId."',
 					modified_on = NOW(), 
 					modified_by = '".$this->session->userdata('userid')."'
@@ -1525,6 +1560,9 @@ public function saveLineVsStyle($entryId, $entryDate, $lineName, $styleId)
 		$sql = "INSERT INTO line_vs_style SET 
 					entrydate = '".$entryDate."', 
 					line_name = '".$lineName."', 
+					line_location = '".$linelocation."', 
+					intable = '".$inTable."', 
+					outtable = '".$outTable."', 
 					styleid = '".$styleId."',
 					created_on = NOW(), 
 					created_by = '".$this->session->userdata('userid')."'";
@@ -1756,18 +1794,60 @@ public function getLineWiseDetails()
 
 /*Report Starts*/
 
-public function getSkillMatrixReport($fromDate, $toDate, $employeeId, $filterBy)
+public function getSkillMatrixReport($fromDate, $toDate, $employeeId)
 {
 	$whrStr = '';
 	if($fromDate != "")
 	{
-		$whrStr .= " AND h.entry_date >= '".$fromDate."'";
+		$whrStr .= " AND eo.entrydate >= '".$fromDate."'";
 	}
 	if($toDate != "")
 	{
-		$whrStr .= " AND h.entry_date <= '".$toDate."'";
+		$whrStr .= " AND eo.entrydate <= '".$toDate."'";
 	}
-	if($filterBy == "EmployeeWise" && $employeeId > 0)
+	if($employeeId > 0)
+	{
+		$whrStr .= " AND eo.empid = '".$employeeId."'";
+	}
+	
+	$sql = "SELECT 
+				eo.id, DATE_FORMAT(eo.entrydate,'%d-%m-%Y') AS entrydt, 
+				eo.lineid, ls.line_name, ls.line_location, 
+				eo.shiftid, st.shiftname, eo.empid, e.empno, e.empname, 
+				eo.styleid, sh.styleno, sh.styledesc, eo.tablename, 
+				eo.operationid, o.operationname, o.operationdesc, 
+				eo.machinaryid, m.machineryname, m.machinerydesc, 
+				eo.smv, eo.targetminutes, eo.ot_hours, 
+				SUM(IF(IFNULL(p.in_time,'') <> '', 1, 0)) AS ip_pieces, 
+				SUM(IF(IFNULL(p.out_time,'') > IFNULL(p.in_time,''), 1, 0)) AS op_pieces
+			FROM 
+				employee_vs_operation eo 
+				INNER JOIN employee e ON eo.empid = e.id
+				INNER JOIN line_vs_style ls ON eo.lineid = ls.id
+				INNER JOIN shifttiming st ON eo.shiftid = st.id
+				INNER JOIN style_hdr sh ON eo.styleid = sh.id
+				INNER JOIN operations o ON eo.operationid = o.id
+				INNER JOIN machineries m ON eo.machinaryid = m.id
+				LEFT OUTER JOIN 
+					(SELECT 
+						h.id, h.lineid, h.linelocation, h.created_dt, 
+						d.tablename, d.hanger_id, d.in_time, d.out_time
+					FROM 
+						piecelogs_hdr h 
+						INNER JOIN piecelogs_dtl d ON h.id = d.piecelog_id
+					WHERE h.status <> 'inactive') p 
+					ON ls.line_name = p.lineid AND 
+						ls.line_location = p.linelocation AND 
+						eo.tablename = p.tablename AND eo.entrydate = p.created_dt
+			WHERE 
+				eo.status <> 'inactive' AND e.status <> 'inactive' AND 
+				ls.status <> 'inactive' AND st.status <> 'inactive' AND 
+				sh.status <> 'inactive' AND o.status <> 'inactive' AND 
+				m.status <> 'inactive' $whrStr
+			GROUP BY eo.entrydate, eo.lineid, eo.empid
+			ORDER BY eo.entrydate, eo.lineid, eo.empid";
+			
+	/*if($filterBy == "EmployeeWise" && $employeeId > 0)
 	{
 		$whrStr .= " AND d.empid = $employeeId";
 	}
@@ -1807,7 +1887,7 @@ public function getSkillMatrixReport($fromDate, $toDate, $employeeId, $filterBy)
 				WHERE 
 					h.status <> 'inactive' AND o.status <> 'inactive' $whrStr
 				GROUP BY h.entry_date, h.linename, d.operationid";
-	}
+	}*/
 	$res = $this->db->query($sql);
 	return $res->result();
 }
@@ -1867,19 +1947,21 @@ public function getPriceRateIncentiveReport($fromDate, $toDate, $employeeId)
 	
 	$sql = "SELECT 
 				DATE_FORMAT(h.entry_date,'%d-%m-%Y') AS entrydt, 
-				h.linename, h.shiftid, s.shiftname, h.lineincharge, 
+				h.lineid, ls.line_name, ls.line_location, 
+				h.shiftid, s.shiftname, h.lineincharge, 
 				e.empno, e.empname, h.target, h.totalpieces, 
 				IF(h.target - h.totalpieces < 0, h.target, h.totalpieces) AS sewing, 
 				IF(h.target - h.totalpieces < 0, ABS(h.target - h.totalpieces), 0) AS incentive, 
 				0 AS amount
 			FROM 
 				assemblyloading h 
+				INNER JOIN line_vs_style ls ON h.lineid = ls.id
 				INNER JOIN employee e ON h.lineincharge = e.id
 				INNER JOIN shifttiming s ON h.shiftid = s.id
 			WHERE 
 				h.status <> 'inactive' AND e.status <> 'inactive' AND 
 				s.status <> 'inactive' $whrStr
-			ORDER BY h.entry_date, h.linename, h.shiftid, h.lineincharge";
+			ORDER BY h.entry_date, h.lineid, h.shiftid, h.lineincharge";
 	$res = $this->db->query($sql);
 	return $res->result();
 }
@@ -1901,9 +1983,11 @@ public function getHourlyProductionReport($fromDate, $toDate, $employeeId)
 	}
 	
 	$sql = "SELECT 
-				DATE_FORMAT(h.entry_date,'%d-%m-%Y') AS entrydt, h.linename, 
-				h.shiftid, s.shiftname, h.lineincharge, e.empno, e.empname, 
-				h.target, h.hour1, h.hour2, h.hour3, h.hour4, 
+				DATE_FORMAT(h.entry_date,'%d-%m-%Y') AS entrydt, 
+				h.lineid, ls.line_name, ls.line_location, 
+				h.shiftid, s.shiftname, h.lineincharge, 
+				e.empno, e.empname, h.target, 
+				h.hour1, h.hour2, h.hour3, h.hour4, 
 				h.hour5, h.hour6, h.hour7, h.hour8, 
 				h.othour, h.totalpieces, 
 				IF(h.target - h.totalpieces < 0, h.target, h.totalpieces) AS sewing, 
@@ -1911,12 +1995,13 @@ public function getHourlyProductionReport($fromDate, $toDate, $employeeId)
 				0 AS amount
 			FROM 
 				assemblyloading h 
+				INNER JOIN line_vs_style ls ON h.lineid = ls.id
 				INNER JOIN employee e ON h.lineincharge = e.id
 				INNER JOIN shifttiming s ON h.shiftid = s.id
 			WHERE 
 				h.status <> 'inactive' AND e.status <> 'inactive' AND 
-				s.status <> 'inactive' $whrStr 
-			ORDER BY h.entry_date, h.linename, h.shiftid, h.lineincharge";
+				s.status <> 'inactive' $whrStr
+			ORDER BY h.entry_date, h.lineid, h.shiftid, h.lineincharge";
 	$res = $this->db->query($sql);
 	return $res->result();
 }
@@ -1926,14 +2011,14 @@ public function getHourlyProductionLineWiseReport($fromDate, $toDate)
 	$whrStr = '';
 	if($fromDate != "")
 	{
-		$whrStr .= " AND a.entry_date >= '".$fromDate."'";
+		$whrStr .= " AND h.created_dt >= '".$fromDate."'";
 	}
 	if($toDate != "")
 	{
-		$whrStr .= " AND a.entry_date <= '".$toDate."'";
+		$whrStr .= " AND h.created_dt <= '".$toDate."'";
 	}
 	
-	$sql = "SELECT 
+	/*$sql = "SELECT 
 				DATE_FORMAT(a.entry_date,'%d-%m-%Y') AS entrydt, h.linename, 
 				h.shiftid, s.shiftname, d.operationname, 
 				h.no_of_workers, h.days_target, h.target_per_hr, h.no_of_operators, 
@@ -1956,7 +2041,62 @@ public function getHourlyProductionLineWiseReport($fromDate, $toDate)
 					ON h.linename = a.linename AND h.shiftid = a.shiftid
 			WHERE 
 				h.status <> 'inactive' AND a.status <> 'inactive' AND 
-				s.status <> 'inactive' $whrStr";
+				s.status <> 'inactive' $whrStr";*/
+	/*$sql = "SELECT 
+				DATE_FORMAT(a.entry_date,'%d-%m-%Y') AS entrydt, 
+				a.lineid, ls.line_name, ls.line_location, 
+				a.shiftid, s.shiftname, e.noofworkers, 
+				a.hour1, a.hour2, a.hour3, a.hour4, 
+				a.hour5, a.hour6, a.hour7, a.hour8, a.othour, 
+				a.totalpieces, a.target AS days_target, a.target/8 AS targetperhr
+			FROM 
+				assemblyloading a 
+				INNER JOIN line_vs_style ls ON a.lineid = ls.id
+				INNER JOIN (SELECT entrydate, lineid, shiftid, SUM(1) AS noofworkers
+					FROM employee_vs_operation 
+					WHERE STATUS <> 'inactive'
+					GROUP BY entrydate, lineid, shiftid) e 
+					ON a.entry_date = e.entrydate AND a.lineid = e.lineid AND 
+					a.shiftid = e.shiftid
+				INNER JOIN shifttiming s ON e.shiftid = s.id
+			WHERE 
+				a.status <> 'inactive' AND ls.status <> 'inactive' AND
+				s.status <> 'inactive' $whrStr";*/
+	$sql = "SELECT 
+				DATE_FORMAT(h.created_dt,'%d-%m-%Y') AS createddt, 
+				h.lineid, h.linelocation, 
+				h.styleid, IFNULL(s.styleno,'') AS styleno, 
+				SUM(IF(d.tablename=ls.intable,1,0)) AS input_cnt,
+				SUM(IF(d.tablename=ls.outtable AND d.out_time > d.in_time,1,0)) AS output_cnt, 
+				SUM(IF(d.tablename=ls.intable,1,0)) - SUM(IF(d.tablename=ls.outtable AND d.out_time > d.in_time,1,0)) AS wip, 
+				IFNULL(n.timings,'') AS timings, IFNULL(n.issuetype,'') AS issuetype, 
+				e.noofworkers
+			FROM 
+				piecelogs_hdr h 
+				INNER JOIN piecelogs_dtl d ON h.id = d.piecelog_id
+				INNER JOIN line_vs_style ls 
+					ON h.lineid = ls.line_name AND h.linelocation = ls.line_location
+				INNER JOIN 
+					(SELECT lineid, entrydate, COUNT(*) AS noofworkers
+					FROM employee_vs_operation 
+					WHERE STATUS <> 'inactive' 
+					GROUP BY lineid, entrydate) e 
+					ON ls.id = e.lineid AND h.created_dt = e.entrydate
+				LEFT OUTER JOIN 
+					(SELECT * FROM style_hdr WHERE STATUS <> 'inactive') s 
+					ON h.styleid = s.id
+				LEFT OUTER JOIN 
+					(SELECT 
+						lineid, linelocation, GROUP_CONCAT(issuetype,'') AS issuetype, 
+					GROUP_CONCAT(CONCAT(in_time,',',out_time),'') AS timings, created_dt
+					FROM nowork_breaddown_issues 
+					GROUP BY lineid, linelocation, created_dt
+					ORDER BY lineid, linelocation, created_dt) n
+					ON h.lineid = n.lineid AND h.linelocation = n.linelocation AND 
+					h.created_dt = n.created_dt
+			WHERE h.status <> 'inactive' AND ls.status <> 'inactive' $whrStr
+			GROUP BY h.lineid, h.linelocation, h.created_dt
+			ORDER BY h.lineid, h.linelocation, h.created_dt";
 	$res = $this->db->query($sql);
 	return $res->result();
 }
@@ -1978,18 +2118,22 @@ public function getAssemblyLoadingReport($fromDate, $toDate, $employeeId)
 	}
 	
 	$sql = "SELECT 
-				DATE_FORMAT(h.entry_date,'%d-%m-%Y') AS entrydt, h.linename, 
-				h.shiftid, s.shiftname, h.lineincharge, e.empno, e.empname, 
+				DATE_FORMAT(h.entry_date,'%d-%m-%Y') AS entrydt, 
+				h.lineid, ls.line_name, ls.line_location, 
+				h.shiftid, s.shiftname, h.lineincharge, 
+				e.empno, e.empname, h.target, 
 				h.hour1, h.hour2, h.hour3, h.hour4, 
-				h.hour5, h.hour6, h.hour7, h.hour8, h.othour, h.totalpieces
+				h.hour5, h.hour6, h.hour7, h.hour8, 
+				h.othour, h.totalpieces
 			FROM 
 				assemblyloading h 
+				INNER JOIN line_vs_style ls ON h.lineid = ls.id
 				INNER JOIN employee e ON h.lineincharge = e.id
 				INNER JOIN shifttiming s ON h.shiftid = s.id
 			WHERE 
 				h.status <> 'inactive' AND e.status <> 'inactive' AND 
-				s.status <> 'inactive' $whrStr 
-			ORDER BY h.entry_date, h.shiftid, h.lineincharge";
+				s.status <> 'inactive' $whrStr
+			ORDER BY h.entry_date, h.lineid, h.shiftid, h.lineincharge";
 	$res = $this->db->query($sql);
 	return $res->result();
 }

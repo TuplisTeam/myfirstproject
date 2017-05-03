@@ -34,6 +34,7 @@
                                 <tr>
                                     <th>Entry Date</th>
                                     <th>Line Name</th>
+                                    <th>Line Location</th>
                                     <th>Style Name</th>
                                     <th>Manage</th>
                                 </tr>
@@ -48,6 +49,7 @@
 								<tr>
 									<td><?php echo $row->entrydt; ?></td>
 									<td><?php echo $row->line_name; ?></td>
+									<td><?php echo $row->line_location; ?></td>
 									<td><?php echo $row->styleno; ?></td>
 									<td>
 										<button class="btn btn-primary btn-xs editEntry" entryId="<?php echo $row->id; ?>">
@@ -136,6 +138,30 @@
 	                                <input type="text" class="form-control" id="lineName" name="lineName" placeholder="Line Name" value="<?php echo $lineName; ?>" required="">
 	                            </div>
 	                        </div>
+							<div class="form-group">
+	                            <label class="col-sm-2 control-label">
+									Line Location&nbsp;<span style="color: red;">*</span>
+								</label>
+	                            <div class="col-sm-6">
+	                                <input type="text" class="form-control" id="linelocation" name="linelocation" placeholder="Line Location" value="<?php echo $lineLocation; ?>" required="">
+	                            </div>
+	                        </div>
+							<div class="form-group">
+	                            <label class="col-sm-2 control-label">
+									In Table&nbsp;<span style="color: red;">*</span>
+								</label>
+	                            <div class="col-sm-6">
+	                                <input type="text" class="form-control" id="inTable" name="inTable" placeholder="In Table" value="<?php echo $inTable; ?>" required="">
+	                            </div>
+	                        </div>
+							<div class="form-group">
+	                            <label class="col-sm-2 control-label">
+									Out Table&nbsp;<span style="color: red;">*</span>
+								</label>
+	                            <div class="col-sm-6">
+	                                <input type="text" class="form-control" id="outTable" name="outTable" placeholder="Out Table" value="<?php echo $outTable; ?>" required="">
+	                            </div>
+	                        </div>
 	                        <div class="form-group">
 	                            <label class="col-sm-2 control-label">
 									Style&nbsp;<span style="color: red;">*</span>
@@ -221,9 +247,12 @@
 		
 		var entryDate = $("#entryDate").val();
 		var lineName = $("#lineName").val();
+		var linelocation = $("#linelocation").val();
+		var inTable = $("#inTable").val();
+		var outTable = $("#outTable").val();
 		var styleId = $("#styleId").val();
 		
-		if(entryDate != "" && lineName != "" && styleId > 0)
+		if(entryDate != "" && lineName != "" && linelocation != "" && inTable != "" && outTable != "" && styleId > 0)
 		{
 			$("#responseMsg").html('');
 			
@@ -234,6 +263,9 @@
 				"entryId" : entryId,
 				"entryDate" : entryDate,
 				"lineName" : lineName, 
+				"linelocation" : linelocation, 
+				"inTable" : inTable, 
+				"outTable" : outTable, 
 				"styleId" : styleId
 			};
 			req.url = "admin/saveLineVsStyle";

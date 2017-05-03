@@ -35,7 +35,9 @@
                                     <th>Entry Date</th>
                                     <th>Employee Name</th>
                                     <th>Line Name</th>
+                                    <th>Line Location</th>
                                     <th>Shift Name</th>
+                                    <th>Style Name</th>
                                     <th>Table Name</th>
                                     <th>Operation Name</th>
                                     <th>Machine Name</th>
@@ -53,8 +55,10 @@
 								<tr>
 									<td><?php echo $row->entrydate; ?></td>
 									<td><?php echo $row->empname; ?></td>
-									<td><?php echo $row->linename; ?></td>
+									<td><?php echo $row->line_name; ?></td>
+									<td><?php echo $row->line_location; ?></td>
 									<td><?php echo $row->shiftname; ?></td>
+									<td><?php echo $row->styleno.' - '.$row->styledesc; ?></td>
 									<td><?php echo $row->tablename; ?></td>
 									<td><?php echo $row->operationname; ?></td>
 									<td><?php echo $row->machineryname; ?></td>
@@ -121,7 +125,20 @@
 									Line Name&nbsp;<span style="color: red;">*</span>
 								</label>
 	                            <div class="col-sm-6">
-	                                <input type="text" class="form-control" id="lineName" name="lineName" placeholder="Line Name" value="<?php echo $lineName; ?>" required="">
+	                                <select class="form-control" style="width: 100%;" id="lineId" name="lineId" required="">
+										<option value="">All</option>
+										<?php
+										foreach($lineVsStyleDtls as $row)
+										{
+											echo '<option value="'.$row->id.'"';
+											if($row->id == $lineId)
+											{
+												echo ' selected="selected"';
+											}
+											echo '>'.$row->line_name.' - '.$row->line_location.'</option>';
+										}
+										?>
+									</select>
 	                            </div>
 	                        </div>
 	                        <div class="form-group">
@@ -140,6 +157,27 @@
 												echo ' selected="selected"';
 											}
 											echo '>'.$row->shiftname.'</option>';
+										}
+										?>
+									</select>
+	                            </div>
+	                        </div>
+							<div class="form-group">
+	                            <label class="col-sm-2 control-label">
+									Style Name&nbsp;<span style="color: red;">*</span>
+								</label>
+	                            <div class="col-sm-6">
+	                            	<select class="form-control" id="styleId" style="width: 100%;" data-placeholder="Select" required="">
+										<option value=""></option>
+										<?php
+										foreach($styleDtls as $row)
+										{
+											echo '<option value="'.$row->id.'"';
+											if($row->id == $styleId)
+											{
+												echo ' selected="selected"';
+											}
+											echo '>'.$row->styleno.' - '.$row->styledesc.'</option>';
 										}
 										?>
 									</select>
@@ -200,7 +238,23 @@
 									SMV&nbsp;<span style="color: red;">*</span>
 								</label>
 	                            <div class="col-sm-6">
-	                                <input type="text" class="form-control" id="smv" name="smv" value="<?php echo $smv; ?>" required="" />
+	                                <input type="text" class="form-control" id="smv" name="smv" value="<?php echo $smv; ?>" disabled="" />
+	                            </div>
+	                        </div>
+							<div class="form-group">
+	                            <label class="col-sm-2 control-label">
+									Target Minutes
+								</label>
+	                            <div class="col-sm-6">
+	                                <input type="text" class="form-control numeric" id="targetMinutes" name="targetMinutes" value="<?php echo $targetMinutes; ?>" />
+	                            </div>
+	                        </div>
+							<div class="form-group">
+	                            <label class="col-sm-2 control-label">
+									OT Hours
+								</label>
+	                            <div class="col-sm-6">
+	                                <input type="text" class="form-control numeric" id="otHours" name="otHours" value="<?php echo $otHours; ?>" />
 	                            </div>
 	                        </div>
 	                        <div class="form-group">
@@ -235,6 +289,7 @@
 	$(document).ready(function()
 	{
 		$('#example').dataTable();
+		$('.numeric').numeric();
 		$('.datePicker').datepicker(
 		{
 			format: 'dd/mm/yyyy', 
@@ -249,6 +304,46 @@
 		$("#entryDetails").css('display', 'block');
 	});
 	
+	$("#styleId,#operationId,#machinaryId").change(function()
+	{
+		var styleId = $("#styleId").val();
+		var operationId = $("#operationId").val();
+		var machinaryId = $("#machinaryId").val();
+		
+		if(styleId > 0 && operationId > 0 && machinaryId > 0)
+		{
+			var req = new Request();
+			req.data = 
+			{
+				"styleId" : styleId, 
+				"operationId" : operationId, 
+				"machinaryId" : machinaryId
+			};
+			req.url = "admin/getSMVFromOBSheet";
+			RequestHandler(req, setSMVValue);
+		}
+		else
+		{
+			return;
+		}
+	});
+	
+	function setSMVValue(data)
+	{
+		data = JSON.parse(data);
+		var isError = data.isError;
+		var msg = data.msg;
+		if(isError)
+		{
+			alert(msg);
+			$("#smv").val(0);
+		}
+		else
+		{
+			$("#smv").val(data.smv);
+		}
+	}
+	
 	$("#entryForm").submit(function(e)
 	{
 		e.preventDefault();
@@ -257,14 +352,17 @@
 		
 		var entryDate = $("#entryDate").val();
 		var employeeId = $("#employeeId").val();
-		var lineName = $("#lineName").val();
+		var lineId = $("#lineId").val();
 		var shiftId = $("#shiftId").val();
+		var styleId = $("#styleId").val();
 		var tableName = $("#tableName").val();
 		var operationId = $("#operationId").val();
 		var machinaryId = $("#machinaryId").val();
 		var smv = $("#smv").val();
+		var targetMinutes = $("#targetMinutes").val();
+		var otHours = $("#otHours").val();
 		
-		if(entryDate != "" && employeeId > 0 && lineName != "" && shiftId > 0 && tableName != "" && operationId > 0 && machinaryId > 0 && smv != "")
+		if(entryDate != "" && employeeId > 0 && lineId > 0 && shiftId > 0 && styleId > 0 && tableName != "" && operationId > 0 && machinaryId > 0 && smv != "")
 		{
 			$("#responseMsg").html('');
 			
@@ -275,12 +373,15 @@
 				"entryId" : entryId,
 				"entryDate" : entryDate, 
 				"employeeId" : employeeId, 
-				"lineName" : lineName, 
+				"lineId" : lineId, 
 				"shiftId" : shiftId, 
+				"styleId" : styleId, 
 				"tableName" : tableName, 
 				"operationId" : operationId, 
 				"machinaryId" : machinaryId, 
-				"smv" : smv
+				"smv" : smv, 
+				"targetMinutes" : targetMinutes, 
+				"otHours" : otHours
 			};
 			req.url = "admin/saveEmployeeVsOperation";
 			RequestHandler(req, showResponse);

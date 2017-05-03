@@ -35,6 +35,7 @@
 	                                <tr>
 	                                    <th>Entry Date</th>
 	                                    <th>Line Name</th>
+	                                    <th>Line Location</th>
 	                                    <th>Shift Name</th>
 	                                    <th>Line Incharge</th>
 	                                    <th>Total Pieces</th>
@@ -48,7 +49,8 @@
 									?>
 									<tr>
 										<td><?php echo $row->entrydate; ?></td>
-										<td><?php echo $row->linename; ?></td>
+										<td><?php echo $row->line_name; ?></td>
+										<td><?php echo $row->line_location; ?></td>
 										<td><?php echo $row->shiftname; ?></td>
 										<td><?php echo $row->lineinchargename; ?></td>
 										<td><?php echo $row->totalpieces; ?></td>
@@ -99,7 +101,20 @@
 											Line Name&nbsp;<span style="color: red;">*</span>
 										</label>
 			                            <div class="col-sm-7">
-			                                <input type="text" class="form-control onBlurEntryDateLineName" id="lineName" name="lineName" placeholder="Line Name" value="<?php echo $lineName; ?>" required="">
+			                                <select class="form-control" style="width: 100%;" id="lineId" name="lineId" required="">
+												<option value="">All</option>
+												<?php
+												foreach($lineVsStyleDtls as $row)
+												{
+													echo '<option value="'.$row->id.'"';
+													if($row->id == $lineId)
+													{
+														echo ' selected="selected"';
+													}
+													echo '>'.$row->line_name.' - '.$row->line_location.'</option>';
+												}
+												?>
+											</select>
 			                            </div>
 			                        </div>
 	                    		</div>
@@ -351,30 +366,30 @@
 	$(document).on('blur','.onBlurEntryDateLineName',function()
 	{
 		var entryDate = $("#entryDate").val();
-		var lineName = $("#lineName").val();
+		var lineId = $("#lineId").val();
 		var shiftId = $("#shiftId").val();
 		
-		getPiecelogDetails(entryDate, lineName, shiftId);
+		getPiecelogDetails(entryDate, lineId, shiftId);
 	});
 	
-	$(document).on('change','#shiftId',function()
+	$(document).on('change','#shiftId,#lineId',function()
 	{
 		var entryDate = $("#entryDate").val();
-		var lineName = $("#lineName").val();
+		var lineId = $("#lineId").val();
 		var shiftId = $("#shiftId").val();
 		
-		getPiecelogDetails(entryDate, lineName, shiftId);
+		getPiecelogDetails(entryDate, lineId, shiftId);
 	});
 	
-	function getPiecelogDetails(entryDate = '', lineName = '', shiftId = '')
+	function getPiecelogDetails(entryDate = '', lineId = '', shiftId = '')
 	{
-		if(entryDate != "" && lineName != "" && shiftId > 0)
+		if(entryDate != "" && lineId > 0 && shiftId > 0)
 		{
 			var req = new Request();
 			req.data = 
 			{
 				"entryDate" : entryDate, 
-				"lineName" : lineName, 
+				"lineId" : lineId, 
 				"shiftId" : shiftId
 			};
 			req.url = "admin/getPieceLogsDetailsByDateLine";
@@ -451,6 +466,17 @@
 			}
 			else
 			{
+				$("#hour1").val(0);
+				$("#hour2").val(0);
+				$("#hour3").val(0);
+				$("#hour4").val(0);
+				$("#hour5").val(0);
+				$("#hour6").val(0);
+				$("#hour7").val(0);
+				$("#hour8").val(0);
+				$("#otHour").val(0);
+				$("#totalPieces").val(0);
+				
 				alert('No Log Details Found.');
 				return;
 			}
@@ -475,7 +501,7 @@
 		
 		var assemblyLoadingId = '<?php echo $assemblyLoadingId; ?>';
 		var entryDate = $("#entryDate").val();
-		var lineName = $("#lineName").val();
+		var lineId = $("#lineId").val();
 		var shiftId = $("#shiftId").val();
 		var lineIncharge = $("#lineIncharge").val();
 		var hour1 = $("#hour1").val();
@@ -491,7 +517,7 @@
 		var target = $("#target").val();
 		var isTargetAchieved = $("#isTargetAchieved").val();
 		
-		if(entryDate != "" && lineName != "" && shiftId > 0 && lineIncharge > 0 && parseFloat(totalPieces) > 0 && parseFloat(target) > 0)
+		if(entryDate != "" && lineId > 0 && shiftId > 0 && lineIncharge > 0 && parseFloat(totalPieces) > 0 && parseFloat(target) > 0)
 		{
 			$("#responseMsg").html('');
 			
@@ -503,7 +529,7 @@
 					"menuId" : '<?php echo $menuId; ?>', 
 					"assemblyLoadingId" : assemblyLoadingId,
 					"entryDate" : entryDate,
-					"lineName" : lineName,
+					"lineId" : lineId,
 					"shiftId" : shiftId, 
 					"lineIncharge" : lineIncharge, 
 					"hour1" : hour1, 
