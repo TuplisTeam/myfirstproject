@@ -1819,7 +1819,8 @@ public function getSkillMatrixReport($fromDate, $toDate, $employeeId)
 				eo.machinaryid, m.machineryname, m.machinerydesc, 
 				eo.smv, eo.targetminutes, eo.ot_hours, 
 				SUM(IF(IFNULL(p.in_time,'') <> '', 1, 0)) AS ip_pieces, 
-				SUM(IF(IFNULL(p.out_time,'') > IFNULL(p.in_time,''), 1, 0)) AS op_pieces
+				SUM(IF(IFNULL(p.out_time,'') > IFNULL(p.in_time,''), 1, 0)) AS op_pieces, 
+				SEC_TO_TIME(SUM(TIME_TO_SEC(IFNULL(p.timetaken,'00:00:00')))) AS producedmin
 			FROM 
 				employee_vs_operation eo 
 				INNER JOIN employee e ON eo.empid = e.id
@@ -1831,7 +1832,7 @@ public function getSkillMatrixReport($fromDate, $toDate, $employeeId)
 				LEFT OUTER JOIN 
 					(SELECT 
 						h.id, h.lineid, h.linelocation, h.created_dt, 
-						d.tablename, d.hanger_id, d.in_time, d.out_time
+						d.tablename, d.hanger_id, d.in_time, d.out_time, d.timetaken
 					FROM 
 						piecelogs_hdr h 
 						INNER JOIN piecelogs_dtl d ON h.id = d.piecelog_id

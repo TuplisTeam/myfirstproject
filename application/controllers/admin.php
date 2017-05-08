@@ -2737,7 +2737,7 @@ public function getSkillMatrixReport()
 		{
 			$str .= "No Data\'s Found...";
 		}*/
-		$str = "Sl No.,Entry Date,Line Name,Shift Name,Employee No.,Style Name,Table Name,Operation Name,Machinary Name,SMV,Target Minutes,OT Hours,Input Pieces,Output Pieces,Efficiency\n";
+		$str = "Sl No.,Entry Date,Line Name,Shift Name,Employee No.,Style Name,Table Name,Operation Name,Machinary Name,SMV,Target Minutes,OT Hours,Input Pieces,Output Pieces,Produced Minutes,Efficiency\n";
 		$i=0;
 	  	if(count($res) > 0)
 		{
@@ -2747,9 +2747,9 @@ public function getSkillMatrixReport()
 				
 				$lineName = $row->line_name.' - '.$row->line_location;
 				$empName = $row->empno.' - '.$row->empname;
-				$efficiency = number_format(($row->op_pieces/$row->ip_pieces),2);
+				$efficiency = number_format(($row->targetminutes/$row->producedmin),2);
 				
-				$str .= $i.',"'.$row->entrydt.'","'.$lineName.'","'.$row->shiftname.'","'.$empName.'","'.$row->styleno.'","'.$row->tablename.'","'.$row->operationname.'","'.$row->machineryname.'","'.$row->smv.'","'.$row->targetminutes.'","'.$row->ot_hours.'","'.$row->ip_pieces.'","'.$row->op_pieces.'","'.$efficiency.'"'."\n";
+				$str .= $i.',"'.$row->entrydt.'","'.$lineName.'","'.$row->shiftname.'","'.$empName.'","'.$row->styleno.'","'.$row->tablename.'","'.$row->operationname.'","'.$row->machineryname.'","'.$row->smv.'","'.$row->targetminutes.'","'.$row->ot_hours.'","'.$row->ip_pieces.'","'.$row->op_pieces.'","'.$row->producedmin.'","'.$efficiency.'"'."\n";
 			}
 		}
 		else
