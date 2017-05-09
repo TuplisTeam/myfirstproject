@@ -370,7 +370,9 @@ public function printBarcodeSticker($barcodeId)
 		}
 	}
 	
-	$this->adminmodel->generateBarcode($barcode);
+	$this->adminmodel->generateBarcode($barcode, $barcodeId);
+	
+	$this->printBarcode($barcodeId);
 }
 
 public function deliverynote($deliveryNoteId = '')

@@ -2232,14 +2232,19 @@ public function delEntry($entryId, $tableName, $columnName)
 	$this->db->query($sql);
 }
 
-public function generateBarcode($code)
+public function generateBarcode($code, $barcodeId)
 {
 	//load library
 	$this->load->library('zend');
 	//load in folder Zend
 	$this->zend->load('Zend/Barcode');
 	//generate barcode
-	Zend_Barcode::render('code128', 'image', array('text'=>$code), array());
+	//Zend_Barcode::render('code128', 'image', array('text'=>$code), array());
+	
+	$imgName = 'barcode_'.$barcodeId.'.png';
+	//Save As Image To Folder 
+	$img = Zend_Barcode::factory('code128', 'image', array('text'=>$code), array())->draw();
+	imagepng($img, 'images/barcodes/'.$imgName);
 }
 
 public function initializeCURL($url)
