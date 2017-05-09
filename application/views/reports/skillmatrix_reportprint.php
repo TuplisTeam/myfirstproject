@@ -89,8 +89,6 @@
 									<th>SMV</th>
 									<th>Target Minutes</th>
 									<th>OT Hours</th>
-									<th>Input Pieces</th>
-									<th>Output Pieces</th>
 									<th>Produced Minutes</th>
 									<th>Efficiency</th>
 								</tr>
@@ -117,17 +115,15 @@
 										<td><?php echo $row->smv; ?></td>
 										<td><?php echo $row->targetminutes; ?></td>
 										<td><?php echo $row->ot_hours; ?></td>
-										<td><?php echo $row->ip_pieces; ?></td>
-										<td><?php echo $row->op_pieces; ?></td>
 										<td><?php echo $row->producedmin; ?></td>
-										<td><?php echo number_format(($row->targetminutes/$row->producedmin),2); ?></td>
+										<td><?php echo number_format((($row->producedmin/$row->targetminutes)*100),2); ?></td>
 									</tr>
 									<?php
 									}
 								}
 								else
 								{
-									echo '<tr><td colspan="16">No Data Found.</td></tr>';
+									echo '<tr><td colspan="14">No Data Found.</td></tr>';
 								}
 								?>
 							</tbody>

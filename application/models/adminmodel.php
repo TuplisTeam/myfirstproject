@@ -882,6 +882,18 @@ public function getSkillMatrix_EmpDetails($skillMatrixId)
 	return $res->result();
 }
 
+public function getCurrentTargetMinutes()
+{
+	$sql = "SELECT TIME_TO_SEC(IF(CURTIME() > '19:00:00', TIMEDIFF('19:00:00', '08:30:00'), TIMEDIFF(CURTIME(), '08:30:00'))) AS actualtime";
+	$res = $this->db->query($sql);
+	$actualTime = 0;
+	foreach($res->result() as $row)
+	{
+		$actualTime = $row->actualtime;
+	}
+	return $actualTime;
+}
+
 public function getPieceLogsDetailsByEmployee($entryDate, $shiftId, $lineName, $empId)
 {
 	$sql = "SELECT 
@@ -1818,9 +1830,7 @@ public function getSkillMatrixReport($fromDate, $toDate, $employeeId)
 				eo.operationid, o.operationname, o.operationdesc, 
 				eo.machinaryid, m.machineryname, m.machinerydesc, 
 				eo.smv, eo.targetminutes, eo.ot_hours, 
-				SUM(IF(IFNULL(p.in_time,'') <> '', 1, 0)) AS ip_pieces, 
-				SUM(IF(IFNULL(p.out_time,'') > IFNULL(p.in_time,''), 1, 0)) AS op_pieces, 
-				SEC_TO_TIME(SUM(TIME_TO_SEC(IFNULL(p.timetaken,'00:00:00')))) AS producedmin
+				SUM(TIME_TO_SEC(IFNULL(p.timetaken,'00:00:00')))/60 AS producedmin
 			FROM 
 				employee_vs_operation eo 
 				INNER JOIN employee e ON eo.empid = e.id
@@ -1844,7 +1854,7 @@ public function getSkillMatrixReport($fromDate, $toDate, $employeeId)
 				eo.status <> 'inactive' AND e.status <> 'inactive' AND 
 				ls.status <> 'inactive' AND st.status <> 'inactive' AND 
 				sh.status <> 'inactive' AND o.status <> 'inactive' AND 
-				m.status <> 'inactive' $whrStr
+				m.status <> 'inactive' $whrStr 
 			GROUP BY eo.entrydate, eo.lineid, eo.empid
 			ORDER BY eo.entrydate, eo.lineid, eo.empid";
 			
