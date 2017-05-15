@@ -1123,7 +1123,7 @@ public function employee_vs_operation($entryId = '')
 	$data["operationId"] = '';
 	$data["machinaryId"] = '';
 	$data["smv"] = '';
-	$data["targetMinutes"] = $this->adminmodel->getCurrentTargetMinutes();
+	$data["empTargetMinutes"] = '';
 	$data["otHours"] = '';
 	
 	$data["empDtls"] = $this->adminmodel->getEmployeeDetails();
@@ -1150,7 +1150,7 @@ public function employee_vs_operation($entryId = '')
 				$data["operationId"] = $row->operationid;
 				$data["machinaryId"] = $row->machinaryid;
 				$data["smv"] = $row->smv;
-				$data["targetMinutes"] = $row->targetminutes;
+				$data["empTargetMinutes"] = $row->targetminutes;
 				$data["otHours"] = $row->ot_hours;
 			}
 		}
@@ -1173,11 +1173,12 @@ public function getSMVFromOBSheet()
 	
 	if($styleId > 0 && $operationId > 0 && $machinaryId > 0)
 	{
-		$smv = $this->adminmodel->getSMVFromOBSheet($styleId, $operationId, $machinaryId);
+		$res = $this->adminmodel->getSMVFromOBSheet($styleId, $operationId, $machinaryId);
 			
 		$data["isError"] = FALSE;
 		$data["msg"] = "";
-		$data["smv"] = $smv;
+		$data["smv"] = $res["smv"];
+		$data["totalTargetMin"] = $res["totalTargetMin"];
 	}
 	else
 	{
@@ -1771,9 +1772,6 @@ public function style($styleId = '')
 	$data["size"] = '';
 	$data["styleImage"] = '';
 	
-	$data["machinaryRequirements"] = $this->adminmodel->getMachineryDetails();
-	$data["operations"] = $this->adminmodel->getOperationDetails();
-	
 	$res = $this->adminmodel->getStyleHeaderDetails($styleId);
 	
 	if($styleId > 0)
@@ -1790,8 +1788,6 @@ public function style($styleId = '')
 				$data["size"] = $row->size;
 				$data["styleImage"] = $row->imagepath;
 			}
-			
-			$data["dtlArr"] = $this->adminmodel->getStyleListDetails($styleId);
 		}
 	}
 	else
@@ -1815,8 +1811,6 @@ public function saveStyle()
 	$colour = $this->input->post('colour');
 	$size = $this->input->post('size');
 	$oldStyleImagePath = $this->input->post('oldStyleImagePath');
-	$dtlArr = $this->input->post('dtlArr');
-	$dtlArr = json_decode($dtlArr);
 	
 	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $styleId);
 	
@@ -1841,7 +1835,7 @@ public function saveStyle()
 		}
 		$styleImage = $imgArr["imageSrc"];
 		
-		$this->adminmodel->saveStyle($styleId, $buyer, $merchant, $styleNo, $styleDesc, $colour, $size, $styleImage, $dtlArr);
+		$this->adminmodel->saveStyle($styleId, $buyer, $merchant, $styleNo, $styleDesc, $colour, $size, $styleImage);
 		
 		$data["isError"] = FALSE;
 		if($styleId > 0)
@@ -1871,7 +1865,9 @@ public function operationbulletin($bulletinId = '')
 	
 	$res = $this->adminmodel->getOperationBulletinDetails($bulletinId);
 	
+	$data["obName"] = "";
 	$data["styleId"] = "";
+	$data["targetMinutes"] = "";
 	$data["stdNoOfWorkStations"] = "";
 	$data["stdNoOfOperators"] = "";
 	$data["stdNoOfHelpers"] = "";
@@ -1909,7 +1905,9 @@ public function operationbulletin($bulletinId = '')
 			
 			foreach($res as $row)
 			{
+				$data["obName"] = $row->obname;
 				$data["styleId"] = $row->styleid;
+				$data["targetMinutes"] = $row->targetminutes;
 				$data["stdNoOfWorkStations"] = $row->workstations;
 				$data["stdNoOfOperators"] = $row->operators_in_line;
 				$data["stdNoOfHelpers"] = $row->helpers_in_line;
@@ -1941,31 +1939,12 @@ public function operationbulletin($bulletinId = '')
 	$this->load->view('footer');
 }
 
-public function getStyle_Operation_Details()
-{
-	$styleId = $this->input->post('styleId');
-	$operationId = $this->input->post('operationId');
-	$machinaryId = $this->input->post('machinaryId');
-	
-	if($styleId > 0 && $operationId > 0 && $machinaryId > 0)
-	{
-		$data["res"] = $this->adminmodel->getStyleListDetails($styleId, $operationId, $machinaryId);
-		$data["isError"] = FALSE;
-		$data["msg"] = "";
-	}
-	else
-	{
-		$data["isError"] = TRUE;
-		$data["msg"] = "Please Fill All Details.";
-	}
-	echo json_encode($data);
-}
-
 public function saveOperationBulletin()
 {
 	$menuId = $this->input->post('menuId');
 	$bulletinId = $this->input->post('bulletinId');
 	$styleId = $this->input->post('styleId');
+	$targetMinutes = $this->input->post('targetMinutes');
 	$stdNoOfWorkStations = $this->input->post('stdNoOfWorkStations');
 	$stdNoOfOperators = $this->input->post('stdNoOfOperators');
 	$stdNoOfHelpers = $this->input->post('stdNoOfHelpers');
@@ -2002,9 +1981,9 @@ public function saveOperationBulletin()
 		return;
 	}
 	
-	if($styleId > 0 && count($operationDtlArr) > 0 && count($machineryDtlArr) > 0 && count($manualWorkDtlArr) > 0)
+	if($styleId > 0 && $targetMinutes > 0 && count($operationDtlArr) > 0 && count($machineryDtlArr) > 0 && count($manualWorkDtlArr) > 0)
 	{
-		$this->adminmodel->saveOperationBulletin($bulletinId, $styleId, $stdNoOfWorkStations, $stdNoOfOperators, $stdNoOfHelpers, $totalSAM, $machineSAM, $manualSAM, $possibleDailyOutput, $expectedPeakEfficiency, $expectedOutput, $expectedAvgEfficiency, $expectedDailyOutput, $avgOutputPerMachine, $mc_TotalNumbers, $mc_TotalSMV, $mn_TotalNumbers, $mn_TotalSMV, $operationDtlArr, $machineryDtlArr, $manualWorkDtlArr);
+		$this->adminmodel->saveOperationBulletin($bulletinId, $styleId, $targetMinutes, $stdNoOfWorkStations, $stdNoOfOperators, $stdNoOfHelpers, $totalSAM, $machineSAM, $manualSAM, $possibleDailyOutput, $expectedPeakEfficiency, $expectedOutput, $expectedAvgEfficiency, $expectedDailyOutput, $avgOutputPerMachine, $mc_TotalNumbers, $mc_TotalSMV, $mn_TotalNumbers, $mn_TotalSMV, $operationDtlArr, $machineryDtlArr, $manualWorkDtlArr);
 		
 		if($bulletinId > 0)
 		{
@@ -2108,7 +2087,8 @@ public function hanger($hangerId = '')
 	$data["menuId"] = 32;
 	$data["hangerId"] = $hangerId;
 	
-	$data["hangerSlNo"] = '';
+	$data["assertName"] = '';
+	$data["hangerRFID"] = '';
 	$data["hangerName"] = '';
 	
 	$res = $this->adminmodel->getHangerDetails($hangerId);
@@ -2119,7 +2099,8 @@ public function hanger($hangerId = '')
 		{
 			foreach($res as $row)
 			{
-				$data["hangerSlNo"] = $row->hanger_slno;
+				$data["assertName"] = $row->assert_name;
+				$data["hangerRFID"] = $row->hanger_slno;
 				$data["hangerName"] = $row->hanger_name;
 			}
 		}
@@ -2138,7 +2119,8 @@ public function saveHanger()
 {
 	$menuId = $this->input->post('menuId');
 	$hangerId = $this->input->post('hangerId');
-	$hangerSlNo = $this->input->post('hangerSlNo');
+	$assertName = $this->input->post('assertName');
+	$hangerRFID = $this->input->post('hangerRFID');
 	$hangerName = $this->input->post('hangerName');
 	
 	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $hangerId);
@@ -2151,9 +2133,9 @@ public function saveHanger()
 		return;
 	}
 	
-	if($hangerSlNo != "" && $hangerName != "")
+	if($assertName != "" && $hangerRFID != "" && $hangerName != "")
 	{
-		$this->adminmodel->saveHanger($hangerId, $hangerSlNo, $hangerName);
+		$this->adminmodel->saveHanger($hangerId, $assertName, $hangerRFID, $hangerName);
 		
 		$data["isError"] = FALSE;
 		if($hangerId > 0)
@@ -2183,10 +2165,10 @@ public function line_vs_style($entryId = '')
 	$data["lineLocation"] = '';
 	$data["inTable"] = '';
 	$data["outTable"] = '';
-	$data["styleId"] = '';
+	$data["obId"] = '';
 	
 	$res = $this->adminmodel->getLineVsStyleDetails($entryId);
-	$data["styleDtls"] = $this->adminmodel->getStyleHeaderDetails();
+	$data["obDtls"] = $this->adminmodel->getOperationBulletinDetails();
 	if($entryId > 0)
 	{
 		if(count($res) > 0)
@@ -2198,7 +2180,7 @@ public function line_vs_style($entryId = '')
 				$data["lineLocation"] = $row->line_location;
 				$data["inTable"] = $row->intable;
 				$data["outTable"] = $row->outtable;
-				$data["styleId"] = $row->styleid;
+				$data["obId"] = $row->obid;
 			}
 		}
 	}
@@ -2222,7 +2204,7 @@ public function saveLineVsStyle()
 	$linelocation = $this->input->post('linelocation');
 	$inTable = $this->input->post('inTable');
 	$outTable = $this->input->post('outTable');
-	$styleId = $this->input->post('styleId');
+	$obId = $this->input->post('obId');
 	
 	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $entryId);
 	
@@ -2234,9 +2216,9 @@ public function saveLineVsStyle()
 		return;
 	}
 	
-	if($entryDate != "" && $lineName != "" && $linelocation != "" && $inTable != "" && $outTable != "" && $styleId > 0)
+	if($entryDate != "" && $lineName != "" && $linelocation != "" && $inTable != "" && $outTable != "" && $obId > 0)
 	{
-		$this->adminmodel->saveLineVsStyle($entryId, $entryDate, $lineName, $linelocation, $inTable, $outTable, $styleId);
+		$this->adminmodel->saveLineVsStyle($entryId, $entryDate, $lineName, $linelocation, $inTable, $outTable, $obId);
 		
 		$data["isError"] = FALSE;
 		if($entryId > 0)
@@ -2398,7 +2380,7 @@ public function table($entryId = '')
 	$data["menuId"] = 34;
 	$data["entryId"] = $entryId;
 	
-	$data["tableSlNo"] = '';
+	$data["assertName"] = '';
 	$data["tableName"] = '';
 	
 	$res = $this->adminmodel->getTableDetails($entryId);
@@ -2409,7 +2391,7 @@ public function table($entryId = '')
 		{
 			foreach($res as $row)
 			{
-				$data["tableSlNo"] = $row->table_slno;
+				$data["assertName"] = $row->table_slno;
 				$data["tableName"] = $row->table_name;
 			}
 		}
@@ -2428,7 +2410,7 @@ public function saveTable()
 {
 	$menuId = $this->input->post('menuId');
 	$entryId = $this->input->post('entryId');
-	$tableSlNo = $this->input->post('tableSlNo');
+	$assertName = $this->input->post('assertName');
 	$tableName = $this->input->post('tableName');
 	
 	$permissions = $this->checkScreenPermissionAvailability($menuId, 'save_update', $entryId);
@@ -2441,9 +2423,9 @@ public function saveTable()
 		return;
 	}
 	
-	if($tableSlNo != "" && $tableName != "")
+	if($assertName != "" && $tableName != "")
 	{
-		$this->adminmodel->saveTable($entryId, $tableSlNo, $tableName);
+		$this->adminmodel->saveTable($entryId, $assertName, $tableName);
 		
 		$data["isError"] = FALSE;
 		if($entryId > 0)
@@ -2739,7 +2721,7 @@ public function getSkillMatrixReport()
 		{
 			$str .= "No Data\'s Found...";
 		}*/
-		$str = "Sl No.,Entry Date,Line Name,Shift Name,Employee No.,Style Name,Table Name,Operation Name,Machinary Name,SMV,Target Minutes,OT Hours,Produced Minutes,Efficiency\n";
+		$str = "Sl No.,Entry Date,Line Name,Shift Name,Employee No.,Style Name,Table Name,Operation Name,Machinary Name,SMV,Target Minutes,OT Hours,Produced Minutes,Employee Efficiency\n";
 		$i=0;
 	  	if(count($res) > 0)
 		{
@@ -2749,7 +2731,7 @@ public function getSkillMatrixReport()
 				
 				$lineName = $row->line_name.' - '.$row->line_location;
 				$empName = $row->empno.' - '.$row->empname;
-				$efficiency = number_format((($row->producedmin/$row->targetminutes)*100),2);
+				$efficiency = number_format(((($row->output_cnt*$row->smv)/$row->producedmin)*100),2);
 				
 				$str .= $i.',"'.$row->entrydt.'","'.$lineName.'","'.$row->shiftname.'","'.$empName.'","'.$row->styleno.'","'.$row->tablename.'","'.$row->operationname.'","'.$row->machineryname.'","'.$row->smv.'","'.$row->targetminutes.'","'.$row->ot_hours.'","'.$row->producedmin.'","'.$efficiency.'"'."\n";
 			}
@@ -2917,8 +2899,8 @@ public function getHourlyProductionReport()
 	
 	$exportAsCSV = $this->input->post('checkValue');
 	
-	$data["title"] = "HOURLY PRODUCTION REPORT";
-	$data["subtitle"] = "Hourly Production Report";
+	$data["title"] = "EMPLOYEE HOURLY PRODUCTION REPORT";
+	$data["subtitle"] = "Employee Hourly Production Report";
 	
 	$res = $this->adminmodel->getHourlyProductionReport($fromDate, $toDate, $employeeId);
 	
@@ -3007,8 +2989,8 @@ public function getHourlyProductionLineWiseReport()
 		  	foreach($res as $row)
 			{
 			   	$i++;
-				
-				$str .= $i.',"'.$row->createddt.'","'.$row->lineid.'","'.$row->linelocation.'","'.$row->styleno.'","'.$row->noofworkers.'","'.$row->input_cnt.'","'.$row->output_cnt.'","'.$row->wip.'","'.$row->timings.'","'.$row->issuetype.'"'."\n";
+				$lineEfficiency = ($row->output_cnt*$row->total_sam*100)/($totalWorkers*$row->producedmin);
+				$str .= $i.',"'.$row->createddt.'","'.$row->lineid.'","'.$row->linelocation.'","'.$row->styleno.'","'.$row->noofworkers.'","'.$row->input_cnt.'","'.$row->output_cnt.'","'.$row->wip.'","'.$row->timings.'","'.$row->issuetype.'","'.number_format($lineEfficiency, 2, '.', '').'"'."\n";
 		  	}
 		}
 		else

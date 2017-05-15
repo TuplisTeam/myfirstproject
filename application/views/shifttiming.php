@@ -46,7 +46,7 @@
 								{
 								?>
 								<tr>
-									<td><?php echo $row->shifttime; ?></td>
+									<td><?php echo $row->shiftname; ?></td>
 									<td><?php echo $row->fromtime; ?></td>
 									<td><?php echo $row->totime; ?></td>
 									<td>

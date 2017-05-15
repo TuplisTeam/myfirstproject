@@ -90,7 +90,7 @@
 									<th>Target Minutes</th>
 									<th>OT Hours</th>
 									<th>Produced Minutes</th>
-									<th>Efficiency</th>
+									<th>Employee Efficiency</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -116,7 +116,7 @@
 										<td><?php echo $row->targetminutes; ?></td>
 										<td><?php echo $row->ot_hours; ?></td>
 										<td><?php echo $row->producedmin; ?></td>
-										<td><?php echo number_format((($row->producedmin/$row->targetminutes)*100),2); ?></td>
+										<td><?php echo number_format(((($row->output_cnt*$row->smv)/$row->producedmin)*100),2); ?></td>
 									</tr>
 									<?php
 									}

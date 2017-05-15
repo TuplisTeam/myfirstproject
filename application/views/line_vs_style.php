@@ -35,6 +35,7 @@
                                     <th>Entry Date</th>
                                     <th>Line Name</th>
                                     <th>Line Location</th>
+                                    <th>OB Name</th>
                                     <th>Style Name</th>
                                     <th>Manage</th>
                                 </tr>
@@ -50,6 +51,7 @@
 									<td><?php echo $row->entrydt; ?></td>
 									<td><?php echo $row->line_name; ?></td>
 									<td><?php echo $row->line_location; ?></td>
+									<td><?php echo $row->obname; ?></td>
 									<td><?php echo $row->styleno; ?></td>
 									<td>
 										<button class="btn btn-primary btn-xs editEntry" entryId="<?php echo $row->id; ?>">
@@ -167,17 +169,17 @@
 									Style&nbsp;<span style="color: red;">*</span>
 								</label>
 	                            <div class="col-sm-6">
-	                                <select class="form-control" style="width: 100%;" data-placeholder="Select" id="styleId" name="styleId" required="">
+	                                <select class="form-control" style="width: 100%;" data-placeholder="Select" id="obId" name="obId" required="">
 										<option value=""></option>
 										<?php
-										foreach($styleDtls as $res)
+										foreach($obDtls as $res)
 										{
 											echo '<option value="'.$res->id.'"';
-											if($res->id == $styleId)
+											if($res->id == $obId)
 											{
 												echo ' selected="selected"';
 											}
-											echo '>'.$res->styleno.'</option>';
+											echo '>'.$res->obname.' - '.$res->styleno.'</option>';
 										}
 										?>
 									</select>
@@ -250,9 +252,9 @@
 		var linelocation = $("#linelocation").val();
 		var inTable = $("#inTable").val();
 		var outTable = $("#outTable").val();
-		var styleId = $("#styleId").val();
+		var obId = $("#obId").val();
 		
-		if(entryDate != "" && lineName != "" && linelocation != "" && inTable != "" && outTable != "" && styleId > 0)
+		if(entryDate != "" && lineName != "" && linelocation != "" && inTable != "" && outTable != "" && obId > 0)
 		{
 			$("#responseMsg").html('');
 			
@@ -266,7 +268,7 @@
 				"linelocation" : linelocation, 
 				"inTable" : inTable, 
 				"outTable" : outTable, 
-				"styleId" : styleId
+				"obId" : obId
 			};
 			req.url = "admin/saveLineVsStyle";
 			RequestHandler(req, showResponse);

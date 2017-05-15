@@ -33,6 +33,8 @@
                             <thead>
                                 <tr>
                                     <th>Hanger Sl.No</th>
+                                    <th>Assert Name</th>
+                                    <th>Hanger RFID</th>
                                     <th>Hanger Name</th>
                                     <th>Manage</th>
                                 </tr>
@@ -45,6 +47,8 @@
 								{
 								?>
 								<tr>
+									<td><?php echo $row->id; ?></td>
+									<td><?php echo $row->assert_name; ?></td>
 									<td><?php echo $row->hanger_slno; ?></td>
 									<td><?php echo $row->hanger_name; ?></td>
 									<td>
@@ -77,10 +81,26 @@
 	                    <form class="form-horizontal" id="hangerForm" method="POST">
 							<div class="form-group">
 	                            <label class="col-sm-2 control-label">
-									Hanger Sl.No&nbsp;<span style="color: red;">*</span>
+									Hanger Sl.No
 								</label>
 	                            <div class="col-sm-6">
-	                                <input type="text" class="form-control" id="hangerSlNo" name="hangerSlNo" placeholder="Hanger Sl.No" value="<?php echo $hangerSlNo; ?>" required="">
+	                                <input type="text" class="form-control" id="hangerSlNo" name="hangerSlNo" placeholder="Hanger Sl.No" value="<?php echo $hangerId; ?>" disabled="">
+	                            </div>
+	                        </div>
+							<div class="form-group">
+	                            <label class="col-sm-2 control-label">
+									Assert Name&nbsp;<span style="color: red;">*</span>
+								</label>
+	                            <div class="col-sm-6">
+	                                <input type="text" class="form-control" id="assertName" name="assertName" placeholder="Assert Name" value="<?php echo $assertName; ?>" required="">
+	                            </div>
+	                        </div>
+							<div class="form-group">
+	                            <label class="col-sm-2 control-label">
+									Hanger RFID&nbsp;<span style="color: red;">*</span>
+								</label>
+	                            <div class="col-sm-6">
+	                                <input type="text" class="form-control" id="hangerRFID" name="hangerRFID" placeholder="Hanger RFID" value="<?php echo $hangerRFID; ?>" required="">
 	                            </div>
 	                        </div>
 	                        <div class="form-group">
@@ -137,10 +157,11 @@
 		
 		var hangerId = '<?php echo $hangerId; ?>';
 		
-		var hangerSlNo = $("#hangerSlNo").val();
+		var assertName = $("#assertName").val();
+		var hangerRFID = $("#hangerRFID").val();
 		var hangerName = $("#hangerName").val();
 		
-		if(hangerSlNo != "" && hangerName != "")
+		if(assertName != "" && hangerRFID != "" && hangerName != "")
 		{
 			$("#responseMsg").html('');
 			
@@ -149,7 +170,8 @@
 			{
 				"menuId" : '<?php echo $menuId; ?>', 
 				"hangerId" : hangerId,
-				"hangerSlNo" : hangerSlNo, 
+				"assertName" : assertName,
+				"hangerRFID" : hangerRFID, 
 				"hangerName" : hangerName
 			};
 			req.url = "admin/saveHanger";

@@ -164,86 +164,6 @@
 									</div>
 								</div>
 							</div>
-							<div class="row">
-	                    		<div class="form-group">
-		                        	<div class="col-md-12">
-		                        		<div class="table-responsive">
-		                        			<div style="float: right;">
-				                        		<button type="button" class="btn btn-success addOperationRow">
-				                        		Add New Row <i class="fa fa-plus"></i>
-				                        		</button>
-			                        		</div>
-			                        		<table class="table table-bordered">
-				                        		<thead>
-				                        			<tr>
-				                        				<th>Operation Desc</th>
-				                        				<th>Machine</th>
-				                        				<th>SMV</th>
-				                        				<th>Manage</th>
-				                        			</tr>
-				                        		</thead>
-				                        		<tbody class="detailsTBody">
-			                        			<?php
-			                        			if($styleId > 0)
-			                        			{
-													if(count($dtlArr) > 0)
-													{
-														$cnt = 0;
-														foreach($dtlArr as $row)
-														{
-															$cnt++;
-														?>
-														<tr class="detailsTR" rowNo="<?php echo $cnt; ?>">
-															<td>
-																<select class="form-control operationSelect operationId_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" style="width: 100%;" data-placeholder="Select">
-																	<option value=""></option>
-																	<?php
-																	foreach($operations as $res)
-																	{
-																		echo '<option value="'.$res->id.'"';
-																		if($row->operationid == $res->id)
-																		{
-																			echo ' selected="selected"';
-																		}
-																		echo '>'.$res->operationname.'</option>';
-																	}
-																	?>
-																</select>
-															</td>
-															<td>
-																<select class="form-control machinarySelect machinaryId_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" style="width: 100%;" data-placeholder="Select">
-																	<option value=""></option>
-																	<?php
-																	foreach($machinaryRequirements as $res)
-																	{
-																		echo '<option value="'.$res->id.'"';
-																		if($row->machineid == $res->id)
-																		{
-																			echo ' selected="selected"';
-																		}
-																		echo '>'.$res->machineryname.'</option>';
-																	}
-																	?>
-																</select>
-															</td>
-															<td>
-																<input type="text" class="form-control numeric smv_<?php echo $cnt; ?>" rowNo="<?php echo $cnt; ?>" placeholder="SMV" value="<?php echo $row->smv; ?>">
-															</td>
-															<td>
-																<button type="button" title="Delete" class="btn btn-danger btn-xs btn-perspective delOperationDtl"><i class="fa fa-close"></i></button>
-															</td>
-														</tr>
-														<?php
-														}
-													}
-												}
-			                        			?>
-				                        		</tbody>
-				                        	</table>
-			                        	</div>
-		                        	</div>
-		                        </div>
-	                    	</div>
 	                    	<div class="row">
 		                        <div class="form-group">
 		                            <div class="col-sm-offset-2 col-sm-10">
@@ -273,30 +193,13 @@
     </div>
 </div>
 
-<div id="operationsDiv" style="display: none;"><?php echo json_encode($operations); ?></div>
-<div id="machinaryRequirementsDiv" style="display: none;"><?php echo json_encode($machinaryRequirements); ?></div>
-
 <script>
-	
-	var deleted_RowsCount = 0;
-	
-	var operations = $("#operationsDiv").html();
-	operations = JSON.parse(operations);
-	
-	var machinaryRequirements = $("#machinaryRequirementsDiv").html();
-	machinaryRequirements = JSON.parse(machinaryRequirements);
 	
 	$(document).ready(function()
 	{
 		$('#example').dataTable();
 		$('select').select2();
 		$('.numeric').numeric();
-		
-		var styleId = '<?php echo $styleId; ?>';
-		if(styleId == "")
-		{
-			addNewRow();
-		}
 	});
 	
 	$(".newEntry").click(function()
@@ -324,101 +227,6 @@
 		}
 	}
 	
-	$(document).on('click','.addOperationRow',function()
-	{
-		addNewRow();
-	});
-	
-	function addNewRow()
-	{
-		var rowNo = $(".detailsTBody tr").length;
-		rowNo = parseInt(rowNo) + parseInt(deleted_RowsCount) + 1;
-		
-		if(rowNo > 0)
-		{
-			var str = '';
-		
-			str += '<tr class="detailsTR" rowNo="'+parseInt(rowNo)+'">';
-			str += '<td>';
-			str += '<select class="form-control operationSelect operationId_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" style="width: 100%;" data-placeholder="Select">';
-			str += '<option value=""></option>';
-			for(var k=0; k<operations.length; k++)
-			{
-				str += '<option value="'+operations[k].id+'"';
-				str += '>'+operations[k].operationname+'</option>';
-			}
-			str += '</select>';
-			str += '</td>';
-			str += '<td>';
-			str += '<select class="form-control machinarySelect machinaryId_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" style="width: 100%;" data-placeholder="Select">';
-			str += '<option value=""></option>';
-			for(var k=0; k<machinaryRequirements.length; k++)
-			{
-				str += '<option value="'+machinaryRequirements[k].id+'"';
-				str += '>'+machinaryRequirements[k].machineryname+'</option>';
-			}
-			str += '</select>';
-			str += '</td>';
-			str += '<td>';
-			str += '<input type="text" class="form-control numeric smv_'+parseInt(rowNo)+'" rowNo="'+parseInt(rowNo)+'" placeholder="SMV" value="">';
-			str += '</td>';
-			str += '<td>';
-			str += '<button type="button" title="Delete" class="btn btn-danger btn-xs btn-perspective delDtl"><i class="fa fa-close"></i></button>';
-			str += '</td>';
-			str += '</tr>';
-			
-			$(".detailsTBody").append(str);
-			
-			$("select").select2();
-			$(".numeric").numeric();
-		}
-	}
-	
-	$(document).on('change','.operationSelect,.machinarySelect',function()
-	{
-		var rowNo = $(this).attr('rowNo');
-		if(rowNo > 0)
-		{
-			var operationId = $(".operationId_"+rowNo).val();
-			var machinaryId = $(".machinaryId_"+rowNo).val();
-			
-			if(operationId > 0 && machinaryId > 0)
-			{
-				var isError = false;
-				
-				$(".detailsTR").each(function()
-				{
-					var tempRowNo = $(this).attr('rowNo');
-					var tempOperationId = $(".operationId_"+tempRowNo).val();
-					var tempMachinaryId = $(".machinaryId_"+tempRowNo).val();
-					
-					if(rowNo != tempRowNo && operationId == tempOperationId && machinaryId == tempMachinaryId)
-					{
-						isError = true;
-					}
-				});
-				
-				if(isError)
-				{
-					alert('This Combination Is Already Available. Please Check.');
-					$(".operationId_"+rowNo).select2('val','');
-					$(".machinaryId_"+rowNo).select2('val','');
-					return;
-				}
-			}
-		}
-	});
-	
-	$(document).on('click','.delDtl',function()
-	{
-		var bool = confirm("Are you sure want to Remove this Detail?");
-		if(bool == true)
-		{
-			deleted_RowsCount++;
-			$(this).closest('tr').remove();
-		}
-	});
-	
 	$("#entryForm").submit(function(e)
 	{
 		e.preventDefault();
@@ -433,43 +241,7 @@
 		var size = $("#size").val();
 		var oldStyleImagePath = $("#styleImagePath").val();
 		
-		var dtlArr = [];
-		
-		var isError = false;
-		
-		$(".detailsTR").each(function()
-		{
-			var rowNo = $(this).attr('rowNo');
-			
-			if(rowNo > 0)
-			{
-				var operationId = $(".operationId_"+rowNo).val();
-				var machinaryId = $(".machinaryId_"+rowNo).val();
-				var smv = $(".smv_"+rowNo).val();
-				
-				if(operationId > 0 && machinaryId > 0 && smv > 0)
-				{
-					var cri = {};
-					cri["operationId"] = operationId;
-					cri["machinaryId"] = machinaryId;
-					cri["smv"] = smv;
-					
-					dtlArr.push(cri);
-				}
-				else
-				{
-					isError = true;
-				}
-			}
-		});
-		
-		if(isError)
-		{
-			alert('Please Fill All Details.');
-			return;
-		}
-		
-		if(styleNo != "" && dtlArr.length > 0)
+		if(styleNo != "")
 		{
 			$("#responseMsg").html('');
 			
@@ -490,7 +262,6 @@
 			data.append( "colour", colour);
 			data.append( "size", size);
 			data.append( "oldStyleImagePath", oldStyleImagePath);
-			data.append( "dtlArr", JSON.stringify(dtlArr));
 			
 			var req = new Request();
 			req.data = data;

@@ -106,6 +106,7 @@
 									<th>WIP</th>
 									<th>Breakdown Timings</th>
 									<th>Issue Type</th>
+									<th>Line Efficiency</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -116,6 +117,8 @@
 									foreach($datas as $row)
 									{
 										$n++;
+										$totalWorkers = intval($row->operators_in_line) + intval($row->helpers_in_line);
+										$lineEfficiency = ($row->output_cnt*$row->total_sam*100)/($totalWorkers*$row->producedmin);
 									?>
 									<tr>
 										<td><?php echo $n; ?></td>
@@ -129,6 +132,7 @@
 										<td><?php echo $row->wip; ?></td>
 										<td><?php echo $row->timings; ?></td>
 										<td><?php echo $row->issuetype; ?></td>
+										<td><?php echo number_format($lineEfficiency, 2, '.', ''); ?></td>
 									</tr>
 									<?php	
 									}

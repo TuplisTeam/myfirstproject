@@ -33,6 +33,7 @@
                             <thead>
                                 <tr>
                                     <th>Table Sl.No</th>
+                                    <th>Assert Name</th>
                                     <th>Table Name</th>
                                     <th>Manage</th>
                                 </tr>
@@ -45,6 +46,7 @@
 								{
 								?>
 								<tr>
+									<td><?php echo $row->id; ?></td>
 									<td><?php echo $row->table_slno; ?></td>
 									<td><?php echo $row->table_name; ?></td>
 									<td>
@@ -77,10 +79,18 @@
 	                    <form class="form-horizontal" id="tableForm" method="POST">
 							<div class="form-group">
 	                            <label class="col-sm-2 control-label">
-									Table Sl.No&nbsp;<span style="color: red;">*</span>
+									Table Sl.No
 								</label>
 	                            <div class="col-sm-6">
-	                                <input type="text" class="form-control" id="tableSlNo" name="tableSlNo" placeholder="Table Sl.No" value="<?php echo $tableSlNo; ?>" required="">
+	                                <input type="text" class="form-control" id="tableSlNo" name="tableSlNo" placeholder="Table Sl.No" value="<?php echo $entryId; ?>" disabled="">
+	                            </div>
+	                        </div>
+							<div class="form-group">
+	                            <label class="col-sm-2 control-label">
+									Assert Name&nbsp;<span style="color: red;">*</span>
+								</label>
+	                            <div class="col-sm-6">
+	                                <input type="text" class="form-control" id="assertName" name="assertName" placeholder="Assert Name" value="<?php echo $assertName; ?>" required="">
 	                            </div>
 	                        </div>
 	                        <div class="form-group">
@@ -137,10 +147,10 @@
 		
 		var entryId = '<?php echo $entryId; ?>';
 		
-		var tableSlNo = $("#tableSlNo").val();
+		var assertName = $("#assertName").val();
 		var tableName = $("#tableName").val();
 		
-		if(tableSlNo != "" && tableName != "")
+		if(assertName != "" && tableName != "")
 		{
 			$("#responseMsg").html('');
 			
@@ -149,7 +159,7 @@
 			{
 				"menuId" : '<?php echo $menuId; ?>', 
 				"entryId" : entryId,
-				"tableSlNo" : tableSlNo, 
+				"assertName" : assertName, 
 				"tableName" : tableName
 			};
 			req.url = "admin/saveTable";

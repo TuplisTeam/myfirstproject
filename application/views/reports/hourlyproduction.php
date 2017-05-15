@@ -2,7 +2,7 @@
     <div class="page-title">
         <h3>
 			<a href="<?php echo base_url(); ?>admin/hourlyproductionreport" style="text-decoration: none;">
-				Hourly Production Report
+				Employee Hourly Production Report
 			</a>
 		</h3>
     </div>

@@ -786,7 +786,7 @@ public function getEmployeeVsOperationDetails($entryId = '', $entryDate = '', $l
 
 public function getSMVFromOBSheet($styleId, $operationId, $machinaryId)
 {
-	$sql = "SELECT h.id, d.operationid, d.machine, d.smv
+	$sql = "SELECT h.id, h.targetminutes, d.operationid, d.machine, d.smv
 			FROM 
 				operationbulletin_hdr h 
 				INNER JOIN operationbulletin_operation_dtl d ON h.id = d.bulletinid
@@ -795,11 +795,15 @@ public function getSMVFromOBSheet($styleId, $operationId, $machinaryId)
 				d.operationid = $operationId AND d.machine = $machinaryId";
 	$res = $this->db->query($sql);
 	$smv = 0;
+	$totalTargetMin = 0;
 	foreach($res->result() as $row)
 	{
 		$smv = $row->smv;
+		$totalTargetMin = $row->targetminutes;
 	}
-	return $smv;
+	$data["smv"] = $smv;
+	$data["totalTargetMin"] = $totalTargetMin;
+	return $data;
 }
 
 public function checkEmployeeVsOperationavailability($entryId, $entryDate, $employeeId, $lineId, $shiftId, $tableName)
@@ -882,7 +886,7 @@ public function getSkillMatrix_EmpDetails($skillMatrixId)
 	return $res->result();
 }
 
-public function getCurrentTargetMinutes()
+/*public function getCurrentTargetMinutes()
 {
 	$sql = "SELECT TIME_TO_SEC(IF(CURTIME() > '19:00:00', TIMEDIFF('19:00:00', '08:30:00'), TIMEDIFF(CURTIME(), '08:30:00'))) AS actualtime";
 	$res = $this->db->query($sql);
@@ -892,7 +896,7 @@ public function getCurrentTargetMinutes()
 		$actualTime = $row->actualtime;
 	}
 	return $actualTime;
-}
+}*/
 
 public function getPieceLogsDetailsByEmployee($entryDate, $shiftId, $lineName, $empId)
 {
@@ -1314,32 +1318,7 @@ public function getStyleHeaderDetails($styleId = '')
 	return $res->result();
 }
 
-public function getStyleListDetails($styleId, $operationId = '', $machinaryId = '')
-{
-	$sql = "SELECT 
-				h.id, d.operationid, o.operationname, 
-				d.machineid, m.machineryname, d.smv
-			FROM 
-				style_hdr h 
-				INNER JOIN style_dtl d ON h.id = d.styleid
-				INNER JOIN operations o ON d.operationid = o.id
-				INNER JOIN machineries m ON d.machineid = m.id
-			WHERE 
-				h.status <> 'inactive' AND o.status <> 'inactive' AND 
-				m.status <> 'inactive' AND h.id = $styleId";
-	if($operationId > 0)
-	{
-		$sql .= " AND d.operationid = $operationId";
-	}
-	if($machinaryId > 0)
-	{
-		$sql .= " AND d.machineid = $machinaryId";
-	}
-	$res = $this->db->query($sql);
-	return $res->result();
-}
-
-public function saveStyle($styleId, $buyer, $merchant, $styleNo, $styleDesc, $colour, $size, $styleImage, $dtlArr)
+public function saveStyle($styleId, $buyer, $merchant, $styleNo, $styleDesc, $colour, $size, $styleImage)
 {
 	if($styleId > 0)
 	{
@@ -1355,9 +1334,6 @@ public function saveStyle($styleId, $buyer, $merchant, $styleNo, $styleDesc, $co
 					modified_by = '".$this->session->userdata('userid')."'
 				WHERE id = $styleId";
 		$this->db->query($sql);
-		
-		$delSQL = "DELETE FROM style_dtl WHERE styleid = $styleId";
-		$this->db->query($delSQL);
 	}
 	else
 	{
@@ -1373,17 +1349,6 @@ public function saveStyle($styleId, $buyer, $merchant, $styleNo, $styleDesc, $co
 					created_by = '".$this->session->userdata('userid')."'";
 		$this->db->query($sql);
 		$styleId = $this->db->insert_id();
-	}
-	
-	if(count($dtlArr) > 0)
-	{
-		foreach($dtlArr as $row)
-		{
-			$sql = "INSERT INTO style_dtl SET 
-						styleid = $styleId, operationid = '".$row->operationId."', 
-						machineid = '".$row->machinaryId."', smv = '".$row->smv."'";
-			$this->db->query($sql);
-		}
 	}
 }
 
@@ -1444,10 +1409,64 @@ public function getOperationBulletin_ManualWorkDetails($bulletinId)
 	return $res->result();
 }
 
-public function saveOperationBulletin($bulletinId, $styleId, $stdNoOfWorkStations, $stdNoOfOperators, $stdNoOfHelpers, $totalSAM, $machineSAM, $manualSAM, $possibleDailyOutput, $expectedPeakEfficiency, $expectedOutput, $expectedAvgEfficiency, $expectedDailyOutput, $avgOutputPerMachine, $mc_TotalNumbers, $mc_TotalSMV, $mn_TotalNumbers, $mn_TotalSMV, $operationDtlArr, $machineryDtlArr, $manualWorkDtlArr)
+public function saveOperationBulletin($bulletinId, $styleId, $targetMinutes, $stdNoOfWorkStations, $stdNoOfOperators, $stdNoOfHelpers, $totalSAM, $machineSAM, $manualSAM, $possibleDailyOutput, $expectedPeakEfficiency, $expectedOutput, $expectedAvgEfficiency, $expectedDailyOutput, $avgOutputPerMachine, $mc_TotalNumbers, $mc_TotalSMV, $mn_TotalNumbers, $mn_TotalSMV, $operationDtlArr, $machineryDtlArr, $manualWorkDtlArr)
 {
+	$generatedOBName = '';
+	$prevOBName = '';
+	
+	$sql1 = "SELECT obname FROM operationbulletin_hdr ORDER BY id DESC LIMIT 1";
+	$res = $this->db->query($sql1);
+	$res1 = $res->result();
+	
+	foreach($res1 as $row)
+	{
+		$prevOBName = $row->obname;
+	}
+	
+	if($prevOBName != "")
+	{
+		$totalOBNameLen = 6;
+		
+		$obNameArr = explode("OB",$prevOBName);
+		$obNameArr = $obNameArr[1];
+		
+		$k = 0;
+		for($n=0; $n<strlen($obNameArr); $n++)
+		{
+			if($obNameArr[$n] == 0)
+			{
+				$k++;
+			}
+			else
+			{
+				break;
+			}
+		}
+		$prevCode = substr($obNameArr, intval($k));
+		
+		$curCode = intval($prevCode) + 1;
+		$curCodeLen = strlen($curCode) + 1;
+		$zerosCount = intval($totalOBNameLen) - $curCodeLen;
+		$zeroStr = '';
+		if($zerosCount > 0)
+		{
+			for($n=0; $n<$zerosCount; $n++)
+			{
+				$zeroStr .= "0";
+			}
+		}
+		$generatedOBName = "OB".$zeroStr.$curCode;
+	}
+	else
+	{
+		$generatedOBName = "OB00001";
+	}
+	
+	
 	$sql = "INSERT INTO operationbulletin_hdr SET 
-				styleid = '".$styleId."', workstations = '".$stdNoOfWorkStations."', 
+				obname = '".$generatedOBName."', 
+				styleid = '".$styleId."', targetminutes = '".$targetMinutes."', 
+				workstations = '".$stdNoOfWorkStations."', 
 				operators_in_line = '".$stdNoOfOperators."', 
 				helpers_in_line = '".$stdNoOfHelpers."', 
 				total_sam = '".$totalSAM."', machine_sam = '".$machineSAM."', 
@@ -1514,12 +1533,13 @@ public function getHangerDetails($hangerId = '')
 	return $res->result();
 }
 
-public function saveHanger($hangerId, $hangerSlNo, $hangerName)
+public function saveHanger($hangerId, $assertName, $hangerRFID, $hangerName)
 {
 	if($hangerId > 0)
 	{
 		$sql = "UPDATE hanger SET 
-					hanger_slno = '".$hangerSlNo."', 
+					assert_name = '".$assertName."', 
+					hanger_slno = '".$hangerRFID."', 
 					hanger_name = '".$hangerName."',
 					modified_on = NOW(), 
 					modified_by = '".$this->session->userdata('userid')."'
@@ -1528,7 +1548,8 @@ public function saveHanger($hangerId, $hangerSlNo, $hangerName)
 	else
 	{
 		$sql = "INSERT INTO hanger SET 
-					hanger_slno = '".$hangerSlNo."', 
+					assert_name = '".$assertName."', 
+					hanger_slno = '".$hangerRFID."', 
 					hanger_name = '".$hangerName."',
 					created_on = NOW(), 
 					created_by = '".$this->session->userdata('userid')."'";
@@ -1538,11 +1559,14 @@ public function saveHanger($hangerId, $hangerSlNo, $hangerName)
 
 public function getLineVsStyleDetails($entryId = '')
 {
-	$sql = "SELECT h.*, DATE_FORMAT(h.entrydate,'%d/%m/%Y') AS entrydt, s.styleno
+	$sql = "SELECT 
+				h.*, ob.styleid, ob.obname, 
+				DATE_FORMAT(h.entrydate,'%d/%m/%Y') AS entrydt, s.styleno
 			FROM 
 				line_vs_style h 
-				INNER JOIN style_hdr s ON h.styleid = s.id
-			WHERE h.status <> 'inactive' AND s.status <> 'inactive'";
+				INNER JOIN operationbulletin_hdr ob ON h.obid = ob.id
+				INNER JOIN style_hdr s ON ob.styleid = s.id
+			WHERE h.status <> 'inactive' AND ob.status <> 'inactive' AND s.status <> 'inactive'";
 	if($entryId > 0)
 	{
 		$sql .= " AND h.id = $entryId";
@@ -1551,7 +1575,7 @@ public function getLineVsStyleDetails($entryId = '')
 	return $res->result();
 }
 
-public function saveLineVsStyle($entryId, $entryDate, $lineName, $linelocation, $inTable, $outTable, $styleId)
+public function saveLineVsStyle($entryId, $entryDate, $lineName, $linelocation, $inTable, $outTable, $obId)
 {
 	$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
 	if($entryId > 0)
@@ -1562,7 +1586,7 @@ public function saveLineVsStyle($entryId, $entryDate, $lineName, $linelocation, 
 					line_location = '".$linelocation."', 
 					intable = '".$inTable."', 
 					outtable = '".$outTable."', 
-					styleid = '".$styleId."',
+					obid = '".$obId."',
 					modified_on = NOW(), 
 					modified_by = '".$this->session->userdata('userid')."'
 				WHERE id = $entryId";
@@ -1575,7 +1599,7 @@ public function saveLineVsStyle($entryId, $entryDate, $lineName, $linelocation, 
 					line_location = '".$linelocation."', 
 					intable = '".$inTable."', 
 					outtable = '".$outTable."', 
-					styleid = '".$styleId."',
+					obid = '".$obId."',
 					created_on = NOW(), 
 					created_by = '".$this->session->userdata('userid')."'";
 	}
@@ -1657,12 +1681,12 @@ public function getTableDetails($entryId = '')
 	return $res->result();
 }
 
-public function saveTable($entryId, $tableSlNo, $tableName)
+public function saveTable($entryId, $assertName, $tableName)
 {
 	if($entryId > 0)
 	{
 		$sql = "UPDATE tablenames SET 
-					table_slno = '".$tableSlNo."', 
+					table_slno = '".$assertName."', 
 					table_name = '".$tableName."',
 					modified_on = NOW(), 
 					modified_by = '".$this->session->userdata('userid')."'
@@ -1671,7 +1695,7 @@ public function saveTable($entryId, $tableSlNo, $tableName)
 	else
 	{
 		$sql = "INSERT INTO tablenames SET 
-					table_slno = '".$tableSlNo."', 
+					table_slno = '".$assertName."', 
 					table_name = '".$tableName."',
 					created_on = NOW(), 
 					created_by = '".$this->session->userdata('userid')."'";
@@ -1830,7 +1854,8 @@ public function getSkillMatrixReport($fromDate, $toDate, $employeeId)
 				eo.operationid, o.operationname, o.operationdesc, 
 				eo.machinaryid, m.machineryname, m.machinerydesc, 
 				eo.smv, eo.targetminutes, eo.ot_hours, 
-				SUM(TIME_TO_SEC(IFNULL(p.timetaken,'00:00:00')))/60 AS producedmin
+				SUM(TIME_TO_SEC(IFNULL(p.timetaken,'00:00:00')))/60 AS producedmin, 
+				SUM(IF(p.out_time > p.in_time,1,0)) AS output_cnt
 			FROM 
 				employee_vs_operation eo 
 				INNER JOIN employee e ON eo.empid = e.id
@@ -1854,7 +1879,7 @@ public function getSkillMatrixReport($fromDate, $toDate, $employeeId)
 				eo.status <> 'inactive' AND e.status <> 'inactive' AND 
 				ls.status <> 'inactive' AND st.status <> 'inactive' AND 
 				sh.status <> 'inactive' AND o.status <> 'inactive' AND 
-				m.status <> 'inactive' $whrStr 
+				m.status <> 'inactive' $whrStr
 			GROUP BY eo.entrydate, eo.lineid, eo.empid
 			ORDER BY eo.entrydate, eo.lineid, eo.empid";
 			
@@ -2075,18 +2100,20 @@ public function getHourlyProductionLineWiseReport($fromDate, $toDate)
 				s.status <> 'inactive' $whrStr";*/
 	$sql = "SELECT 
 				DATE_FORMAT(h.created_dt,'%d-%m-%Y') AS createddt, 
-				h.lineid, h.linelocation, 
+				h.lineid, h.linelocation, ls.intable, ls.outtable, 
 				h.styleid, IFNULL(s.styleno,'') AS styleno, 
 				SUM(IF(d.tablename=ls.intable,1,0)) AS input_cnt,
 				SUM(IF(d.tablename=ls.outtable AND d.out_time > d.in_time,1,0)) AS output_cnt, 
 				SUM(IF(d.tablename=ls.intable,1,0)) - SUM(IF(d.tablename=ls.outtable AND d.out_time > d.in_time,1,0)) AS wip, 
 				IFNULL(n.timings,'') AS timings, IFNULL(n.issuetype,'') AS issuetype, 
-				e.noofworkers
+				e.noofworkers, obh.total_sam, obh.operators_in_line, obh.helpers_in_line, 
+				SUM(TIME_TO_SEC(IFNULL(d.timetaken,'00:00:00')))/60 AS producedmin
 			FROM 
 				piecelogs_hdr h 
 				INNER JOIN piecelogs_dtl d ON h.id = d.piecelog_id
 				INNER JOIN line_vs_style ls 
-					ON h.lineid = ls.line_name AND h.linelocation = ls.line_location
+					ON h.lineid = ls.line_name AND h.linelocation = ls.line_location AND h.created_dt = ls.entrydate
+				INNER JOIN operationbulletin_hdr obh ON ls.obid = obh.id
 				INNER JOIN 
 					(SELECT lineid, entrydate, COUNT(*) AS noofworkers
 					FROM employee_vs_operation 
@@ -2105,7 +2132,9 @@ public function getHourlyProductionLineWiseReport($fromDate, $toDate)
 					ORDER BY lineid, linelocation, created_dt) n
 					ON h.lineid = n.lineid AND h.linelocation = n.linelocation AND 
 					h.created_dt = n.created_dt
-			WHERE h.status <> 'inactive' AND ls.status <> 'inactive' $whrStr
+			WHERE 
+				h.status <> 'inactive' AND ls.status <> 'inactive' AND 
+				obh.status <> 'inactive' $whrStr
 			GROUP BY h.lineid, h.linelocation, h.created_dt
 			ORDER BY h.lineid, h.linelocation, h.created_dt";
 	$res = $this->db->query($sql);

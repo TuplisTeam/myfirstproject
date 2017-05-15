@@ -33,6 +33,7 @@
 						   <table id="example" class="display table" style="width: 100%; cellspacing: 0;">
 	                            <thead>
 	                                <tr>
+	                                    <th>OB Name</th>
 	                                    <th>Style No.</th>
 										<th>Manage</th>
 	                                </tr>
@@ -43,6 +44,7 @@
 									{
 									?>
 									<tr>
+										<td><?php echo $row->obname; ?></td>
 										<td><?php echo $row->styleno; ?></td>
 										<td>
 										<button class="btn btn-primary btn-xs editEntry" entryId="<?php echo $row->id; ?>">
@@ -76,6 +78,16 @@
 	                    <form class="form-horizontal" id="operationBulletinForm" method="POST">
 	                    	<div class="row">
 	                    		<div class="col-md-12">
+									<div class="col-md-4">
+										<div class="form-group">
+				                            <label class="col-sm-5 control-label">
+												OB Name&nbsp;<span style="color: red;">*</span>
+											</label>
+				                            <div class="col-sm-7">
+				                                <input type="text" class="form-control" id="obName" name="obName" placeholder="OB Name" value="<?php echo $obName; ?>" disabled="" />
+				                            </div>
+				                        </div>
+									</div>
 	                    			<div class="col-md-4">
 	                    				<div class="form-group">
 				                            <label class="col-sm-5 control-label">
@@ -95,6 +107,16 @@
 				                            </div>
 				                        </div>
 	                    			</div>
+									<div class="col-md-4">
+										<div class="form-group">
+				                            <label class="col-sm-5 control-label">
+												Target Minutes&nbsp;<span style="color: red;">*</span>
+											</label>
+				                            <div class="col-sm-7">
+				                                <input type="text" class="form-control numeric" id="targetMinutes" name="targetMinutes" placeholder="Target Minutes" value="<?php echo $targetMinutes; ?>" required="" />
+				                            </div>
+				                        </div>
+									</div>
 	                    		</div>
 	                    	</div>
 							<div class="row">
@@ -364,10 +386,10 @@
 															<?php echo $row->machineryname; ?>
 														</td>
 														<td>
-															<input type="text" class="form-control numeric mc_numbers_<?php echo $row->id; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Numbers" value="" disabled="">
+															<input type="text" class="form-control numeric mc_numbers_<?php echo $row->id; ?>" rowNo="<?php echo $cnt; ?>" placeholder="Numbers" value="">
 														</td>
 														<td>
-															<input type="text" class="form-control numeric mc_smv_<?php echo $row->id; ?>" rowNo="<?php echo $cnt; ?>" placeholder="SMV" value="" disabled="">
+															<input type="text" class="form-control numeric mc_smv_<?php echo $row->id; ?>" rowNo="<?php echo $cnt; ?>" placeholder="SMV" value="">
 														</td>
 													</tr>
 													<?php
@@ -660,57 +682,9 @@
 					$(".op_machine_"+rowNo).select2('val','');
 					return;
 				}
-				else
-				{
-					var styleId = $("#styleId").val();
-					
-					if(styleId > 0)
-					{
-						var req = new Request();
-						req.data = 
-						{
-							"styleId" : styleId, 
-							"operationId" : operationId, 
-							"machinaryId" : machinaryId
-						};
-						req.url = "admin/getStyle_Operation_Details";
-						RequestHandler(req, setStyleSMVDetails, rowNo);
-					}
-					else
-					{
-						alert('Please select style.');
-						return;
-					}
-				}
 			}
 		}
 	});
-	
-	function setStyleSMVDetails(data, rowNo)
-	{
-		data = JSON.parse(data);
-		var isError = data.isError;
-		var msg = data.msg;
-		if(isError)
-		{
-			alert(msg);
-		}
-		else
-		{
-			var res = data.res;
-			if(res.length > 0)
-			{
-				$(".op_smv_"+rowNo).val(res[0].smv);
-			}
-			else
-			{
-				alert('No Combination Found.');
-				$(".op_operationId_"+rowNo).select2('val','');
-				$(".op_machine_"+rowNo).select2('val','');
-				return;
-			}
-		}
-	}
 	
 	$(document).on('click','.delOperationDtl',function()
 	{
@@ -729,6 +703,7 @@
 		var bulletinId = '<?php echo $bulletinId; ?>';
 		
 		var styleId = $("#styleId").val();
+		var targetMinutes = $("#targetMinutes").val();
 		var stdNoOfWorkStations = $("#stdNoOfWorkStations").val();
 		var stdNoOfOperators = $("#stdNoOfOperators").val();
 		var stdNoOfHelpers = $("#stdNoOfHelpers").val();
@@ -846,7 +821,7 @@
 			return;
 		}
 		
-		if(styleId > 0 && operationDtlArr.length > 0 && machineryDtlArr.length > 0 && manualWorkDtlArr.length > 0)
+		if(styleId > 0 && targetMinutes > 0 && operationDtlArr.length > 0 && machineryDtlArr.length > 0 && manualWorkDtlArr.length > 0)
 		{
 			$("#responseMsg").html('');
 			
@@ -858,6 +833,7 @@
 					"menuId" : '<?php echo $menuId; ?>', 
 					"bulletinId" : bulletinId,
 					"styleId" : styleId,
+					"targetMinutes" : targetMinutes,
 					"stdNoOfWorkStations" : stdNoOfWorkStations,
 					"stdNoOfOperators" : stdNoOfOperators,
 					"stdNoOfHelpers" : stdNoOfHelpers,

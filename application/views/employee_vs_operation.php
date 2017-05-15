@@ -243,10 +243,10 @@
 	                        </div>
 							<div class="form-group">
 	                            <label class="col-sm-2 control-label">
-									Target Minutes
+									Employee Target Minutes
 								</label>
 	                            <div class="col-sm-6">
-	                                <input type="text" class="form-control numeric" id="targetMinutes" name="targetMinutes" value="<?php echo $targetMinutes; ?>" />
+	                                <input type="text" class="form-control numeric" id="empTargetMinutes" name="empTargetMinutes" value="<?php echo $empTargetMinutes; ?>" disabled="" />
 	                            </div>
 	                        </div>
 							<div class="form-group">
@@ -337,10 +337,15 @@
 		{
 			alert(msg);
 			$("#smv").val(0);
+			$("#empTargetMinutes").val(0);
 		}
 		else
 		{
-			$("#smv").val(data.smv);
+			var smv = data.smv;
+			var totalTargetMinutes = data.totalTargetMin;
+			var empTargetMinutes = totalTargetMinutes/smv;
+			$("#smv").val(smv);
+			$("#empTargetMinutes").val(parseFloat(empTargetMinutes).toFixed(2));
 		}
 	}
 	
@@ -359,7 +364,7 @@
 		var operationId = $("#operationId").val();
 		var machinaryId = $("#machinaryId").val();
 		var smv = $("#smv").val();
-		var targetMinutes = $("#targetMinutes").val();
+		var targetMinutes = $("#empTargetMinutes").val();
 		var otHours = $("#otHours").val();
 		
 		if(entryDate != "" && employeeId > 0 && lineId > 0 && shiftId > 0 && styleId > 0 && tableName != "" && operationId > 0 && machinaryId > 0 && smv != "")
