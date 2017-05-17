@@ -125,7 +125,8 @@
                     </div>
                     <div class="logo-box">
                         <a href="<?php echo base_url(); ?>admin/" class="logo-text">
-							<span><?php echo $this->config->item('logoText'); ?></span>
+							<!--<span><?php echo $this->config->item('logoText'); ?></span>-->
+							<img src="<?php echo base_url(); ?>images/akm_logo.png" />
 						</a>
                     </div><!-- Logo Box -->
                     <div class="search-button">
