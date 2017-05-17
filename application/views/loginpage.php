@@ -144,7 +144,7 @@
 					var res = data.res;
 					if(res.length > 0)
 					{
-						if(res[0].usertype == "user")
+						if(res[0].usertype != "admin")
 						{
 							$("#sectionDiv").css('display','block');
 							

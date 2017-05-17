@@ -26,6 +26,10 @@ public function index()
 	$data["pieceLogsMovements"] = $this->adminmodel->getPieceLogsMovements();
 	$data["lineWiseEfficiency"] = $this->adminmodel->getLineWiseDetails();
 	
+	if($this->session->userdata('usertype') == "mechanic")
+	{
+		$data["issueDls"] = $this->adminmodel->getIssueDetails();
+	}
 	$this->load->view('header', $data);
 	$this->load->view('dashboard');
 	$this->load->view('footer');
@@ -1512,7 +1516,7 @@ public function assemblyloading($assemblyLoadingId = '')
 	$this->load->view('footer');
 }
 
-public function getPieceLogsDetailsByDateLine()
+public function getHourWiseAssemblyLoadingDetails()
 {
 	$entryDate = $this->input->post('entryDate');
 	$lineId = $this->input->post('lineId');
@@ -1534,7 +1538,14 @@ public function getPieceLogsDetailsByDateLine()
 			$lineLocation = $row->line_location;
 		}
 		
-		$data["pieceLogDtls"] = $this->adminmodel->getPieceLogsDetailsByDateLine($entryDate, $lineName, $lineLocation, $shiftId);
+		$resArr = $this->adminmodel->getPieceLogsDetailsByDateLine($entryDate, $lineName, $lineLocation, $shiftId);
+		$pieceLogId = $resArr["pieceLogId"];
+		$shiftFromTiming = $resArr["shiftFromTiming"];
+		$shiftToTiming = $resArr["shiftToTiming"];
+		if($pieceLogId > 0 && $shiftFromTiming != "" && $shiftToTiming != "")
+		{
+			$data["pieceLogDtls"] = $this->adminmodel->callPieceLogDetails_Procedure($pieceLogId, $shiftFromTiming, $shiftToTiming);
+		}
 	}
 	else
 	{
@@ -2876,6 +2887,7 @@ public function getPriceRateIncentiveReport()
 public function hourlyproductionreport()
 {
 	$data["empDtls"] = $this->adminmodel->getEmployeeDetails();
+	$data["shiftTimingDtls"] = $this->adminmodel->getShiftTimings();
 	
 	$this->load->view('header');
 	$this->load->view('reports/hourlyproduction', $data);
@@ -2884,17 +2896,21 @@ public function hourlyproductionreport()
 
 public function getHourlyProductionReport()
 {
-	$fromDate = $this->input->post('fromDate');
-	$toDate = $this->input->post('toDate');
+	$entryDate = $this->input->post('entryDate');
+	$lineName = $this->input->post('lineName');
+	$locationName = $this->input->post('locationName');
+	$shiftId = $this->input->post('shiftId');
 	$employeeId = $this->input->post('employeeId');
 	
-	if($fromDate != "")
+	if($entryDate != "")
 	{
-		$fromDate = substr($fromDate,6,4).'-'.substr($fromDate,3,2).'-'.substr($fromDate,0,2);
+		$entryDate = substr($entryDate,6,4).'-'.substr($entryDate,3,2).'-'.substr($entryDate,0,2);
 	}
-	if($toDate != "")
+	
+	if($entryDate == "" || $lineName == "" || $locationName == "" || $shiftId == "" || $shiftId == 0)
 	{
-		$toDate = substr($toDate,6,4).'-'.substr($toDate,3,2).'-'.substr($toDate,0,2);
+		echo 'Please Fill All Required Fields.';
+		return;
 	}
 	
 	$exportAsCSV = $this->input->post('checkValue');
@@ -2902,13 +2918,13 @@ public function getHourlyProductionReport()
 	$data["title"] = "EMPLOYEE HOURLY PRODUCTION REPORT";
 	$data["subtitle"] = "Employee Hourly Production Report";
 	
-	$res = $this->adminmodel->getHourlyProductionReport($fromDate, $toDate, $employeeId);
+	$res = $this->adminmodel->getHourlyProductionReport($entryDate, $lineName, $locationName, $shiftId, $employeeId);
 	
 	$data["datas"] = $res;
 	
 	if($exportAsCSV == 1)
 	{
-		$str = "Sl No.,Entry Date,Line Name,Shift,Employee No.,Employee Name,Hour 1,Hour 2,Hour 3,Hour 4,Hour 5,Hour 6,Hour 7,Hour 8,OT Pieces,Total Pieces\n";
+		$str = "Sl No.,Entry Date,Line Name,Shift,Employee No.,Employee Name,Start Time,End Time,Input Pieces,Output Pieces\n";
 	  	$i=0;
 	  	if(count($res) > 0)
 		{
@@ -2916,7 +2932,7 @@ public function getHourlyProductionReport()
 			{
 			   	$i++;
 				$lineName = $row->line_name.' - '.$row->line_location;
-				$str .= $i.',"'.$row->entrydt.'","'.$lineName.'","'.$row->shiftname.'","'.$row->empno.'","'.$row->empname.'","'.$row->hour1.'","'.$row->hour2.'","'.$row->hour3.'","'.$row->hour4.'","'.$row->hour5.'","'.$row->hour6.'","'.$row->hour7.'","'.$row->hour8.'","'.$row->othour.'","'.$row->totalpieces.'"'."\n";
+				$str .= $i.',"'.$row->entrydt.'","'.$lineName.'","'.$row->shiftname.'","'.$row->empno.'","'.$row->empname.'","'.$row->start_time.'","'.$row->end_time.'","'.$row->incnt.'","'.$row->outcnt.'"'."\n";
 		  	}
 		}
 		else
@@ -2924,7 +2940,7 @@ public function getHourlyProductionReport()
 			$str .= "No Data\'s Found...";
 		}
 	  	header('Content-Type: application/csv');
-	  	header('Content-Disposition: attachement; filename="HourlyProductionReport.csv"');
+	  	header('Content-Disposition: attachement; filename="EmployeeHourlyProductionReport.csv"');
 	  	echo $str; 
 		return;
 	}

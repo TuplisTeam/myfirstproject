@@ -19,26 +19,57 @@
 	                    		<div class="col-md-6">
 	                    			<div class="form-group">
 			                            <label class="col-sm-3 control-label">
-											From Date
+											Entry Date&nbsp;<span style="color: red;">*</span>
 										</label>
 			                            <div class="col-sm-6">
-			                                <input type="text" class="form-control datePicker" id="fromDate" name="fromDate" placeholder="From Date">
+			                                <input type="text" class="form-control datePicker" id="entryDate" name="entryDate" placeholder="Entry Date" required="">
 			                            </div>
 			                        </div>
 	                    		</div>
 	                    		<div class="col-md-6">
 	                    			<div class="form-group">
 			                            <label class="col-sm-3 control-label">
-											To Date
+											Line Name&nbsp;<span style="color: red;">*</span>
 										</label>
 			                            <div class="col-sm-6">
-			                                <input type="text" class="form-control datePicker" id="toDate" name="toDate" placeholder="To Date">
+			                                <input type="text" class="form-control" id="lineName" name="lineName" placeholder="Line Name" required="">
 			                            </div>
 			                        </div>
 	                    		</div>
 	                    	</div>
 	                    	<div class="row">
 	                    		<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											Location Name&nbsp;<span style="color: red;">*</span>
+										</label>
+			                            <div class="col-sm-6">
+			                                <input type="text" class="form-control" id="locationName" name="locationName" placeholder="Location Name" required="">
+			                            </div>
+			                        </div>
+	                    		</div>
+	                    		<div class="col-md-6">
+	                    			<div class="form-group">
+			                            <label class="col-sm-3 control-label">
+											Shift Name&nbsp;<span style="color: red;">*</span>
+										</label>
+			                            <div class="col-sm-6">
+			                            	<select class="form-control" id="shiftId" name="shiftId" style="width: 100%;" data-placeholder="Select" required="">
+												<option value=""></option>
+												<?php
+												foreach($shiftTimingDtls as $row)
+												{
+													echo '<option value="'.$row->id.'"';
+													echo '>'.$row->shiftname.'</option>';
+												}
+												?>
+											</select>
+			                            </div>
+			                        </div>
+	                    		</div>
+			                </div>
+			                <div class="row">
+			                	<div class="col-md-6">
 									<div class="form-group">
 			                            <label class="col-sm-3 control-label">
 											Employee

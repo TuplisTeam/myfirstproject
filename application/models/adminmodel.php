@@ -1107,11 +1107,11 @@ public function getPieceLogsDetailsByDateLine($entryDate, $lineName, $lineLocati
 		$shiftFromTiming = $entryDate.' '.$row->fromtime;
 		$shiftToTiming = $entryDate.' '.$row->totime;
 	}
+	
 	$resArr = array();
-	if($pieceLogId > 0 && $shiftFromTiming != "" && $shiftToTiming != "")
-	{
-		$resArr = $this->callPieceLogDetails_Procedure($pieceLogId, $shiftFromTiming, $shiftToTiming);
-	}
+	$resArr["pieceLogId"] = $pieceLogId;
+	$resArr["shiftFromTiming"] = $shiftFromTiming;
+	$resArr["shiftToTiming"] = $shiftToTiming;
 	return $resArr;
 }
 
@@ -1828,6 +1828,22 @@ public function getLineWiseDetails()
 	return $res->result();
 }
 
+public function getIssueDetails()
+{
+	$sql = "SELECT 
+				h.lineid, h.linelocation, t.table_slno, t.table_name, 
+				h.in_time, h.out_time, 
+				IF(h.out_time > h.in_time, 'Closed', 'Active') AS issuestatus, 
+				DATE_FORMAT(h.created_dt, '%d-%m-%Y') AS createddt
+			FROM 
+				nowork_breaddown_issues h 
+				INNER JOIN tablenames t ON h.tablename = t.table_slno
+			WHERE 1=1 AND t.status <> 'inactive'
+			ORDER BY h.lineid, h.linelocation, h.created_dt DESC";
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
 /*Report Starts*/
 
 public function getSkillMatrixReport($fromDate, $toDate, $employeeId)
@@ -2002,44 +2018,36 @@ public function getPriceRateIncentiveReport($fromDate, $toDate, $employeeId)
 	return $res->result();
 }
 
-public function getHourlyProductionReport($fromDate, $toDate, $employeeId)
+public function getHourlyProductionReport($entryDate, $lineName, $locationName, $shiftId, $employeeId)
 {
-	$whrStr = '';
-	if($fromDate != "")
-	{
-		$whrStr .= " AND h.entry_date >= '".$fromDate."'";
-	}
-	if($toDate != "")
-	{
-		$whrStr .= " AND h.entry_date <= '".$toDate."'";
-	}
-	if($employeeId > 0)
-	{
-		$whrStr .= " AND h.lineincharge = $employeeId";
-	}
+	$employeeId = $employeeId ? $employeeId : 0;
 	
-	$sql = "SELECT 
-				DATE_FORMAT(h.entry_date,'%d-%m-%Y') AS entrydt, 
-				h.lineid, ls.line_name, ls.line_location, 
-				h.shiftid, s.shiftname, h.lineincharge, 
-				e.empno, e.empname, h.target, 
-				h.hour1, h.hour2, h.hour3, h.hour4, 
-				h.hour5, h.hour6, h.hour7, h.hour8, 
-				h.othour, h.totalpieces, 
-				IF(h.target - h.totalpieces < 0, h.target, h.totalpieces) AS sewing, 
-				IF(h.target - h.totalpieces < 0, ABS(h.target - h.totalpieces), 0) AS incentive, 
-				0 AS amount
-			FROM 
-				assemblyloading h 
-				INNER JOIN line_vs_style ls ON h.lineid = ls.id
-				INNER JOIN employee e ON h.lineincharge = e.id
-				INNER JOIN shifttiming s ON h.shiftid = s.id
-			WHERE 
-				h.status <> 'inactive' AND e.status <> 'inactive' AND 
-				s.status <> 'inactive' $whrStr
-			ORDER BY h.entry_date, h.lineid, h.shiftid, h.lineincharge";
-	$res = $this->db->query($sql);
-	return $res->result();
+	$resArr = $this->getPieceLogsDetailsByDateLine($entryDate, $lineName, $locationName, $shiftId);
+	$pieceLogId = $resArr["pieceLogId"];
+	$shiftFromTiming = $resArr["shiftFromTiming"];
+	$shiftToTiming = $resArr["shiftToTiming"];
+	$empHourlyProdDetails = array();
+	if($pieceLogId > 0 && $shiftFromTiming != "" && $shiftToTiming != "")
+	{
+		$empHourlyProdDetails = $this->callEmployeeWiseHourlyProductionDetails_Procedure($pieceLogId, $shiftFromTiming, $shiftToTiming, $employeeId);
+	}
+	return $empHourlyProdDetails;
+}
+
+public function callEmployeeWiseHourlyProductionDetails_Procedure($pieceLogId, $shiftFromTiming, $shiftToTiming, $employeeId)
+{
+	try
+	{
+		$this->db->reconnect();
+		$sql = "CALL get_emphourlyproduction('".$pieceLogId."','".$shiftFromTiming."','".$shiftToTiming."','".$employeeId."')"; 
+		$result = $this->db->query($sql,$data);
+		$this->db->close();
+	}
+	catch(Exception $e)
+	{
+		echo $e->getMessage();
+	}
+	return $result->result();
 }
 
 public function getHourlyProductionLineWiseReport($fromDate, $toDate)
@@ -2053,51 +2061,6 @@ public function getHourlyProductionLineWiseReport($fromDate, $toDate)
 	{
 		$whrStr .= " AND h.created_dt <= '".$toDate."'";
 	}
-	
-	/*$sql = "SELECT 
-				DATE_FORMAT(a.entry_date,'%d-%m-%Y') AS entrydt, h.linename, 
-				h.shiftid, s.shiftname, d.operationname, 
-				h.no_of_workers, h.days_target, h.target_per_hr, h.no_of_operators, 
-				h.avail_min, h.current_target, h.issues, 
-				a.hour1, a.hour2, a.hour3, a.hour4, 
-				a.hour5, a.hour6, a.hour7, a.hour8, a.othour, a.totalpieces, 
-				h.wip, h.idletime, h.breakdown_time, h.rework_time, 
-				h.nowork_time, h.line_efficiency
-			FROM 
-				hourlyproduction_linewise h 
-				INNER JOIN 
-					(SELECT a.hourly_linewise_id, GROUP_CONCAT(o.operationname) AS operationname
-					FROM 
-						hourlyproduction_linewise_operations a 
-						INNER JOIN operations o ON a.operationid = o.id 
-					WHERE o.status <> 'inactive'
-					GROUP BY a.hourly_linewise_id) d ON h.id = d.hourly_linewise_id
-				INNER JOIN shifttiming s ON h.shiftid = s.id
-				INNER JOIN assemblyloading a 
-					ON h.linename = a.linename AND h.shiftid = a.shiftid
-			WHERE 
-				h.status <> 'inactive' AND a.status <> 'inactive' AND 
-				s.status <> 'inactive' $whrStr";*/
-	/*$sql = "SELECT 
-				DATE_FORMAT(a.entry_date,'%d-%m-%Y') AS entrydt, 
-				a.lineid, ls.line_name, ls.line_location, 
-				a.shiftid, s.shiftname, e.noofworkers, 
-				a.hour1, a.hour2, a.hour3, a.hour4, 
-				a.hour5, a.hour6, a.hour7, a.hour8, a.othour, 
-				a.totalpieces, a.target AS days_target, a.target/8 AS targetperhr
-			FROM 
-				assemblyloading a 
-				INNER JOIN line_vs_style ls ON a.lineid = ls.id
-				INNER JOIN (SELECT entrydate, lineid, shiftid, SUM(1) AS noofworkers
-					FROM employee_vs_operation 
-					WHERE STATUS <> 'inactive'
-					GROUP BY entrydate, lineid, shiftid) e 
-					ON a.entry_date = e.entrydate AND a.lineid = e.lineid AND 
-					a.shiftid = e.shiftid
-				INNER JOIN shifttiming s ON e.shiftid = s.id
-			WHERE 
-				a.status <> 'inactive' AND ls.status <> 'inactive' AND
-				s.status <> 'inactive' $whrStr";*/
 	$sql = "SELECT 
 				DATE_FORMAT(h.created_dt,'%d-%m-%Y') AS createddt, 
 				h.lineid, h.linelocation, ls.intable, ls.outtable, 

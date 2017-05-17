@@ -106,6 +106,7 @@
 	                                <select class="form-control" style="width: 100%;" data-placeholder="Select" id="userType" name="userType" required="">
 										<option value=""></option>
 										<option value="user">User</option>
+										<option value="mechanic">Mechanic</option>
 									</select>
 	                            </div>
 	                        </div>

@@ -392,7 +392,7 @@
 				"lineId" : lineId, 
 				"shiftId" : shiftId
 			};
-			req.url = "admin/getPieceLogsDetailsByDateLine";
+			req.url = "admin/getHourWiseAssemblyLoadingDetails";
 			RequestHandler(req, setPieceLogs);
 		}
 		else
