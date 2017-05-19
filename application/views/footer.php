@@ -19,7 +19,7 @@
 		<script src="<?php echo base_url(); ?>assets/plugins/x-editable/bootstrap3-editable/js/bootstrap-editable.js"></script>
         <script src="<?php echo base_url(); ?>assets/js/modern.min.js"></script>
         <script src="<?php echo base_url(); ?>assets/plugins/waypoints/jquery.waypoints.min.js"></script>
-        <script src="<?php echo base_url(); ?>assets/plugins/jquery-counterup/jquery.counterup.min.js"></script>
+        
         <script src="<?php echo base_url(); ?>assets/plugins/toastr/toastr.min.js"></script>
         <!--<script src="<?php echo base_url(); ?>assets/plugins/flot/jquery.flot.min.js"></script>
         <script src="<?php echo base_url(); ?>assets/plugins/flot/jquery.flot.time.min.js"></script>

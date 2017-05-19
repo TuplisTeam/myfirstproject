@@ -1,14 +1,7 @@
+<script src="<?php echo base_url(); ?>assets/plugins/jquery-counterup/jquery.counterup.min.js"></script>
 <script src="<?php echo base_url(); ?>assets/highcharts/highcharts.js"></script>
 <script src="<?php echo base_url(); ?>assets/highcharts/highcharts-3d.js"></script>
 <script src="<?php echo base_url(); ?>assets/highcharts/exporting.js"></script>
-
-<style>
-	.myBoxes .col-md-3 .panel
-	{
-		padding: 25px;
-		max-height: 135px;
-	}
-</style>
 
 <div class="page-inner">
     <div class="page-title">
@@ -19,25 +12,267 @@
 		</h3>
     </div>
 	<div id="main-wrapper">
-		<div class="row myBoxes">
+		<div class="row">
+			<div class="col-md-12">
+            <div class="col-lg-3 col-md-6">
+                <div class="panel info-box panel-white">
+                    <div class="panel-body">
+                        <div class="info-box-stats">
+                            <p class="counter">
+                            	<?php echo $empCount; ?>
+                            </p>
+                            <span class="info-box-title">
+                            	Working Employees
+                            </span>
+                        </div>
+                        <div class="info-box-icon">
+                            <i class="icon-users"></i>
+                        </div>
+                        <div class="info-box-progress">
+                            <div class="progress progress-xs progress-squared bs-n">
+                                <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="panel info-box panel-white">
+                    <div class="panel-body">
+                        <div class="info-box-stats">
+                            <p class="counter">
+                            	<?php echo $linesOperating; ?>
+                            </p>
+                            <span class="info-box-title">
+                            	Lines Operationg
+                            </span>
+                        </div>
+                        <div class="info-box-icon">
+                            <i class="icon-eye"></i>
+                        </div>
+                        <div class="info-box-progress">
+                            <div class="progress progress-xs progress-squared bs-n">
+                                <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 80%">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="panel info-box panel-white">
+                    <div class="panel-body">
+                        <div class="info-box-stats">
+                            <p class="counter">
+                            	<?php echo $todayOpenIssues; ?>
+                            </p>
+                            <span class="info-box-title">
+                            	Open Issues
+                            </span>
+                        </div>
+                        <div class="info-box-icon">
+                            <i class="icon-basket"></i>
+                        </div>
+                        <div class="info-box-progress">
+                            <div class="progress progress-xs progress-squared bs-n">
+                                <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="panel info-box panel-white">
+                    <div class="panel-body">
+                        <div class="info-box-stats">
+                            <p class="counter">
+                            	<?php echo $todayClosedIssues; ?>
+                            </p>
+                            <span class="info-box-title">
+                            	Closed Issues
+                            </span>
+                        </div>
+                        <div class="info-box-icon">
+                            <i class="icon-envelope"></i>
+                        </div>
+                        <div class="info-box-progress">
+                            <div class="progress progress-xs progress-squared bs-n">
+                                <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: 50%">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+        
+		<div class="row">
 			<div class="col-md-12">
 				<div class="col-md-6" id="pieceLogChartDiv" style="display: none;">
-					<div id="pieceLogsMovementsContainer" style="height: 400px;"></div>
+					<div class="panel panel-white">
+						<div class="panel-heading clearfix">
+		                    <h4 class="panel-title">
+		                    	Linewise Piecelog Movements
+		                    </h4>
+		                </div>
+		                <div class="panel-body">
+							<div id="pieceMovementsContainer"></div>
+						</div>
+					</div>
 				</div>
 				<div class="col-md-6" id="lineEfficiencyChartDiv" style="display: none;">
-					<div id="lineWiseEfficiencyContainer" style="height: 400px;"></div>
+					<div class="panel panel-white">
+						<div class="panel-heading clearfix">
+		                    <h4 class="panel-title">
+		                    	Linewise Efficiency
+		                    </h4>
+		                </div>
+		                <div class="panel-body">
+							<div id="lineWiseEfficiencyContainer"></div>
+						</div>
+					</div>
 				</div>
 			</div>
-			<div class="col-md-12" id="noProgressDiv" style="display: none;">
+		</div>
+		
+		<div class="row">
+			<div class="col-md-12">
+				<div class="col-md-12">
+					<div class="panel panel-white">
+		                <div class="panel-heading clearfix">
+		                    <h4 class="panel-title">
+		                    	Linewise Piecelog Movements
+		                    </h4>
+		                </div>
+		                <div class="panel-body">
+		                	<?php
+							if(count($lineWiseEfficiency) > 0)
+							{
+							?>
+							<div class="table-responsive">
+								<table class="table table-striped table-hover">
+									<thead>
+										<tr>
+											<th>Line Name</th>
+											<th>In Count</th>
+											<th>Out Count</th>
+											<th>WIP</th>
+											<th>Line Efficiency</th>
+										</tr>
+									</thead>
+									<tbody>
+										<?php
+										foreach($lineWiseEfficiency as $row)
+										{
+											$totalWorkers = intval($row->operators_in_line) + intval($row->helpers_in_line);
+											$lineEfficiency = (intval($row->output_cnt)*floatval($row->total_sam)*100)/(intval($totalWorkers)*floatval($row->producedmin));
+										?>
+										<tr>
+											<td><?php echo $row->lineid; ?></td>
+											<td><?php echo $row->input_cnt; ?></td>
+											<td><?php echo $row->output_cnt; ?></td>
+											<td><?php echo $row->wip; ?></td>
+											<td><?php echo number_format($lineEfficiency, 2, '.', ''); ?></td>
+										</tr>
+										<?php
+										}
+										?>
+									</tbody>
+								</table>
+							</div>
+							<?php
+							}
+							?>
+		                </div>
+		            </div>
+		        </div>
+			</div>
+	    </div>
+	    
+	    <div class="row">
+	    	<div class="col-md-12">
+	    		<div class="col-md-12">
+					<div class="panel panel-white">
+	                    <div class="panel-heading clearfix">
+	                        <h4 class="panel-title">Issue Details</h4>
+						</div>
+						<div class="panel-body">
+							<div class="table-responsive">
+								<table class="table table-striped">
+		                            <thead>
+		                                <tr>
+		                                    <th>Line Name</th>
+		                                    <th>Line Location</th>
+		                                    <th>Table Assert Name</th>
+		                                    <th>Table Name</th>
+		                                    <th>Issue Started Time</th>
+		                                    <th>Issue Closed Time</th>
+		                                    <th>Issue Occured On</th>
+		                                    <th>Issue Status</th>
+		                                </tr>
+		                            </thead>
+		                            <tbody>
+		                            <?php
+									if(count($issueDls) > 0)
+									{
+										foreach($issueDls as $row)
+										{
+											$bgColor = '';
+											if($row->issuestatus == "Closed")
+											{
+												$bgColor = '#95f995';//Green
+											}
+											if($row->issuestatus == "Active")
+											{
+												$bgColor = '#ff9191';//Red
+											}
+										?>
+										<tr style="background-color: <?php echo $bgColor; ?>;">
+											<td><?php echo $row->lineid; ?></td>
+											<td><?php echo $row->linelocation; ?></td>
+											<td><?php echo $row->table_slno; ?></td>
+											<td><?php echo $row->table_name; ?></td>
+											<td><?php echo $row->in_time; ?></td>
+											<td><?php echo $row->out_time; ?></td>
+											<td><?php echo $row->createddt; ?></td>
+											<td><?php echo $row->issuestatus; ?></td>
+										</tr>
+										<?php
+										}
+									}
+									else
+									{
+									?>
+									<tr>
+										<td colspan="8">
+											No Issues Found.
+										</td>
+									</tr>
+									<?php
+									}
+									?>
+		                            </tbody>
+		                        </table>  
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+			</div>
+	    </div>
+		<div class="row" id="noProgressDiv" style="display: none;">
+			<div class="col-md-12">
 				<div role="alert" class="alert alert-danger">
 					OOPS! No Progress In Work Today.
 				</div>
 			</div>
 		</div>
+		
     </div>
 </div>
 
-<div id="pieceLogsMovementsDiv" style="display: none;"><?php echo json_encode($pieceLogsMovements); ?></div>
 <div id="lineWiseEfficiencyDiv" style="display: none;"><?php echo json_encode($lineWiseEfficiency); ?></div>
 
 <script>
@@ -47,13 +282,16 @@ $(document).ready(function()
 	var userType = "<?php echo $this->session->userdata('usertype'); ?>";
 	if(userType == "admin")
 	{
-		var pieceLogsMovements = $("#pieceLogsMovementsDiv").html();
-		pieceLogsMovements = JSON.parse(pieceLogsMovements);
-		
+		$('.counter').counterUp(
+		{
+	        delay: 10,
+	        time: 500
+	    });
+	    
 		var lineWiseEfficiency = $("#lineWiseEfficiencyDiv").html();
 		lineWiseEfficiency = JSON.parse(lineWiseEfficiency);
 		
-		if(pieceLogsMovements.length > 0 || lineWiseEfficiency.length > 0)
+		if(lineWiseEfficiency.length > 0)
 		{
 			renderPieceLogsMovementsChart(lineWiseEfficiency);
 			renderLineWiseEfficiencyChart(lineWiseEfficiency);
@@ -82,12 +320,12 @@ function renderPieceLogsMovementsChart(lineWiseEfficiency)
 			xAxisData.push(lineWiseEfficiency[n].lineid);
 			
 			var cri = {};
-			cri["y"] = parseFloat(lineWiseEfficiency[n].input_cnt);
+			cri["y"] = parseInt(lineWiseEfficiency[n].input_cnt);
 			cri["color"] = getRandomColor(1, 'Str');
 			inCntArr.push(cri);
 			
 			var cri = {};
-			cri["y"] = parseFloat(lineWiseEfficiency[n].output_cnt);
+			cri["y"] = parseInt(lineWiseEfficiency[n].output_cnt);
 			cri["color"] = getRandomColor(1, 'Str');
 			outCntArr.push(cri);
 		}
@@ -104,17 +342,7 @@ function renderPieceLogsMovementsChart(lineWiseEfficiency)
 		cri["stack"] = "Out Count";
 		yAxisData.push(cri);
 		
-		/*yAxisData = [{
-				name: 'John',
-				data: [{y: 5, color: "red"}, {y: 5, color: "yellow"}, {y: 5, color: "pink"}, {y: 5, color: "orange"}, {y: 5, color: "violet"}],
-				stack: 'male'
-				}, {
-				name: 'Jane',
-				data: [2, 5, 6, 2, 1],
-				stack: 'female'
-				}];*/
-		
-		$('#pieceLogsMovementsContainer').highcharts(
+		$('#pieceMovementsContainer').highcharts(
 		{
 			chart:
 			{
@@ -158,6 +386,10 @@ function renderPieceLogsMovementsChart(lineWiseEfficiency)
 					depth: 40
 				}
 			},
+			credits: 
+			{
+		      enabled: false
+		  	},
 			series: yAxisData
 		});
 	}
@@ -169,88 +401,86 @@ function renderLineWiseEfficiencyChart(lineWiseEfficiency)
 	{
 		$("#lineEfficiencyChartDiv").css('display','block');
 		
-		var xAxisArr = [];
-		var yAxisArr = [];
-		var colorArr = getRandomColor(lineWiseEfficiency.length, 'Arr');
+		var xAxisData = [];
+		var yAxisData = [];
+		var tempArr = [];
 		
 		for(var n=0; n<lineWiseEfficiency.length; n++)
 		{
 			var totalWorkers = parseInt(lineWiseEfficiency[n].operators_in_line) + parseInt(lineWiseEfficiency[n].helpers_in_line);
-			var lineEff = (parseInt(lineWiseEfficiency[n].output_cnt) * parseFloat(lineWiseEfficiency[n].total_sam) * 100)/(parseInt(totalWorkers) * parseInt(lineWiseEfficiency[n].producedmin));
-			xAxisArr.push(lineWiseEfficiency[n].linename);
-			yAxisArr.push(parseFloat(lineEff).toFixed(2));
+			var lineEff = (parseInt(lineWiseEfficiency[n].output_cnt) * parseFloat(lineWiseEfficiency[n].total_sam) * 100)/(parseInt(totalWorkers) * parseFloat(lineWiseEfficiency[n].producedmin));
+			
+			xAxisData.push(lineWiseEfficiency[n].lineid);
+			
+			var lineEffVal = 0;
+			if(parseFloat(lineEff) > 0)
+			{
+				lineEffVal = parseFloat(lineEff).toFixed(2);
+			}
+			else
+			{
+				lineEffVal = null;
+			}
+			var cri = {};
+			cri["y"] = parseFloat(lineEffVal);
+			cri["color"] = getRandomColor(1, 'Str');
+			tempArr.push(cri);
 		}
+		
+		var cri = {};
+		cri["name"] = "Line Efficiency";
+		cri["data"] = tempArr;
+		yAxisData.push(cri);
 		
 		$('#lineWiseEfficiencyContainer').highcharts(
 		{
-	        chart: 
+			chart:
 			{
-	            type: 'column',
-				height: 350,
-	            margin: 75,
-	            options3d:
-	            {
-	                enabled: true,
-	                alpha: 10,
-	                beta: 25,
-	                depth: 70
-	            }
-	        },
-	        title: 
-			{
-	            text: 'Line Wise Efficiency'
-	        },
-	        subtitle: 
-			{
-	            text: ''
-	        },
-	        plotOptions: 
-			{
-	            column: 
+				type: 'column',
+				options3d:
 				{
-	                depth: 25
-	            }
-	        },
+					enabled: true,
+					alpha: 10,
+					beta: 25,
+					depth: 70
+				}
+			},
+			title:
+			{
+				text: 'Linewise Efficiency'
+			},
+			subtitle:
+			{
+				text: ''
+			},
+			plotOptions:
+			{
+				column:
+				{
+					depth: 25
+				}
+			},
 			credits: 
 			{
 		      enabled: false
 		  	},
-	        xAxis: 
+			xAxis:
 			{
-	            categories: xAxisArr,
-				labels: 
-				{
-					useHTML: true, 
-					formatter: function()
-					{
-						return '<div title="'+this.value+'" style="width: 60px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">'+this.value+'</div>'; 
-					}
-				}
-	        },
-	        yAxis: 
-			{
-	            title: 
-				{
-	                text: null
-	            }
-	        },
-			legend:
-			{
-				enabled: false
+				categories: xAxisData
 			},
-		    series: 
-		    [{
-		        type: 'column',
-		        name: 'Line Efficiency',
-		        colorByPoint: true,
-				colors: colorArr,
-		        data: yAxisArr
-		    }]
+			yAxis:
+			{
+				title:
+				{
+					text: null
+				}
+			},
+			series: yAxisData
 	    });
 	}
 }
 
-function getRandomColor(cnt = 2, returnType = 'Arrs')
+function getRandomColor(cnt = 2, returnType = 'Arr')
 {
 	var colorArr = [];
 	var colorStr = '';

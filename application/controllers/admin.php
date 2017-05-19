@@ -25,8 +25,12 @@ public function index()
 {
 	if($this->session->userdata('usertype') == "admin")
 	{
-		$data["pieceLogsMovements"] = $this->adminmodel->getPieceLogsMovements();
 		$data["lineWiseEfficiency"] = $this->adminmodel->getLineWiseEfficiencyDetails();
+		$data["issueDls"] = $this->adminmodel->getIssueDetails();
+		$data["todayOpenIssues"] = $this->adminmodel->getTodayIssuesCount();
+		$data["todayClosedIssues"] = $this->adminmodel->getTodayIssuesCount('Closed');
+		$data["empCount"] = $this->adminmodel->getTodayWorkingEmployeeCount();
+		$data["linesOperating"] = $this->adminmodel->getTodayWorkingLinesCount();
 		
 		$this->load->view('header', $data);
 		$this->load->view('admindashboard');

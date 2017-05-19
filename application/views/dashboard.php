@@ -452,11 +452,11 @@
 									$bgColor = '';
 									if($row->issuestatus == "Closed")
 									{
-										$bgColor = '#00ff00';//Green
+										$bgColor = '#95f995';//Green
 									}
 									if($row->issuestatus == "Active")
 									{
-										$bgColor = '#ff0000';//Red
+										$bgColor = '#ff9191';//Red
 									}
 								?>
 								<tr style="background-color: <?php echo $bgColor; ?>;">

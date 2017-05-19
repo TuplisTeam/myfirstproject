@@ -1802,19 +1802,6 @@ public function saveBreakdown($entryId, $breakdownSlNo, $breakdownName)
 	$this->db->query($sql);
 }
 
-public function getPieceLogsMovements()
-{
-	$sql = "SELECT h.id, h.lineid, d.tablename, h.created_dt, SUM(1) AS cnt
-			FROM 
-				piecelogs_hdr h 
-				INNER JOIN piecelogs_dtl d ON h.id = d.piecelog_id
-			WHERE h.status <> 'inactive' AND h.created_dt = CURDATE()
-			GROUP BY h.lineid, d.tablename, h.created_dt
-			ORDER BY h.id, h.lineid, d.tablename, h.created_dt";
-	$res = $this->db->query($sql);
-	return $res->result();
-}
-
 public function getLineWiseEfficiencyDetails()
 {
 	$sql = "SELECT 
@@ -1861,6 +1848,34 @@ public function getIssueDetails()
 			ORDER BY h.lineid, h.linelocation, h.created_dt DESC";
 	$res = $this->db->query($sql);
 	return $res->result();
+}
+
+public function getTodayWorkingEmployeeCount()
+{
+	$sql = "SELECT * FROM employee_vs_operation 
+			WHERE STATUS <> 'inactive' AND entrydate = CURDATE()";
+	$res = $this->db->query($sql);
+	return $res->num_rows();
+}
+
+public function getTodayWorkingLinesCount()
+{
+	$sql = "SELECT * FROM line_vs_style 
+			WHERE STATUS <> 'inactive' AND entrydate = CURDATE()";
+	$res = $this->db->query($sql);
+	return $res->num_rows();
+}
+
+public function getTodayIssuesCount($type = 'Open')
+{
+	$sql = "SELECT * FROM nowork_breaddown_issues 
+			WHERE created_dt = CURDATE()";
+	if($type == "Closed")
+	{
+		$sql .= " AND out_time > in_time";
+	}
+	$res = $this->db->query($sql);
+	return $res->num_rows();
 }
 
 /*Report Starts*/
