@@ -23,16 +23,26 @@ public function __construct()
 
 public function index()
 {
-	$data["pieceLogsMovements"] = $this->adminmodel->getPieceLogsMovements();
-	$data["lineWiseEfficiency"] = $this->adminmodel->getLineWiseDetails();
-	
-	if($this->session->userdata('usertype') == "mechanic")
+	if($this->session->userdata('usertype') == "admin")
 	{
-		$data["issueDls"] = $this->adminmodel->getIssueDetails();
+		$data["pieceLogsMovements"] = $this->adminmodel->getPieceLogsMovements();
+		$data["lineWiseEfficiency"] = $this->adminmodel->getLineWiseEfficiencyDetails();
+		
+		$this->load->view('header', $data);
+		$this->load->view('admindashboard');
+		$this->load->view('footer');
 	}
-	$this->load->view('header', $data);
-	$this->load->view('dashboard');
-	$this->load->view('footer');
+	else
+	{
+		if($this->session->userdata('usertype') == "mechanic")
+		{
+			$data["issueDls"] = $this->adminmodel->getIssueDetails();
+		}
+		
+		$this->load->view('header', $data);
+		$this->load->view('dashboard');
+		$this->load->view('footer');
+	}
 }
 
 public function logout($a)

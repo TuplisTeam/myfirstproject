@@ -1815,15 +1815,34 @@ public function getPieceLogsMovements()
 	return $res->result();
 }
 
-public function getLineWiseDetails()
+public function getLineWiseEfficiencyDetails()
 {
-	$sql = "SELECT h.linename, s.shiftname, h.line_efficiency
+	$sql = "SELECT 
+				DATE_FORMAT(h.created_dt,'%d-%m-%Y') AS createddt, 
+				h.lineid, h.linelocation, ls.intable, ls.outtable, 
+				SUM(IF(d.tablename=ls.intable,1,0)) AS input_cnt,
+				SUM(IF(d.tablename=ls.outtable AND d.out_time > d.in_time,1,0)) AS output_cnt, 
+				SUM(IF(d.tablename=ls.intable,1,0)) - SUM(IF(d.tablename=ls.outtable AND d.out_time > d.in_time,1,0)) AS wip, 
+				e.noofworkers, obh.total_sam, obh.operators_in_line, 
+				obh.helpers_in_line, 
+				SUM(TIME_TO_SEC(IFNULL(d.timetaken,'00:00:00')))/60 AS producedmin
 			FROM 
-				hourlyproduction_linewise h 
-				INNER JOIN shifttiming s ON h.shiftid = s.id
+				piecelogs_hdr h 
+				INNER JOIN piecelogs_dtl d ON h.id = d.piecelog_id
+				INNER JOIN line_vs_style ls 
+					ON h.lineid = ls.line_name AND h.linelocation = ls.line_location AND h.created_dt = ls.entrydate
+				INNER JOIN operationbulletin_hdr obh ON ls.obid = obh.id
+				INNER JOIN 
+					(SELECT lineid, entrydate, COUNT(*) AS noofworkers
+					FROM employee_vs_operation 
+					WHERE STATUS <> 'inactive' 
+					GROUP BY lineid, entrydate) e 
+					ON ls.id = e.lineid AND h.created_dt = e.entrydate
 			WHERE 
-				h.status <> 'inactive' AND s.status <> 'inactive' AND 
-				h.entry_date = CURDATE()";
+				h.status <> 'inactive' AND ls.status <> 'inactive' AND 
+				obh.status <> 'inactive'  AND h.created_dt = CURDATE()
+			GROUP BY h.lineid, h.linelocation, h.created_dt
+			ORDER BY h.lineid, h.linelocation, h.created_dt";
 	$res = $this->db->query($sql);
 	return $res->result();
 }
@@ -1898,48 +1917,6 @@ public function getSkillMatrixReport($fromDate, $toDate, $employeeId)
 				m.status <> 'inactive' $whrStr
 			GROUP BY eo.entrydate, eo.lineid, eo.empid
 			ORDER BY eo.entrydate, eo.lineid, eo.empid";
-			
-	/*if($filterBy == "EmployeeWise" && $employeeId > 0)
-	{
-		$whrStr .= " AND d.empid = $employeeId";
-	}
-	
-	if($filterBy == "EmployeeWise")
-	{
-		$sql = "SELECT 
-					DATE_FORMAT(h.entry_date,'%d-%m-%Y') AS entrydt, h.linename, 
-					d.empid, e.empno, e.empname, d.operationid, o.operationname, 
-					SUM(d.producedmin) AS producedmin, SUM(d.pieces) AS pieces,
-					SUM(d.sam) AS sam, SUM(d.shifthrs) AS shifthrs, 
-					SUM(d.othours) AS othours, 
-					ROUND(((SUM(d.producedmin) * SUM(d.pieces) * SUM(d.sam))/(SUM(d.shifthrs) + SUM(d.othours))),2) AS efficiency
-				FROM 
-					skillmatrix_hdr h 
-					INNER JOIN skillmatrix_dtl d ON h.id = d.skillmatrix_id
-					INNER JOIN employee e ON d.empid = e.id
-					INNER JOIN operations o ON d.operationid = o.id
-				WHERE 
-					h.status <> 'inactive' AND e.status <> 'inactive' AND 
-					o.status <> 'inactive' $whrStr
-				GROUP BY h.entry_date, h.linename, d.empid";
-	}
-	else if($filterBy == "OperationWise")
-	{
-		$sql = "SELECT 
-					DATE_FORMAT(h.entry_date,'%d-%m-%Y') AS entrydt, h.linename, 
-					d.operationid, o.operationname, 
-					SUM(d.producedmin) AS producedmin, SUM(d.pieces) AS pieces,
-					SUM(d.sam) AS sam, SUM(d.shifthrs) AS shifthrs, 
-					SUM(d.othours) AS othours, 
-					ROUND(((SUM(d.producedmin) * SUM(d.pieces) * SUM(d.sam))/(SUM(d.shifthrs) + SUM(d.othours))),2) AS efficiency
-				FROM 
-					skillmatrix_hdr h 
-					INNER JOIN skillmatrix_dtl d ON h.id = d.skillmatrix_id
-					INNER JOIN operations o ON d.operationid = o.id
-				WHERE 
-					h.status <> 'inactive' AND o.status <> 'inactive' $whrStr
-				GROUP BY h.entry_date, h.linename, d.operationid";
-	}*/
 	$res = $this->db->query($sql);
 	return $res->result();
 }
@@ -2061,6 +2038,7 @@ public function getHourlyProductionLineWiseReport($fromDate, $toDate)
 	{
 		$whrStr .= " AND h.created_dt <= '".$toDate."'";
 	}
+	
 	$sql = "SELECT 
 				DATE_FORMAT(h.created_dt,'%d-%m-%Y') AS createddt, 
 				h.lineid, h.linelocation, ls.intable, ls.outtable, 
@@ -2069,7 +2047,8 @@ public function getHourlyProductionLineWiseReport($fromDate, $toDate)
 				SUM(IF(d.tablename=ls.outtable AND d.out_time > d.in_time,1,0)) AS output_cnt, 
 				SUM(IF(d.tablename=ls.intable,1,0)) - SUM(IF(d.tablename=ls.outtable AND d.out_time > d.in_time,1,0)) AS wip, 
 				IFNULL(n.timings,'') AS timings, IFNULL(n.issuetype,'') AS issuetype, 
-				e.noofworkers, obh.total_sam, obh.operators_in_line, obh.helpers_in_line, 
+				e.noofworkers, obh.total_sam, 
+				obh.operators_in_line, obh.helpers_in_line, 
 				SUM(TIME_TO_SEC(IFNULL(d.timetaken,'00:00:00')))/60 AS producedmin
 			FROM 
 				piecelogs_hdr h 
@@ -2160,7 +2139,8 @@ public function getPiecelogReport($fromDate, $toDate, $lineName)
 	$sql = "SELECT 
 				h.id, h.lineid, h.styleid, IFNULL(s.styleno,'') AS styleno, 
 				DATE_FORMAT(h.created_dt,'%d-%m-%Y') AS createddt, 
-				IFNULL(s.styledesc,'') AS styledesc, d.linename, d.tablename AS tableslno, 
+				IFNULL(s.styledesc,'') AS styledesc, 
+				d.linename, d.tablename AS tableslno, 
 				t.table_name AS table_name, 
 				d.hanger_id, d.hanger_name, d.in_time, d.out_time, d.timetaken, 
 				IFNULL(tt.timetaken,'') AS timetakenformoving
@@ -2169,8 +2149,8 @@ public function getPiecelogReport($fromDate, $toDate, $lineName)
 				INNER JOIN piecelogs_dtl d ON h.id = d.piecelog_id
 				INNER JOIN tablenames t ON d.tablename = t.table_slno
 				LEFT OUTER JOIN 
-					(SELECT id, styleno, styledesc FROM style_hdr WHERE STATUS <> 'inactive') s 
-					ON h.styleid = s.id
+					(SELECT id, styleno, styledesc FROM style_hdr 
+					WHERE STATUS <> 'inactive') s ON h.styleid = s.id
 				LEFT OUTER JOIN 
 				(SELECT 
 					t1.id, t1.piecelog_id, t1.tablename, t1.hanger_name, 
@@ -2214,6 +2194,7 @@ public function getIssuesReport($fromDate, $toDate, $lineName, $issueType)
 	$res = $this->db->query($sql);
 	return $res->result();
 }
+
 /*Report Ends*/
 
 /*Common Function Starts*/
