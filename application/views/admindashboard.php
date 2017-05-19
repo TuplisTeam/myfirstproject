@@ -1,6 +1,6 @@
 <script src="<?php echo base_url(); ?>assets/highcharts/highcharts.js"></script>
 <script src="<?php echo base_url(); ?>assets/highcharts/highcharts-3d.js"></script>
-<script src="<?php echo base_url(); ?>assets/highcharts/modules/exporting.js"></script>
+<script src="<?php echo base_url(); ?>assets/highcharts/exporting.js"></script>
 
 <style>
 	.myBoxes .col-md-3 .panel
@@ -55,7 +55,7 @@ $(document).ready(function()
 		
 		if(pieceLogsMovements.length > 0 || lineWiseEfficiency.length > 0)
 		{
-			renderPieceLogsMovementsChart(pieceLogsMovements);
+			renderPieceLogsMovementsChart(lineWiseEfficiency);
 			renderLineWiseEfficiencyChart(lineWiseEfficiency);
 		}
 		else
@@ -65,88 +65,101 @@ $(document).ready(function()
 	}
 });
 
-function renderPieceLogsMovementsChart(pieceLogsMovements)
+function renderPieceLogsMovementsChart(lineWiseEfficiency)
 {
-	if(pieceLogsMovements.length > 0)
+	if(lineWiseEfficiency.length > 0)
 	{
 		$("#pieceLogChartDiv").css('display','block');
 		
-		var xAxisArr = [];
-		var yAxisArr = [];
-		var colorArr = getRandomColor(pieceLogsMovements.length);
+		var xAxisData = [];
+		var yAxisData = [];
 		
-		for(var n=0; n<pieceLogsMovements.length; n++)
+		var inCntArr = [];
+		var outCntArr = [];
+			
+		for(var n=0; n<lineWiseEfficiency.length; n++)
 		{
-			xAxisArr.push(pieceLogsMovements[n].lineid + ' - ' + pieceLogsMovements[n].tablename);
-			yAxisArr.push(parseFloat(pieceLogsMovements[n].cnt));
+			xAxisData.push(lineWiseEfficiency[n].lineid);
+			
+			var cri = {};
+			cri["y"] = parseFloat(lineWiseEfficiency[n].input_cnt);
+			cri["color"] = getRandomColor(1, 'Str');
+			inCntArr.push(cri);
+			
+			var cri = {};
+			cri["y"] = parseFloat(lineWiseEfficiency[n].output_cnt);
+			cri["color"] = getRandomColor(1, 'Str');
+			outCntArr.push(cri);
 		}
+		
+		var cri = {};
+		cri["name"] = "In Count";
+		cri["data"] = inCntArr;
+		cri["stack"] = "In Count";
+		yAxisData.push(cri);
+		
+		var cri = {};
+		cri["name"] = "Out Count";
+		cri["data"] = outCntArr;
+		cri["stack"] = "Out Count";
+		yAxisData.push(cri);
+		
+		/*yAxisData = [{
+				name: 'John',
+				data: [{y: 5, color: "red"}, {y: 5, color: "yellow"}, {y: 5, color: "pink"}, {y: 5, color: "orange"}, {y: 5, color: "violet"}],
+				stack: 'male'
+				}, {
+				name: 'Jane',
+				data: [2, 5, 6, 2, 1],
+				stack: 'female'
+				}];*/
 		
 		$('#pieceLogsMovementsContainer').highcharts(
 		{
-	        chart: 
+			chart:
 			{
-	            type: 'column',
-				height: 350,
-	            margin: 75,
-	            options3d:
-	            {
-	                enabled: true,
-	                alpha: 10,
-	                beta: 25,
-	                depth: 70
-	            }
-	        },
-	        title: 
-			{
-	            text: 'Piecelog Table Hanger Moved Counts'
-	        },
-	        subtitle: 
-			{
-	            text: ''
-	        },
-	        plotOptions: 
-			{
-	            column: 
+				type: 'column',
+				options3d:
 				{
-	                depth: 25
-	            }
-	        },
-			credits: 
-			{
-		      enabled: false
-		  	},
-	        xAxis: 
-			{
-	            categories: xAxisArr,
-				labels: 
-				{
-					useHTML: true, 
-					formatter: function()
-					{
-						return '<div title="'+this.value+'" style="width: 60px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">'+this.value+'</div>'; 
-					}
+					enabled: true,
+					alpha: 15,
+					beta: 15,
+					viewDistance: 25,
+					depth: 40
 				}
-	        },
-	        yAxis: 
-			{
-	            title: 
-				{
-	                text: null
-	            }
-	        },
-			legend:
-			{
-				enabled: false
 			},
-		    series: 
-		    [{
-		        type: 'column',
-		        name: 'Pieces Moved',
-		        colorByPoint: true,
-				colors: colorArr,
-		        data: yAxisArr
-		    }]
-	    });
+			title:
+			{
+				text: 'Linewise Piece Movements'
+			},
+			xAxis:
+			{
+				categories: xAxisData
+			},
+			yAxis:
+			{
+				allowDecimals: false,
+				min: 0,
+				title:
+				{
+					text: 'Linewise Piece Movements'
+				}
+			},
+			tooltip:
+			{
+				headerFormat: '<b>{point.key}</b><br>',
+            pointFormat: '<span style="color:{series.color}">\u25CF</span> {series.name}: {point.y:.0f}'
+			},
+			plotOptions:
+			{
+				column:
+				{
+					stacking: 'normal',
+					depth: 40
+				}
+			},
+			series: yAxisData
+		});
 	}
 }
 
@@ -158,7 +171,7 @@ function renderLineWiseEfficiencyChart(lineWiseEfficiency)
 		
 		var xAxisArr = [];
 		var yAxisArr = [];
-		var colorArr = getRandomColor(lineWiseEfficiency.length);
+		var colorArr = getRandomColor(lineWiseEfficiency.length, 'Arr');
 		
 		for(var n=0; n<lineWiseEfficiency.length; n++)
 		{
@@ -237,9 +250,10 @@ function renderLineWiseEfficiencyChart(lineWiseEfficiency)
 	}
 }
 
-function getRandomColor(cnt = 2)
+function getRandomColor(cnt = 2, returnType = 'Arrs')
 {
 	var colorArr = [];
+	var colorStr = '';
 	for(var n=0; n<cnt; n++)
 	{
 		var letters = '0123456789ABCDEF';
@@ -249,8 +263,17 @@ function getRandomColor(cnt = 2)
 	        color += letters[Math.floor(Math.random() * 16)];
 	    }
 	    colorArr.push(color);
+	    colorStr += ','+color;
 	}
-    return colorArr;
+	if(returnType == "Str")
+	{
+		colorStr = colorStr.substr(1);
+		return colorStr;
+	}
+	if(returnType == "Arr")
+	{
+		return colorArr;
+	}
 }
 
 </script>
