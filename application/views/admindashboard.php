@@ -45,7 +45,7 @@
                             	<?php echo $linesOperating; ?>
                             </p>
                             <span class="info-box-title">
-                            	Lines Operationg
+                            	Lines Operating
                             </span>
                         </div>
                         <div class="info-box-icon">
@@ -185,6 +185,16 @@
 							</div>
 							<?php
 							}
+							else
+							{
+							?>
+							<div class="col-md-12">
+								<div role="alert" class="alert alert-danger">
+									OOPS! No Pieces Moved.
+								</div>
+							</div>
+							<?php
+							}
 							?>
 		                </div>
 		            </div>
@@ -262,6 +272,7 @@
 	            </div>
 			</div>
 	    </div>
+
 		<div class="row" id="noProgressDiv" style="display: none;">
 			<div class="col-md-12">
 				<div role="alert" class="alert alert-danger">
@@ -293,6 +304,9 @@ $(document).ready(function()
 		
 		if(lineWiseEfficiency.length > 0)
 		{
+			$("#pieceLogChartDiv").css('display','block');
+			$("#lineEfficiencyChartDiv").css('display','block');
+			
 			renderPieceLogsMovementsChart(lineWiseEfficiency);
 			renderLineWiseEfficiencyChart(lineWiseEfficiency);
 		}
@@ -307,8 +321,6 @@ function renderPieceLogsMovementsChart(lineWiseEfficiency)
 {
 	if(lineWiseEfficiency.length > 0)
 	{
-		$("#pieceLogChartDiv").css('display','block');
-		
 		var xAxisData = [];
 		var yAxisData = [];
 		
@@ -399,8 +411,6 @@ function renderLineWiseEfficiencyChart(lineWiseEfficiency)
 {
 	if(lineWiseEfficiency.length > 0)
 	{
-		$("#lineEfficiencyChartDiv").css('display','block');
-		
 		var xAxisData = [];
 		var yAxisData = [];
 		var tempArr = [];
