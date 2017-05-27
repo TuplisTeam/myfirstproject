@@ -154,6 +154,13 @@ public function checkLogin($email, $password, $sectionName)
 	$this->initializeCURL($myURL);
 }*/
 
+public function setIssueAssignedTo($issueId, $assignTo)
+{
+	$sql = "UPDATE nowork_breaddown_issues SET assign_to = $assignTo 
+			WHERE id = $issueId";
+	$this->db->query($sql);
+}
+
 public function getUserDetails($userType = '', $userId = '')
 {
 	$sql = "SELECT u.*, IFNULL(cb.firstname,'') AS createdby
@@ -173,6 +180,13 @@ public function getUserDetails($userType = '', $userId = '')
 	{
 		$sql .= " AND u.userid = $userId";
 	}
+	$res = $this->db->query($sql);
+	return $res->result();
+}
+
+public function getUserDetails_Mechanic()
+{
+	$sql = "SELECT * FROM users WHERE status <> 'inactive' AND usertype = 'mechanic'";
 	$res = $this->db->query($sql);
 	return $res->result();
 }
@@ -1837,13 +1851,18 @@ public function getLineWiseEfficiencyDetails()
 public function getIssueDetails()
 {
 	$sql = "SELECT 
-				h.lineid, h.linelocation, t.table_slno, t.table_name, 
-				h.in_time, h.out_time, 
+				h.id, h.lineid, h.linelocation, t.table_slno, t.table_name, 
+				h.in_time, h.out_time, h.issuetype, 
+				h.assign_to, IFNULL(u.username,'-') AS assignedto, 
 				IF(h.out_time > h.in_time, 'Closed', 'Active') AS issuestatus, 
 				DATE_FORMAT(h.created_dt, '%d-%m-%Y') AS createddt
 			FROM 
 				nowork_breaddown_issues h 
 				INNER JOIN tablenames t ON h.tablename = t.table_slno
+				LEFT OUTER JOIN 
+					(SELECT userid, CONCAT(firstname, ' (', email, ')') AS username 
+					FROM users WHERE status <> 'inactive') u 
+					ON h.assign_to = u.userid
 			WHERE 1=1 AND t.status <> 'inactive'
 			ORDER BY h.lineid, h.linelocation, h.created_dt DESC";
 	$res = $this->db->query($sql);

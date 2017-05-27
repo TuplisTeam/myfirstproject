@@ -14,98 +14,98 @@
 	<div id="main-wrapper">
 		<div class="row">
 			<div class="col-md-12">
-            <div class="col-lg-3 col-md-6">
-                <div class="panel info-box panel-white">
-                    <div class="panel-body">
-                        <div class="info-box-stats">
-                            <p class="counter">
-                            	<?php echo $empCount; ?>
-                            </p>
-                            <span class="info-box-title">
-                            	Working Employees
-                            </span>
-                        </div>
-                        <div class="info-box-icon">
-                            <i class="icon-users"></i>
-                        </div>
-                        <div class="info-box-progress">
-                            <div class="progress progress-xs progress-squared bs-n">
-                                <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="panel info-box panel-white">
-                    <div class="panel-body">
-                        <div class="info-box-stats">
-                            <p class="counter">
-                            	<?php echo $linesOperating; ?>
-                            </p>
-                            <span class="info-box-title">
-                            	Lines Operating
-                            </span>
-                        </div>
-                        <div class="info-box-icon">
-                            <i class="icon-eye"></i>
-                        </div>
-                        <div class="info-box-progress">
-                            <div class="progress progress-xs progress-squared bs-n">
-                                <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 80%">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="panel info-box panel-white">
-                    <div class="panel-body">
-                        <div class="info-box-stats">
-                            <p class="counter">
-                            	<?php echo $todayOpenIssues; ?>
-                            </p>
-                            <span class="info-box-title">
-                            	Open Issues
-                            </span>
-                        </div>
-                        <div class="info-box-icon">
-                            <i class="icon-basket"></i>
-                        </div>
-                        <div class="info-box-progress">
-                            <div class="progress progress-xs progress-squared bs-n">
-                                <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="panel info-box panel-white">
-                    <div class="panel-body">
-                        <div class="info-box-stats">
-                            <p class="counter">
-                            	<?php echo $todayClosedIssues; ?>
-                            </p>
-                            <span class="info-box-title">
-                            	Closed Issues
-                            </span>
-                        </div>
-                        <div class="info-box-icon">
-                            <i class="icon-envelope"></i>
-                        </div>
-                        <div class="info-box-progress">
-                            <div class="progress progress-xs progress-squared bs-n">
-                                <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: 50%">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+	            <div class="col-lg-3 col-md-6">
+	                <div class="panel info-box panel-white">
+	                    <div class="panel-body">
+	                        <div class="info-box-stats">
+	                            <p class="counter">
+	                            	<?php echo $empCount; ?>
+	                            </p>
+	                            <span class="info-box-title">
+	                            	Working Employees
+	                            </span>
+	                        </div>
+	                        <div class="info-box-icon">
+	                            <i class="icon-users"></i>
+	                        </div>
+	                        <div class="info-box-progress">
+	                            <div class="progress progress-xs progress-squared bs-n">
+	                                <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+	            <div class="col-lg-3 col-md-6">
+	                <div class="panel info-box panel-white">
+	                    <div class="panel-body">
+	                        <div class="info-box-stats">
+	                            <p class="counter">
+	                            	<?php echo $linesOperating; ?>
+	                            </p>
+	                            <span class="info-box-title">
+	                            	Lines Operating
+	                            </span>
+	                        </div>
+	                        <div class="info-box-icon">
+	                            <i class="icon-eye"></i>
+	                        </div>
+	                        <div class="info-box-progress">
+	                            <div class="progress progress-xs progress-squared bs-n">
+	                                <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 80%">
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+	            <div class="col-lg-3 col-md-6">
+	                <div class="panel info-box panel-white">
+	                    <div class="panel-body">
+	                        <div class="info-box-stats">
+	                            <p class="counter">
+	                            	<?php echo $todayOpenIssues; ?>
+	                            </p>
+	                            <span class="info-box-title">
+	                            	Open Issues
+	                            </span>
+	                        </div>
+	                        <div class="info-box-icon">
+	                            <i class="icon-basket"></i>
+	                        </div>
+	                        <div class="info-box-progress">
+	                            <div class="progress progress-xs progress-squared bs-n">
+	                                <div class="progress-bar progress-bar-warning" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%">
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+	            <div class="col-lg-3 col-md-6">
+	                <div class="panel info-box panel-white">
+	                    <div class="panel-body">
+	                        <div class="info-box-stats">
+	                            <p class="counter">
+	                            	<?php echo $todayClosedIssues; ?>
+	                            </p>
+	                            <span class="info-box-title">
+	                            	Closed Issues
+	                            </span>
+	                        </div>
+	                        <div class="info-box-icon">
+	                            <i class="icon-envelope"></i>
+	                        </div>
+	                        <div class="info-box-progress">
+	                            <div class="progress progress-xs progress-squared bs-n">
+	                                <div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: 50%">
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
             </div>
         </div>
         

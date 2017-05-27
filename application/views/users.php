@@ -157,7 +157,7 @@
 												<td><?php echo $row->slno; ?></td>
 												<td><?php echo $row->menu_name; ?></td>
 												<td class="selectCheckTD parentMenuId_<?php echo $row->parent_id; ?>" menuId="<?php echo $row->menu_id; ?>">
-													<input type="checkbox" id="check_<?php echo $row->menu_id; ?>" class="onCheckSelectField" isParent="<?php echo $row->is_parent; ?>" menuId="<?php echo $row->menu_id; ?>" />
+													<input type="checkbox" id="check_<?php echo $row->menu_id; ?>" class="onCheckSelectField" isParent="<?php echo $row->is_parent; ?>" parentId="<?php echo $row->parent_id; ?>" menuId="<?php echo $row->menu_id; ?>" />
 												</td>
 												<td>
 													<?php
@@ -277,6 +277,7 @@
 	{
 		var menuId = $(this).attr('menuId');
 		var isParent = $(this).attr('isParent');
+		var parentId = $(this).attr('parentId');
 		var isChecked = $(this).is(":checked");
 		
 		if(menuId > 0)
@@ -312,6 +313,24 @@
 				else
 				{
 					$("#saveAccess_"+curMenuId).prop("checked",false);
+				}
+				
+				var isCheckedUnderThisParent = false;
+				$("td.parentMenuId_"+parentId+" .onCheckSelectField").each(function()
+				{
+					if($(this).is(":checked"))
+					{
+						isCheckedUnderThisParent = true;
+					}
+				});
+				
+				if(isCheckedUnderThisParent)
+				{
+					$("#check_"+parentId).prop("checked",true);
+				}
+				else
+				{
+					$("#check_"+parentId).prop("checked",false);
 				}
 			}
 		}

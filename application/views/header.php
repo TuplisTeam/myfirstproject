@@ -164,8 +164,5 @@
             </div><!-- Navbar -->
             
             <?php
-			if($this->session->userdata('usertype') == "admin")
-			{
-				$this->load->view('sidebar');
-			}
+			$this->load->view('sidebar');
 			?>

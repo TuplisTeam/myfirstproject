@@ -38,15 +38,38 @@ public function index()
 	}
 	else
 	{
+		$data = array();
 		if($this->session->userdata('usertype') == "mechanic")
 		{
-			$data["issueDls"] = $this->adminmodel->getIssueDetails();
+		$data["todayOpenIssues"] = $this->adminmodel->getTodayIssuesCount();
+		$data["todayClosedIssues"] = $this->adminmodel->getTodayIssuesCount('Closed');
+		$data["issueDls"] = $this->adminmodel->getIssueDetails();
+		$data["mechanicDtls"] = $this->adminmodel->getUserDetails_Mechanic();
 		}
 		
 		$this->load->view('header', $data);
 		$this->load->view('dashboard');
 		$this->load->view('footer');
 	}
+}
+
+public function setIssueAssignedTo()
+{
+	$issueId = $this->input->post('issueId');
+	$assignTo = $this->input->post('assignTo');
+	if($issueId > 0 && $assignTo > 0)
+	{
+		$this->adminmodel->setIssueAssignedTo($issueId, $assignTo);
+		
+		$data["isError"] = FALSE;
+		$data["msg"] = "Issue Assigned Successfully...";
+	}
+	else
+	{
+		$data["isError"] = TRUE;
+		$data["msg"] = "Please Fill All Fields.";
+	}
+	echo json_encode($data);
 }
 
 public function logout($a)
